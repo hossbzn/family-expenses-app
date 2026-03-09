@@ -18,15 +18,15 @@ Estado: IN\_PROGRESS
 
 Tareas:
 
-\- \[ ] Entities Room
+\- \[x] Entities Room
 
 \- \[ ] DAO transactions
 
-\- \[ ] AppDatabase
+\- \[x] AppDatabase
 
-\- \[ ] Seed inicial
+\- \[x] Seed inicial
 
-\- \[ ] DevHomeScreen
+\- \[x] DevHomeScreen
 
 
 

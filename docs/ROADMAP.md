@@ -1,5 +1,12 @@
 \# ROADMAP
 
+\## Estado actual
+
+Fase 1 completada.  
+Fase 2 en progreso.
+
+---
+
 
 
 \## Fase 1 — Base técnica
@@ -8,17 +15,17 @@ Objetivo: proyecto Android compilando.
 
 
 
-\- Crear proyecto Android
+\- [x] Crear proyecto Android
 
-\- Configurar Compose
+\- [x] Configurar Compose
 
-\- Configurar Room
+\- [x] Configurar Room
 
-\- Configurar Hilt
+\- [x] Configurar Hilt
 
-\- Crear entidades
+\- [x] Crear entidades
 
-\- Crear AppDatabase
+\- [x] Crear AppDatabase
 
 
 
@@ -30,13 +37,13 @@ Objetivo: proyecto Android compilando.
 
 
 
-\- DAO
+\- [x] DAO
 
-\- Repositorios
+\- [x] Repositorios basicos
 
-\- Seed inicial
+\- [x] Seed inicial
 
-\- Pantalla DevHome para verificar datos
+\- [x] Pantalla DevHome para verificar datos
 
 
 

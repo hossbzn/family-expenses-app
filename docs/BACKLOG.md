@@ -6,17 +6,17 @@ Estados: TODO | IN\_PROGRESS | REVIEW | DONE | BLOCKED
 
 
 
-\## P0 — MVP
+\## P0 â€” MVP
 
 
 
 \### US-01 Registrar gasto personal
 
-Estado: TODO  
+Estado: IN\_PROGRESS  
 
 Criterios:
 
-\- Guardar gasto con categoría obligatoria
+\- Guardar gasto con categorÃ­a obligatoria
 
 \- Afecta saldo personal mensual
 
@@ -62,7 +62,7 @@ Tareas:
 
 \- \[ ] Crear ledger entry
 
-\- \[ ] Ajustar cálculos dashboard
+\- \[ ] Ajustar cÃ¡lculos dashboard
 
 
 
@@ -70,13 +70,13 @@ Tareas:
 
 
 
-\### US-03 Liquidar pendiente familiar → personal
+\### US-03 Liquidar pendiente familiar â†’ personal
 
 Estado: TODO  
 
 Criterios:
 
-\- Liquidación siempre total
+\- LiquidaciÃ³n siempre total
 
 \- Crea Settlement
 
@@ -102,7 +102,7 @@ Tareas:
 
 \### US-04 Movimientos recurrentes
 
-Estado: TODO  
+Estado: IN\_PROGRESS  
 
 Criterios:
 
@@ -116,7 +116,7 @@ Criterios:
 
 Tareas:
 
-\- \[ ] RecurrenceRule DAO
+\- \[x] RecurrenceRule DAO
 
 \- \[ ] Worker GenerateRecurringTransactionsWorker
 
@@ -138,7 +138,7 @@ Criterios:
 
 \- saldo familiar mes
 
-\- pendiente familia → personal
+\- pendiente familia â†’ personal
 
 
 
@@ -149,4 +149,3 @@ Tareas:
 \- \[ ] GetDashboardSummaryUseCase
 
 \- \[ ] DashboardScreen
-

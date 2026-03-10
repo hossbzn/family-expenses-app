@@ -6,6 +6,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.familyexpenses.app.core.model.TransactionType
+import com.familyexpenses.app.data.seed.DatabaseSeeder
 import com.familyexpenses.app.feature.addtransaction.AddTransactionRoute
 import com.familyexpenses.app.feature.addtransaction.AddTransactionViewModel
 import com.familyexpenses.app.feature.dashboard.DashboardRoute
@@ -21,11 +23,37 @@ fun FamilyExpensesNavHost() {
     ) {
         composable("dashboard") {
             DashboardRoute(
-                onAddExpenseClick = {
-                    navController.navigate("add-transaction?familyPaidFromPersonal=false")
+                onAddPersonalIncomeClick = {
+                    navController.navigate(
+                        buildAddTransactionRoute(
+                            accountId = DatabaseSeeder.PERSONAL_ACCOUNT_ID,
+                            type = TransactionType.INCOME,
+                        ),
+                    )
                 },
-                onAddFamilyPaidWithPersonalClick = {
-                    navController.navigate("add-transaction?familyPaidFromPersonal=true")
+                onAddPersonalExpenseClick = {
+                    navController.navigate(
+                        buildAddTransactionRoute(
+                            accountId = DatabaseSeeder.PERSONAL_ACCOUNT_ID,
+                            type = TransactionType.EXPENSE,
+                        ),
+                    )
+                },
+                onAddFamilyIncomeClick = {
+                    navController.navigate(
+                        buildAddTransactionRoute(
+                            accountId = DatabaseSeeder.FAMILY_ACCOUNT_ID,
+                            type = TransactionType.INCOME,
+                        ),
+                    )
+                },
+                onAddFamilyExpenseClick = {
+                    navController.navigate(
+                        buildAddTransactionRoute(
+                            accountId = DatabaseSeeder.FAMILY_ACCOUNT_ID,
+                            type = TransactionType.EXPENSE,
+                        ),
+                    )
                 },
                 onHistoryClick = {
                     navController.navigate("history")
@@ -33,11 +61,19 @@ fun FamilyExpensesNavHost() {
             )
         }
         composable(
-            route = "add-transaction?familyPaidFromPersonal={familyPaidFromPersonal}",
+            route = "add-transaction?familyPaidFromPersonal={familyPaidFromPersonal}&initialAccountId={initialAccountId}&initialType={initialType}",
             arguments = listOf(
                 navArgument(AddTransactionViewModel.FAMILY_PAID_FROM_PERSONAL_ARG) {
                     type = NavType.BoolType
                     defaultValue = false
+                },
+                navArgument(AddTransactionViewModel.INITIAL_ACCOUNT_ID_ARG) {
+                    type = NavType.StringType
+                    defaultValue = DatabaseSeeder.PERSONAL_ACCOUNT_ID
+                },
+                navArgument(AddTransactionViewModel.INITIAL_TYPE_ARG) {
+                    type = NavType.StringType
+                    defaultValue = TransactionType.EXPENSE.name
                 },
             ),
         ) {
@@ -52,3 +88,12 @@ fun FamilyExpensesNavHost() {
         }
     }
 }
+
+private fun buildAddTransactionRoute(
+    accountId: String,
+    type: TransactionType,
+    familyPaidFromPersonal: Boolean = false,
+): String = "add-transaction?" +
+    "${AddTransactionViewModel.FAMILY_PAID_FROM_PERSONAL_ARG}=$familyPaidFromPersonal&" +
+    "${AddTransactionViewModel.INITIAL_ACCOUNT_ID_ARG}=$accountId&" +
+    "${AddTransactionViewModel.INITIAL_TYPE_ARG}=${type.name}"

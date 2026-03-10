@@ -18,6 +18,7 @@ Tareas:
 - [x] AddTransactionViewModel
 - [x] AddTransactionScreen
 - [x] Historial basico visible
+- [x] Selector de tipo para ingreso y gasto
 
 ---
 
@@ -30,6 +31,7 @@ Tareas:
 - [x] ComputeMonthlyBalanceRule
 - [x] GetDashboardSummaryUseCase
 - [x] DashboardScreen
+- [x] Acciones rapidas + / - por saldo
 
 ---
 
@@ -48,3 +50,4 @@ Tareas:
 - [x] Dashboard inicial conectado a Room
 - [x] Formulario basico de alta de gasto
 - [x] Historial basico con navegacion
+- [x] Alta simplificada desde saldo personal y familiar

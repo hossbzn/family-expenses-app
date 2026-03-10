@@ -1,23 +1,24 @@
 package com.familyexpenses.app.feature.dashboard
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -27,16 +28,20 @@ import java.util.Locale
 
 @Composable
 fun DashboardRoute(
-    onAddExpenseClick: () -> Unit,
-    onAddFamilyPaidWithPersonalClick: () -> Unit,
+    onAddPersonalIncomeClick: () -> Unit,
+    onAddPersonalExpenseClick: () -> Unit,
+    onAddFamilyIncomeClick: () -> Unit,
+    onAddFamilyExpenseClick: () -> Unit,
     onHistoryClick: () -> Unit,
     viewModel: DashboardViewModel = hiltViewModel(),
 ) {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     DashboardScreen(
         uiState = uiState.value,
-        onAddExpenseClick = onAddExpenseClick,
-        onAddFamilyPaidWithPersonalClick = onAddFamilyPaidWithPersonalClick,
+        onAddPersonalIncomeClick = onAddPersonalIncomeClick,
+        onAddPersonalExpenseClick = onAddPersonalExpenseClick,
+        onAddFamilyIncomeClick = onAddFamilyIncomeClick,
+        onAddFamilyExpenseClick = onAddFamilyExpenseClick,
         onHistoryClick = onHistoryClick,
     )
 }
@@ -44,33 +49,27 @@ fun DashboardRoute(
 @Composable
 fun DashboardScreen(
     uiState: DashboardUiState,
-    onAddExpenseClick: () -> Unit,
-    onAddFamilyPaidWithPersonalClick: () -> Unit,
+    onAddPersonalIncomeClick: () -> Unit,
+    onAddPersonalExpenseClick: () -> Unit,
+    onAddFamilyIncomeClick: () -> Unit,
+    onAddFamilyExpenseClick: () -> Unit,
     onHistoryClick: () -> Unit,
 ) {
     Scaffold { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            Color(0xFFF6EFE6),
-                            Color(0xFFFDFBF7),
-                        ),
-                    ),
-                )
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp, vertical = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+                .padding(horizontal = 20.dp, vertical = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
                     text = "Dashboard mensual",
                     style = MaterialTheme.typography.headlineMedium,
                 )
                 Text(
-                    text = "Resumen rapido del mes actual y del pendiente familia a personal.",
+                    text = "Balance limpio del mes actual.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -79,44 +78,27 @@ fun DashboardScreen(
             SummaryCard(
                 title = "Saldo personal",
                 amountMinor = uiState.personalBalanceMinor,
-                containerColor = Color(0xFFD9F0E4),
+                onPlusClick = onAddPersonalIncomeClick,
+                onMinusClick = onAddPersonalExpenseClick,
             )
             SummaryCard(
                 title = "Saldo familiar",
                 amountMinor = uiState.familyBalanceMinor,
-                containerColor = Color(0xFFF7DFC7),
+                onPlusClick = onAddFamilyIncomeClick,
+                onMinusClick = onAddFamilyExpenseClick,
             )
             SummaryCard(
                 title = "Pendiente familia a personal",
                 amountMinor = uiState.pendingReimbursementMinor,
-                containerColor = Color(0xFFF2D7D5),
             )
 
-            Column(
+            Button(
+                onClick = onHistoryClick,
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(vertical = 16.dp),
+                shape = RoundedCornerShape(14.dp),
             ) {
-                Button(
-                    onClick = onAddExpenseClick,
-                    modifier = Modifier.fillMaxWidth(),
-                    contentPadding = PaddingValues(vertical = 14.dp),
-                ) {
-                    Text("+ Anadir gasto")
-                }
-                Button(
-                    onClick = onAddFamilyPaidWithPersonalClick,
-                    modifier = Modifier.fillMaxWidth(),
-                    contentPadding = PaddingValues(vertical = 14.dp),
-                ) {
-                    Text("+ Gasto familiar pagado con personal")
-                }
-                Button(
-                    onClick = onHistoryClick,
-                    modifier = Modifier.fillMaxWidth(),
-                    contentPadding = PaddingValues(vertical = 14.dp),
-                ) {
-                    Text("Ver historial")
-                }
+                Text("Ver historial")
             }
         }
     }
@@ -126,31 +108,65 @@ fun DashboardScreen(
 private fun SummaryCard(
     title: String,
     amountMinor: Long,
-    containerColor: Color,
+    onPlusClick: (() -> Unit)? = null,
+    onMinusClick: (() -> Unit)? = null,
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        border = CardDefaults.outlinedCardBorder(),
     ) {
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(containerColor)
-                .padding(20.dp),
+                .padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
-                Text(
-                    text = amountMinor.toCurrencyText(),
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
+                if (onPlusClick != null && onMinusClick != null) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        MinimalActionButton(label = "+", onClick = onPlusClick)
+                        MinimalActionButton(label = "-", onClick = onMinusClick)
+                    }
+                }
             }
+            HorizontalDivider()
+            Text(
+                text = amountMinor.toCurrencyText(),
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
         }
+    }
+}
+
+@Composable
+private fun MinimalActionButton(
+    label: String,
+    onClick: () -> Unit,
+) {
+    OutlinedButton(
+        onClick = onClick,
+        shape = RoundedCornerShape(12.dp),
+        contentPadding = PaddingValues(0.dp),
+        modifier = Modifier.width(44.dp),
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.titleMedium,
+        )
     }
 }
 

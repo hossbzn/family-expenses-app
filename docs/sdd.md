@@ -1,784 +1,355 @@
-\# SDD — Family Expenses App (Android)
+# SDD - Family Expenses App (Android)
 
+## 1. Objetivo
 
+App Android **offline-first** para gestionar:
 
-\## 1. Objetivo
+- gastos personales
+- gastos familiares
+- dinero personal adelantado a la familia
 
-App Android \*\*offline-first\*\* para gestionar:
-
-\- gastos personales
-
-\- gastos familiares
-
-\- dinero personal adelantado a la familia
-
-
-
-Objetivo UX: \*\*registrar un gasto en < 3 segundos\*\*.
-
-
+Objetivo UX: **registrar un gasto en < 3 segundos**.
 
 ---
 
-
-
-\## 2. Alcance del MVP
+## 2. Alcance del MVP
 
 Incluido:
 
-\- ingresos y gastos personales
-
-\- ingresos y gastos familiares
-
-\- gasto familiar pagado con cuenta personal
-
-\- cálculo automático de \*\*pendiente familia → personal\*\*
-
-\- \*\*liquidación total\*\* del pendiente
-
-\- movimientos recurrentes automáticos
-
-\- categorías editables
-
-\- dashboard mensual
-
-\- historial agrupado por día
-
-\- edición y borrado de movimientos
-
-\- \*\*quick expense\*\*
-
-
+- ingresos y gastos personales
+- ingresos y gastos familiares
+- gasto familiar pagado con cuenta personal
+- calculo automatico de **pendiente familia -> personal**
+- **liquidacion total** del pendiente
+- movimientos recurrentes automaticos
+- categorias editables
+- dashboard mensual
+- historial agrupado por dia
+- edicion y borrado de movimientos
+- **quick expense**
 
 Excluido (fase futura):
 
-\- sincronización cloud
-
-\- multiusuario real
-
-\- exportaciones
-
-\- estadísticas avanzadas
-
-\- OCR tickets
-
-\- integración bancaria
-
-
+- sincronizacion cloud
+- multiusuario real
+- exportaciones
+- estadisticas avanzadas
+- OCR tickets
+- integracion bancaria
 
 ---
 
-
-
-\## 3. Modelo conceptual
-
-
+## 3. Modelo conceptual
 
 La app maneja tres balances:
 
-
-
-\- `saldo\_personal\_mes`
-
-\- `saldo\_familiar\_mes`
-
-\- `pendiente\_familia\_personal`
-
-
+- `saldo_personal_mes`
+- `saldo_familiar_mes`
+- `pendiente_familia_personal`
 
 Ejemplo:
 
-
-
-Gasto supermercado 120€  
-
-pertenece: \*\*Familiar\*\*  
-
-pagado desde: \*\*Personal\*\*
-
-
+Gasto supermercado 120 EUR  
+pertenece: **Familiar**  
+pagado desde: **Personal**
 
 Resultado:
 
-
-
-
-
-saldo\_familiar\_mes -= 120
-
-saldo\_personal\_mes no cambia
-
-pendiente\_familia\_personal += 120
-
-
-
-
+- `saldo_familiar_mes -= 120`
+- `saldo_personal_mes` no cambia
+- `pendiente_familia_personal += 120`
 
 ---
 
-
-
-\## 4. Entidades principales
-
-
-
-\### User
-
-
-
-id
-
-name
-
-createdAt
-
-
-
-
-
-\### Account
-
-
-
-id
-
-name
-
-type (PERSONAL | FAMILY)
-
-createdByUserId
-
-createdAt
-
-
-
-
-
-\### Category
-
-
-
-id
-
-name
-
-icon
-
-color
-
-createdByUserId
-
-createdAt
-
-
-
-
-
-\### Transaction
-
-
-
-id
-
-amount\_minor (Long)
-
-type (INCOME | EXPENSE)
-
-accountId
-
-categoryId
-
-description
-
-transaction\_at
-
-paid\_from\_personal (boolean)
-
-source (MANUAL | AUTO\_RECURRENT)
-
-recurrence\_rule\_id
-
-createdByUserId
-
-createdAt
-
-updatedAt
-
-
-
-
-
-\### RecurrenceRule
-
-
-
-id
-
-amount\_minor
-
-type
-
-accountId
-
-categoryId
-
-description
-
-frequency
-
-interval
-
-next\_run\_at
-
-notifications\_enabled
-
-is\_paused
-
-createdByUserId
-
-createdAt
-
-
-
-
-
-\### ReimbursementLedger
-
-
-
-id
-
-transaction\_id
-
-amount\_minor
-
-status (PENDING | SETTLED)
-
-createdAt
-
-
-
-
-
-\### Settlement
-
-
-
-id
-
-amount\_minor
-
-settlement\_at
-
-createdAt
-
-
-
-
-
-\### SettlementItem
-
-
-
-id
-
-settlement\_id
-
-reimbursement\_ledger\_id
-
-amount\_minor
-
-
-
-
+## 4. Entidades principales
+
+### User
+
+- id
+- name
+- createdAt
+
+### Account
+
+- id
+- name
+- type (PERSONAL | FAMILY)
+- createdByUserId
+- createdAt
+
+### Category
+
+- id
+- name
+- icon
+- color
+- createdByUserId
+- createdAt
+
+### Transaction
+
+- id
+- amount_minor (Long)
+- type (INCOME | EXPENSE)
+- accountId
+- categoryId
+- description
+- transaction_at
+- paid_from_personal (boolean)
+- source (MANUAL | AUTO_RECURRENT)
+- recurrence_rule_id
+- createdByUserId
+- createdAt
+- updatedAt
+
+### RecurrenceRule
+
+- id
+- amount_minor
+- type
+- accountId
+- categoryId
+- description
+- frequency
+- interval
+- next_run_at
+- notifications_enabled
+- is_paused
+- createdByUserId
+- createdAt
+
+### ReimbursementLedger
+
+- id
+- transaction_id
+- amount_minor
+- status (PENDING | SETTLED)
+- createdAt
+
+### Settlement
+
+- id
+- amount_minor
+- settlement_at
+- createdAt
+
+### SettlementItem
+
+- id
+- settlement_id
+- reimbursement_ledger_id
+- amount_minor
 
 ---
 
+## 5. Reglas de negocio
 
+### 5.1 Todo movimiento pertenece a una cuenta
 
-\## 5. Reglas de negocio
+`transaction.accountId != null`
 
-
-
-\### 5.1 Todo movimiento pertenece a una cuenta
-
-
-
-transaction.accountId ≠ null
-
-
-
-
-
-\### 5.2 Gasto familiar pagado con personal
-
-
+### 5.2 Gasto familiar pagado con personal
 
 Si:
 
-
-
-
-
-account = FAMILY
-
-paid\_from\_personal = true
-
-
-
-
+- `account = FAMILY`
+- `paid_from_personal = true`
 
 Entonces:
 
+- `saldo_familiar_mes -= amount`
+- `pendiente_familia_personal += amount`
 
+### 5.3 Saldo personal
 
+`saldo_personal_mes = ingresos_personales_mes - gastos_personales_mes`
 
+Los gastos familiares pagados con personal **no afectan al saldo personal**.
 
-saldo\_familiar\_mes -= amount
+### 5.4 Saldo familiar
 
-pendiente\_familia\_personal += amount
-
-
-
-
-
----
-
-
-
-\### 5.3 Saldo personal
-
-
-
-saldo\_personal\_mes =
-
-ingresos\_personales\_mes
-
-
-
-gastos\_personales\_mes
-
-
-
-
-
-Los gastos familiares pagados con personal \*\*no afectan al saldo personal\*\*.
-
-
-
----
-
-
-
-\### 5.4 Saldo familiar
-
-
-
-saldo\_familiar\_mes =
-
-ingresos\_familiares\_mes
-
-
-
-gastos\_familiares\_mes
-
-
-
-
+`saldo_familiar_mes = ingresos_familiares_mes - gastos_familiares_mes`
 
 Incluye gastos pagados con personal.
 
+### 5.5 Pendiente familia -> personal
 
+`pendiente = SUM(gastos familiares pagados con personal no liquidados)`
 
----
+### 5.6 Liquidacion
 
-
-
-\### 5.5 Pendiente familia → personal
-
-
-
-
-
-pendiente =
-
-SUM(gastos familiares pagados con personal
-
-no liquidados)
-
-
-
-
-
----
-
-
-
-\### 5.6 Liquidación
-
-
-
-\- siempre \*\*total\*\*
-
-\- nunca parcial
-
-\- no genera movimientos en cuentas
-
-
+- siempre **total**
+- nunca parcial
+- no genera movimientos en cuentas
 
 Resultado:
 
+- `pendiente -> 0`
+- `ledger.status -> SETTLED`
 
-
-
-
-pendiente → 0
-
-ledger.status → SETTLED
-
-
-
-
-
----
-
-
-
-\### 5.7 Edición o borrado
-
-
+### 5.7 Edicion o borrado
 
 Si un gasto cambia o se elimina:
 
+- recalcular pendiente
 
+### 5.8 Recurrentes
 
+Se generan automaticamente si:
 
-
-recalcular pendiente
-
-
-
-
-
----
-
-
-
-\### 5.8 Recurrentes
-
-
-
-Se generan automáticamente si:
-
-
-
-
-
-next\_run\_at <= today
-
-
-
-
+- `next_run_at <= today`
 
 Algoritmo:
 
-
-
-
-
-while next\_run\_at <= today
-
-createTransaction()
-
-advanceNextRunDate()
-
-
-
-
+- `while next_run_at <= today`
+- `createTransaction()`
+- `advanceNextRunDate()`
 
 ---
 
-
-
-\## 6. Dashboard
-
-
+## 6. Dashboard
 
 Mostrar:
 
-
-
-\- saldo personal del mes
-
-\- saldo familiar del mes
-
-\- pendiente familia → personal
-
-
+- saldo personal del mes
+- saldo familiar del mes
+- pendiente familia -> personal
 
 Acciones:
 
-
-
-
-
-Añadir gasto
-
-
-
-Gasto familiar pagado con personal
-
-
-
-
+- acceso rapido `+` y `-` dentro de `Saldo personal`
+- acceso rapido `+` y `-` dentro de `Saldo familiar`
+- acceso a historial
 
 ---
 
+## 7. Historial
 
-
-\## 7. Historial
-
-
-
-\- lista única
-
-\- agrupado por día
-
-\- orden descendente
-
-
+- lista unica
+- agrupado por dia
+- orden descendente
 
 Ejemplo:
 
+- Hoy
+- Supermercado -45 EUR Familiar
+- Gasolina -60 EUR Personal
 
+- Ayer
+- Amazon -30 EUR Familiar - pagado con personal
 
-
-
-Hoy
-
-Supermercado -45€ Familiar
-
-Gasolina -60€ Personal
-
-
-
-Ayer
-
-Amazon -30€ Familiar • pagado con personal
-
-
-
-1 marzo
-
-Netflix -12€ Familiar • recurrente
-
-
-
-
+- 1 marzo
+- Netflix -12 EUR Familiar - recurrente
 
 Filtros:
 
-
-
-
-
-Todo
-
-Personal
-
-Familiar
-
-Recurrentes
-
-Pagados con personal
-
-
-
-
+- Todo
+- Personal
+- Familiar
+- Recurrentes
+- Pagados con personal
 
 ---
 
-
-
-\## 8. Añadir gasto
-
-
+## 8. Añadir gasto o ingreso
 
 Campos:
 
-
-
-
-
-importe
-
-categoría
-
-cuenta
-
-fecha
-
-nota
-
-switch pagado con personal
-
-
-
-
+- tipo
+- importe
+- categoria
+- cuenta
+- fecha
+- nota
+- switch pagado con personal
 
 Defaults:
 
+- fecha = hoy
+- categoria = ultima usada
+- cuenta = ultima usada
 
-
-
-
-fecha = hoy
-
-categoría = última usada
-
-cuenta = última usada
-
-
-
-
+Si se activa `pagado con cuenta personal`, la cuenta debe forzarse a `Familiar`.
 
 ---
 
+## 9. Quick expense
 
+Pantalla rapida:
 
-\## 9. Quick expense
-
-
-
-Pantalla rápida:
-
-
-
-
-
-\[ 45,00 ]
-
-categoría: última usada
-
-cuenta: última usada
-
-
-
-✔ guardar
-
-
-
-
+- `[ 45,00 ]`
+- categoria: ultima usada
+- cuenta: ultima usada
+- guardar
 
 ---
 
+## 10. Direccion visual
 
+La app debe seguir una estetica:
 
-\## 10. Stack técnico
+- minimalista
+- black and white
+- con muy poco ruido visual
 
+Reglas visuales:
 
+- priorizar fondo claro, texto negro y grises neutros
+- evitar colores decorativos salvo feedback o estados imprescindibles
+- evitar botones recargados o bloques visuales pesados
+- usar espaciado amplio y jerarquia tipografica limpia
+- si se usan iconos, deben ser simples, monocromos y de estilo minimalista
 
+Objetivo visual:
 
-
-Kotlin
-
-Jetpack Compose
-
-Room
-
-Hilt
-
-ViewModel + StateFlow
-
-Navigation Compose
-
-WorkManager
-
-
-
-
+- que la interfaz se sienta rapida, limpia y sobria
 
 ---
 
+## 11. Stack tecnico
 
+- Kotlin
+- Jetpack Compose
+- Room
+- Hilt
+- ViewModel + StateFlow
+- Navigation Compose
+- WorkManager
 
-\## 11. Arquitectura
+---
 
-
+## 12. Arquitectura
 
 Capas:
 
-
-
-
-
-data
-
-domain
-
-ui
-
-
-
-
+- data
+- domain
+- ui
 
 Paquetes:
 
+- data
+- database
+- dao
+- entity
+- repository
 
+- domain
+- model
+- usecase
 
-
-
-data
-
-database
-
-dao
-
-entity
-
-repository
-
-
-
-domain
-
-model
-
-usecase
-
-
-
-ui
-
-dashboard
-
-history
-
-addtransaction
-
-settlement
-
-recurrence
-
-components
-
-
-
-
+- ui
+- dashboard
+- history
+- addtransaction
+- settlement
+- recurrence
+- components
 
 ---
 
-
-
-\## 12. Métrica principal
-
-
+## 13. Metrica principal
 
 North star metric:
 
-
-
-
-
-Tiempo medio de registro de gasto < 3 segundos
-
+- Tiempo medio de registro de gasto < 3 segundos

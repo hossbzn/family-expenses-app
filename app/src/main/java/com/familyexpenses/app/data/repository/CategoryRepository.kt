@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.map
 class CategoryRepository @Inject constructor(
     private val categoryDao: CategoryDao,
 ) {
+    fun observeCategories(): Flow<List<CategoryEntity>> = categoryDao.observeCategories()
+
     fun observeExpenseCategories(): Flow<List<CategoryEntity>> = categoryDao.observeCategories()
         .map { categories ->
             categories.filter { it.type == CategoryType.EXPENSE }

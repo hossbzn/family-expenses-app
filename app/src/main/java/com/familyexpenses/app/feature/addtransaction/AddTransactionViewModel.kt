@@ -4,11 +4,13 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.familyexpenses.app.core.model.AccountType
+import com.familyexpenses.app.core.model.CategoryType
+import com.familyexpenses.app.core.model.TransactionType
 import com.familyexpenses.app.data.local.entity.AccountEntity
 import com.familyexpenses.app.data.local.entity.CategoryEntity
 import com.familyexpenses.app.data.repository.AccountRepository
 import com.familyexpenses.app.data.repository.CategoryRepository
-import com.familyexpenses.app.data.worker.DatabaseSeedWorker
+import com.familyexpenses.app.data.seed.DatabaseSeeder
 import com.familyexpenses.app.domain.model.AddExpenseRequest
 import com.familyexpenses.app.domain.usecase.AddExpenseUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -33,9 +35,15 @@ class AddTransactionViewModel @Inject constructor(
 
     private val preselectFamilyPaidFromPersonal = savedStateHandle
         .get<Boolean>(FAMILY_PAID_FROM_PERSONAL_ARG) ?: false
+    private val initialAccountId = savedStateHandle.get<String>(INITIAL_ACCOUNT_ID_ARG)
+    private val initialType = savedStateHandle.get<String>(INITIAL_TYPE_ARG)
+        ?.let { runCatching { TransactionType.valueOf(it) }.getOrNull() }
+        ?: TransactionType.EXPENSE
 
     private val formState = MutableStateFlow(
         AddTransactionFormState(
+            selectedType = initialType,
+            selectedAccountId = initialAccountId,
             paidFromPersonal = preselectFamilyPaidFromPersonal,
         ),
     )
@@ -45,28 +53,41 @@ class AddTransactionViewModel @Inject constructor(
 
     val uiState: StateFlow<AddTransactionUiState> = combine(
         accountRepository.observeAccounts(),
-        categoryRepository.observeExpenseCategories(),
+        categoryRepository.observeCategories(),
         formState,
     ) { accounts, categories, form ->
+        val selectedType = form.selectedType
+        val filteredCategories = categories.filter { category ->
+            when (selectedType) {
+                TransactionType.EXPENSE -> category.type == CategoryType.EXPENSE
+                TransactionType.INCOME -> category.type == CategoryType.INCOME
+                TransactionType.ADJUSTMENT -> false
+            }
+        }
         val selectedAccountId = resolveSelectedAccountId(
             accounts = accounts,
             selectedAccountId = form.selectedAccountId,
-            paidFromPersonal = form.paidFromPersonal,
+            paidFromPersonal = form.paidFromPersonal && selectedType == TransactionType.EXPENSE,
         )
-        val selectedCategoryId = form.selectedCategoryId ?: categories.firstOrNull()?.id
+        val selectedCategoryId = form.selectedCategoryId
+            ?.takeIf { selectedId -> filteredCategories.any { it.id == selectedId } }
+            ?: filteredCategories.firstOrNull()?.id
 
         AddTransactionUiState(
+            selectedType = selectedType,
             amountInput = form.amountInput,
             noteInput = form.noteInput,
-            paidFromPersonal = form.paidFromPersonal,
+            paidFromPersonal = form.paidFromPersonal && selectedType == TransactionType.EXPENSE,
             selectedAccountId = selectedAccountId,
             selectedCategoryId = selectedCategoryId,
             accountOptions = accounts.filter { !it.isArchived },
-            categoryOptions = categories,
+            categoryOptions = filteredCategories,
             isSaving = form.isSaving,
             errorMessage = form.errorMessage,
             title = if (preselectFamilyPaidFromPersonal) {
                 "Gasto familiar pagado con personal"
+            } else if (selectedType == TransactionType.INCOME) {
+                "Anadir ingreso"
             } else {
                 "Anadir gasto"
             },
@@ -89,6 +110,18 @@ class AddTransactionViewModel @Inject constructor(
         }
     }
 
+    fun onTypeSelected(type: TransactionType) {
+        formState.update { state ->
+            val paidFromPersonal = if (type == TransactionType.INCOME) false else state.paidFromPersonal
+            state.copy(
+                selectedType = type,
+                paidFromPersonal = paidFromPersonal,
+                selectedCategoryId = null,
+                errorMessage = null,
+            )
+        }
+    }
+
     fun onCategorySelected(categoryId: String) {
         formState.update { state ->
             state.copy(selectedCategoryId = categoryId, errorMessage = null)
@@ -108,8 +141,8 @@ class AddTransactionViewModel @Inject constructor(
     fun onPaidFromPersonalChanged(enabled: Boolean) {
         formState.update { state ->
             state.copy(
-                paidFromPersonal = enabled,
-                selectedAccountId = if (enabled) DatabaseSeedWorker.FAMILY_ACCOUNT_ID else state.selectedAccountId,
+                paidFromPersonal = if (state.selectedType == TransactionType.EXPENSE) enabled else false,
+                selectedAccountId = if (enabled) DatabaseSeeder.FAMILY_ACCOUNT_ID else state.selectedAccountId,
                 errorMessage = null,
             )
         }
@@ -138,16 +171,26 @@ class AddTransactionViewModel @Inject constructor(
             runCatching {
                 addExpenseUseCase(
                     AddExpenseRequest(
+                        type = snapshot.selectedType,
                         amountMinor = amountMinor,
                         accountId = accountId,
                         categoryId = categoryId,
                         note = snapshot.noteInput,
-                        paidFromPersonal = snapshot.paidFromPersonal,
+                        paidFromPersonal = snapshot.selectedType == TransactionType.EXPENSE && snapshot.paidFromPersonal,
                         occurredAt = System.currentTimeMillis(),
                     ),
                 )
             }.onSuccess {
-                formState.update { AddTransactionFormState(paidFromPersonal = preselectFamilyPaidFromPersonal) }
+                formState.update {
+                    AddTransactionFormState(
+                        selectedType = if (preselectFamilyPaidFromPersonal) {
+                            TransactionType.EXPENSE
+                        } else {
+                            TransactionType.EXPENSE
+                        },
+                        paidFromPersonal = preselectFamilyPaidFromPersonal,
+                    )
+                }
                 events.emit(AddTransactionEvent.Saved)
             }.onFailure { error ->
                 formState.update {
@@ -166,23 +209,26 @@ class AddTransactionViewModel @Inject constructor(
         paidFromPersonal: Boolean,
     ): String? {
         if (paidFromPersonal) {
-            return accounts.firstOrNull { it.id == DatabaseSeedWorker.FAMILY_ACCOUNT_ID }?.id
+            return accounts.firstOrNull { it.id == DatabaseSeeder.FAMILY_ACCOUNT_ID }?.id
                 ?: accounts.firstOrNull { it.type == AccountType.FAMILY }?.id
         }
 
         return selectedAccountId
-            ?: accounts.firstOrNull { it.id == DatabaseSeedWorker.PERSONAL_ACCOUNT_ID }?.id
+            ?: accounts.firstOrNull { it.id == DatabaseSeeder.PERSONAL_ACCOUNT_ID }?.id
             ?: accounts.firstOrNull { it.type == AccountType.PERSONAL }?.id
             ?: accounts.firstOrNull()?.id
     }
 
     companion object {
         const val FAMILY_PAID_FROM_PERSONAL_ARG = "familyPaidFromPersonal"
+        const val INITIAL_ACCOUNT_ID_ARG = "initialAccountId"
+        const val INITIAL_TYPE_ARG = "initialType"
     }
 }
 
 data class AddTransactionUiState(
     val title: String = "Anadir gasto",
+    val selectedType: TransactionType = TransactionType.EXPENSE,
     val amountInput: String = "",
     val noteInput: String = "",
     val paidFromPersonal: Boolean = false,
@@ -195,6 +241,7 @@ data class AddTransactionUiState(
 )
 
 private data class AddTransactionFormState(
+    val selectedType: TransactionType = TransactionType.EXPENSE,
     val amountInput: String = "",
     val noteInput: String = "",
     val paidFromPersonal: Boolean = false,

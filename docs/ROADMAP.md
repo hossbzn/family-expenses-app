@@ -1,165 +1,91 @@
-\# ROADMAP
+# ROADMAP
 
-\## Estado actual
+## Estado actual
 
 Fase 1 completada.  
-Fase 2 en progreso.
+Fase 2 completada.  
+Fase 3 completada en su parte basica.  
+Fase 4 implementada en su base funcional.  
+Fase 6 completada en su primer corte.
 
 ---
 
-
-
-\## Fase 1 — Base técnica
+## Fase 1 - Base tecnica
 
 Objetivo: proyecto Android compilando.
 
-
-
-\- [x] Crear proyecto Android
-
-\- [x] Configurar Compose
-
-\- [x] Configurar Room
-
-\- [x] Configurar Hilt
-
-\- [x] Crear entidades
-
-\- [x] Crear AppDatabase
-
-
+- [x] Crear proyecto Android
+- [x] Configurar Compose
+- [x] Configurar Room
+- [x] Configurar Hilt
+- [x] Crear entidades
+- [x] Crear AppDatabase
 
 ---
 
+## Fase 2 - Persistencia basica
 
-
-\## Fase 2 — Persistencia básica
-
-
-
-\- [x] DAO
-
-\- [x] Repositorios basicos
-
-\- [x] Seed inicial
-
-\- [x] Pantalla DevHome para verificar datos
-
-
+- [x] DAO
+- [x] Repositorios basicos
+- [x] Seed inicial
+- [x] Pantalla base para verificar datos
 
 ---
 
+## Fase 3 - Registro de movimientos
 
-
-\## Fase 3 — Registro de movimientos
-
-
-
-\- AddTransactionScreen
-
-\- Guardar ingresos y gastos
-
-\- Historial básico
-
-\- Edición y borrado
-
-
+- [x] AddTransactionScreen
+- [x] Guardar ingresos y gastos
+- [x] Historial basico
+- [ ] Edicion y borrado
 
 ---
 
+## Fase 4 - Caso especial familiar
 
-
-\## Fase 4 — Caso especial familiar
-
-
-
-\- gasto familiar pagado con personal
-
-\- reimbursement\_ledger
-
-\- cálculo pendiente
-
-
+- [x] Gasto familiar pagado con personal
+- [x] reimbursement_ledger
+- [x] Calculo pendiente
 
 ---
 
+## Fase 5 - Liquidacion
 
-
-\## Fase 5 — Liquidación
-
-
-
-\- pantalla PendingSettlement
-
-\- botón liquidar
-
-\- creación Settlement
-
-\- reset del pendiente
-
-
+- [ ] Pantalla PendingSettlement
+- [ ] Boton liquidar
+- [ ] Creacion Settlement
+- [ ] Reset del pendiente
 
 ---
 
+## Fase 6 - Dashboard
 
-
-\## Fase 6 — Dashboard
-
-
-
-\- saldo personal mensual
-
-\- saldo familiar mensual
-
-\- pendiente familia → personal
-
-\- últimos movimientos
-
-
+- [x] Saldo personal mensual
+- [x] Saldo familiar mensual
+- [x] Pendiente familia -> personal
+- [x] Acciones rapidas por saldo (+ / -)
+- [ ] Ultimos movimientos
 
 ---
 
+## Fase 7 - Recurrentes
 
-
-\## Fase 7 — Recurrentes
-
-
-
-\- reglas recurrentes
-
-\- worker generación
-
-\- edición reglas
-
-
+- [ ] Reglas recurrentes
+- [ ] Worker de generacion
+- [ ] Edicion de reglas
 
 ---
 
+## Fase 8 - UX rapida
 
-
-\## Fase 8 — UX rápida
-
-
-
-\- quick expense
-
-\- recordar última categoría
-
-\- recordar última cuenta
-
-
+- [ ] Quick expense
+- [ ] Recordar ultima categoria
+- [ ] Recordar ultima cuenta
 
 ---
 
+## Fase 9 - Mejoras
 
-
-\## Fase 9 — mejoras
-
-
-
-\- filtros historial
-
-\- notificaciones recurrentes
-
-\- mejoras UI
-
+- [ ] Filtros de historial
+- [ ] Notificaciones recurrentes
+- [ ] Mejoras de UI

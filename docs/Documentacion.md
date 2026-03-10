@@ -8,7 +8,7 @@ La aplicacion permite registrar ingresos y gastos personales y familiares en loc
 - Seed inicial con cuentas `Personal` y `Familiar`.
 - Categorias iniciales de ejemplo.
 - Dashboard mensual conectado a Room con saldo personal, saldo familiar y pendiente familia a personal.
-- Alta manual de gasto con flujo basico para gasto personal y gasto familiar pagado con personal.
+- Alta manual de ingresos y gastos desde un unico formulario.
 - Historial basico de movimientos con lista unica y orden descendente.
 
 ## Reglas contables clave
@@ -21,14 +21,16 @@ La aplicacion permite registrar ingresos y gastos personales y familiares en loc
 1. Abrir la app.
 2. Esperar a que se ejecute el seed inicial en el primer arranque.
 3. Revisar el dashboard mensual.
-4. Usar `+ Anadir gasto` para registrar un gasto personal.
-5. Usar `+ Gasto familiar pagado con personal` para registrar el caso especial que crea pendiente.
-6. Usar `Ver historial` para revisar los movimientos guardados.
+4. En `Saldo personal`, usar `+` para anadir un ingreso personal o `-` para anadir un gasto personal.
+5. En `Saldo familiar`, usar `+` para anadir un ingreso familiar o `-` para anadir un gasto familiar.
+6. Si el gasto familiar fue pagado con cuenta personal, activar el switch dentro del formulario.
+7. Usar `Ver historial` para revisar los movimientos guardados.
 
 ## Pantalla principal
 - `Saldo personal`: ingresos menos gastos personales del mes. Si un gasto se marco como pagado con personal pero pertenece a familia, no descuenta aqui.
 - `Saldo familiar`: ingresos menos gastos familiares del mes.
 - `Pendiente familia a personal`: suma de entradas abiertas en `reimbursement_ledger`.
+- Cada saldo tiene acceso rapido `+ / -` para abrir el formulario ya preconfigurado.
 
 ## Limitaciones actuales
 - El historial todavia no tiene filtros, agrupacion por dia ni edicion.

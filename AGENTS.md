@@ -108,6 +108,13 @@ Entonces:
 
 ## Reglas de UX
 
+### Direccion visual
+- La app debe seguir un estilo minimalista y black and white
+- Priorizar blanco, negro y escala de grises
+- Evitar colores decorativos innecesarios
+- Si se usan iconos, deben ser simples, monocromos y minimalistas
+- Evitar interfaces recargadas o con demasiados botones visibles a la vez
+
 ### Dashboard
 Debe mostrar:
 - saldo personal del mes

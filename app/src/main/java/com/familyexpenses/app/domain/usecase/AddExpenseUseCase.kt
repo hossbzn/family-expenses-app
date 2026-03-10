@@ -5,7 +5,7 @@ import com.familyexpenses.app.core.model.TransactionType
 import com.familyexpenses.app.data.local.entity.TransactionEntity
 import com.familyexpenses.app.data.repository.AccountRepository
 import com.familyexpenses.app.data.repository.ExpenseRepository
-import com.familyexpenses.app.data.worker.DatabaseSeedWorker
+import com.familyexpenses.app.data.seed.DatabaseSeeder
 import com.familyexpenses.app.domain.model.AddExpenseRequest
 import com.familyexpenses.app.domain.model.AddExpenseResult
 import com.familyexpenses.app.domain.rule.ValidateFamilyPaidFromPersonalRule
@@ -25,10 +25,12 @@ class AddExpenseUseCase @Inject constructor(
         val account = accountRepository.getAccountById(request.accountId)
             ?: throw IllegalArgumentException("La cuenta seleccionada no existe.")
 
-        validateFamilyPaidFromPersonalRule.validate(
-            accountType = account.type,
-            paidFromPersonal = request.paidFromPersonal,
-        )
+        if (request.type == TransactionType.EXPENSE) {
+            validateFamilyPaidFromPersonalRule.validate(
+                accountType = account.type,
+                paidFromPersonal = request.paidFromPersonal,
+            )
+        }
 
         val transactionId = UUID.randomUUID().toString()
         expenseRepository.addExpense(
@@ -36,21 +38,25 @@ class AddExpenseUseCase @Inject constructor(
                 id = transactionId,
                 accountId = request.accountId,
                 categoryId = request.categoryId,
-                type = TransactionType.EXPENSE,
+                type = request.type,
                 amountMinor = request.amountMinor,
-                paidFromPersonal = request.paidFromPersonal,
+                paidFromPersonal = request.type == TransactionType.EXPENSE && request.paidFromPersonal,
                 note = request.note?.takeIf { it.isNotBlank() },
                 occurredAt = request.occurredAt,
                 createdAt = System.currentTimeMillis(),
             ),
-            createReimbursementLedger = account.type == AccountType.FAMILY && request.paidFromPersonal,
-            familyAccountId = DatabaseSeedWorker.FAMILY_ACCOUNT_ID,
-            personalAccountId = DatabaseSeedWorker.PERSONAL_ACCOUNT_ID,
+            createReimbursementLedger = request.type == TransactionType.EXPENSE &&
+                account.type == AccountType.FAMILY &&
+                request.paidFromPersonal,
+            familyAccountId = DatabaseSeeder.FAMILY_ACCOUNT_ID,
+            personalAccountId = DatabaseSeeder.PERSONAL_ACCOUNT_ID,
         )
 
         return AddExpenseResult(
             transactionId = transactionId,
-            createdReimbursementLedger = account.type == AccountType.FAMILY && request.paidFromPersonal,
+            createdReimbursementLedger = request.type == TransactionType.EXPENSE &&
+                account.type == AccountType.FAMILY &&
+                request.paidFromPersonal,
         )
     }
 }

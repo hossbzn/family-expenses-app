@@ -21,6 +21,7 @@ Tareas:
 - [x] ViewModel AddTransactionViewModel
 - [x] UI AddTransactionScreen
 - [x] Historial basico de movimientos
+- [x] Selector de tipo para ingreso y gasto
 
 ---
 
@@ -95,3 +96,4 @@ Tareas:
 - [x] ComputeMonthlyBalanceRule
 - [x] GetDashboardSummaryUseCase
 - [x] DashboardScreen
+- [x] Acciones rapidas + / - en saldo personal y familiar

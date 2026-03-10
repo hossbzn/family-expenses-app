@@ -14,4 +14,7 @@ interface CategoryDao {
 
     @Query("SELECT * FROM categories ORDER BY name ASC")
     fun observeCategories(): Flow<List<CategoryEntity>>
+
+    @Query("SELECT COUNT(*) FROM categories")
+    suspend fun countCategories(): Int
 }

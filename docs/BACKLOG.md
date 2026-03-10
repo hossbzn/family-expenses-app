@@ -6,7 +6,7 @@ Estados: TODO | IN_PROGRESS | REVIEW | DONE | BLOCKED
 
 ### US-01 Registrar gasto personal
 
-Estado: IN_PROGRESS
+Estado: DONE
 
 Criterios:
 
@@ -20,6 +20,7 @@ Tareas:
 - [x] UseCase AddExpenseUseCase
 - [x] ViewModel AddTransactionViewModel
 - [x] UI AddTransactionScreen
+- [x] Historial basico de movimientos
 
 ---
 
@@ -81,7 +82,7 @@ Tareas:
 
 ### US-05 Dashboard mensual
 
-Estado: REVIEW
+Estado: DONE
 
 Criterios:
 

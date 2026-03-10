@@ -2,11 +2,11 @@
 
 Objetivo: persistencia basica + primeras pantallas funcionales del MVP
 
-## En progreso
+## Completadas
 
 ### US-01 Registrar gasto personal
 
-Estado: REVIEW
+Estado: DONE
 
 Tareas:
 
@@ -17,16 +17,13 @@ Tareas:
 - [x] AddExpenseUseCase
 - [x] AddTransactionViewModel
 - [x] AddTransactionScreen
-
-Pendiente funcional:
-
-- [ ] Reflejar el movimiento en historial
+- [x] Historial basico visible
 
 ---
 
 ### US-05 Dashboard mensual
 
-Estado: REVIEW
+Estado: DONE
 
 Tareas:
 
@@ -50,3 +47,4 @@ Tareas:
 - [x] Definir entidades Room
 - [x] Dashboard inicial conectado a Room
 - [x] Formulario basico de alta de gasto
+- [x] Historial basico con navegacion

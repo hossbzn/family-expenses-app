@@ -9,6 +9,7 @@ import androidx.navigation.navArgument
 import com.familyexpenses.app.feature.addtransaction.AddTransactionRoute
 import com.familyexpenses.app.feature.addtransaction.AddTransactionViewModel
 import com.familyexpenses.app.feature.dashboard.DashboardRoute
+import com.familyexpenses.app.feature.history.HistoryRoute
 
 @Composable
 fun FamilyExpensesNavHost() {
@@ -26,6 +27,9 @@ fun FamilyExpensesNavHost() {
                 onAddFamilyPaidWithPersonalClick = {
                     navController.navigate("add-transaction?familyPaidFromPersonal=true")
                 },
+                onHistoryClick = {
+                    navController.navigate("history")
+                },
             )
         }
         composable(
@@ -38,6 +42,11 @@ fun FamilyExpensesNavHost() {
             ),
         ) {
             AddTransactionRoute(
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable("history") {
+            HistoryRoute(
                 onBack = { navController.popBackStack() },
             )
         }

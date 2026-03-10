@@ -29,6 +29,7 @@ import java.util.Locale
 fun DashboardRoute(
     onAddExpenseClick: () -> Unit,
     onAddFamilyPaidWithPersonalClick: () -> Unit,
+    onHistoryClick: () -> Unit,
     viewModel: DashboardViewModel = hiltViewModel(),
 ) {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
@@ -36,6 +37,7 @@ fun DashboardRoute(
         uiState = uiState.value,
         onAddExpenseClick = onAddExpenseClick,
         onAddFamilyPaidWithPersonalClick = onAddFamilyPaidWithPersonalClick,
+        onHistoryClick = onHistoryClick,
     )
 }
 
@@ -44,6 +46,7 @@ fun DashboardScreen(
     uiState: DashboardUiState,
     onAddExpenseClick: () -> Unit,
     onAddFamilyPaidWithPersonalClick: () -> Unit,
+    onHistoryClick: () -> Unit,
 ) {
     Scaffold { innerPadding ->
         Column(
@@ -106,6 +109,13 @@ fun DashboardScreen(
                     contentPadding = PaddingValues(vertical = 14.dp),
                 ) {
                     Text("+ Gasto familiar pagado con personal")
+                }
+                Button(
+                    onClick = onHistoryClick,
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(vertical = 14.dp),
+                ) {
+                    Text("Ver historial")
                 }
             }
         }

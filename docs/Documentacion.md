@@ -9,6 +9,7 @@ La aplicacion permite registrar ingresos y gastos personales y familiares en loc
 - Categorias iniciales de ejemplo.
 - Dashboard mensual conectado a Room con saldo personal, saldo familiar y pendiente familia a personal.
 - Alta manual de gasto con flujo basico para gasto personal y gasto familiar pagado con personal.
+- Historial basico de movimientos con lista unica y orden descendente.
 
 ## Reglas contables clave
 - Todo movimiento pertenece a una cuenta.
@@ -22,6 +23,7 @@ La aplicacion permite registrar ingresos y gastos personales y familiares en loc
 3. Revisar el dashboard mensual.
 4. Usar `+ Anadir gasto` para registrar un gasto personal.
 5. Usar `+ Gasto familiar pagado con personal` para registrar el caso especial que crea pendiente.
+6. Usar `Ver historial` para revisar los movimientos guardados.
 
 ## Pantalla principal
 - `Saldo personal`: ingresos menos gastos personales del mes. Si un gasto se marco como pagado con personal pero pertenece a familia, no descuenta aqui.
@@ -29,5 +31,5 @@ La aplicacion permite registrar ingresos y gastos personales y familiares en loc
 - `Pendiente familia a personal`: suma de entradas abiertas en `reimbursement_ledger`.
 
 ## Limitaciones actuales
-- Los accesos rapidos del dashboard aun no navegan a formularios.
-- El alta de movimientos y la liquidacion completa siguen en desarrollo segun `docs/SPRINT.md`.
+- El historial todavia no tiene filtros, agrupacion por dia ni edicion.
+- La liquidacion completa y los movimientos recurrentes siguen pendientes segun `docs/SPRINT.md`.

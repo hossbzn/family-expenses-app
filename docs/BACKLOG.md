@@ -1,151 +1,96 @@
-\# BACKLOG
+# BACKLOG
 
+Estados: TODO | IN_PROGRESS | REVIEW | DONE | BLOCKED
 
+## P0 - MVP
 
-Estados: TODO | IN\_PROGRESS | REVIEW | DONE | BLOCKED
+### US-01 Registrar gasto personal
 
-
-
-\## P0 â€” MVP
-
-
-
-\### US-01 Registrar gasto personal
-
-Estado: IN\_PROGRESS  
+Estado: IN_PROGRESS
 
 Criterios:
 
-\- Guardar gasto con categorÃ­a obligatoria
-
-\- Afecta saldo personal mensual
-
-\- Aparece en historial
-
-
+- Guardar gasto con categoria obligatoria
+- Afecta saldo personal mensual
+- Aparece en historial
 
 Tareas:
 
-\- \[ ] DAO insertTransaction
-
-\- \[ ] UseCase AddExpenseUseCase
-
-\- \[ ] ViewModel AddTransactionViewModel
-
-\- \[ ] UI AddTransactionScreen
-
-
+- [x] DAO insertTransaction
+- [x] UseCase AddExpenseUseCase
+- [x] ViewModel AddTransactionViewModel
+- [x] UI AddTransactionScreen
 
 ---
 
+### US-02 Registrar gasto familiar pagado con personal
 
-
-\### US-02 Registrar gasto familiar pagado con personal
-
-Estado: TODO  
+Estado: REVIEW
 
 Criterios:
 
-\- account=FAMILY y paidFromPersonal=true
-
-\- No afecta saldo personal
-
-\- Afecta saldo familiar
-
-\- Crea entrada en reimbursement\_ledger
-
-
+- account=FAMILY y paidFromPersonal=true
+- No afecta saldo personal
+- Afecta saldo familiar
+- Crea entrada en reimbursement_ledger
 
 Tareas:
 
-\- \[ ] Regla de dominio ValidateFamilyPaidFromPersonalRule
-
-\- \[ ] Crear ledger entry
-
-\- \[ ] Ajustar cÃ¡lculos dashboard
-
-
+- [x] Regla de dominio ValidateFamilyPaidFromPersonalRule
+- [x] Crear ledger entry
+- [x] Ajustar calculos dashboard
 
 ---
 
+### US-03 Liquidar pendiente familiar -> personal
 
-
-\### US-03 Liquidar pendiente familiar â†’ personal
-
-Estado: TODO  
+Estado: TODO
 
 Criterios:
 
-\- LiquidaciÃ³n siempre total
-
-\- Crea Settlement
-
-\- Marca ledger como SETTLED
-
-\- Pendiente pasa a 0
-
-
+- Liquidacion siempre total
+- Crea Settlement
+- Marca ledger como SETTLED
+- Pendiente pasa a 0
 
 Tareas:
 
-\- \[ ] UseCase CreateFullSettlementUseCase
-
-\- \[ ] PendingSettlementScreen
-
-\- \[ ] DAO updateLedgerStatus
-
-
+- [ ] UseCase CreateFullSettlementUseCase
+- [ ] PendingSettlementScreen
+- [ ] DAO updateLedgerStatus
 
 ---
 
+### US-04 Movimientos recurrentes
 
-
-\### US-04 Movimientos recurrentes
-
-Estado: IN\_PROGRESS  
+Estado: IN_PROGRESS
 
 Criterios:
 
-\- Regla con next\_run\_at
-
-\- Worker genera movimientos pendientes
-
-\- source = AUTO\_RECURRENT
-
-
+- Regla con next_run_at
+- Worker genera movimientos pendientes
+- source = AUTO_RECURRENT
 
 Tareas:
 
-\- \[x] RecurrenceRule DAO
-
-\- \[ ] Worker GenerateRecurringTransactionsWorker
-
-\- \[ ] UI RecurrenceScreen
-
-
+- [x] RecurrenceRule DAO
+- [ ] Worker GenerateRecurringTransactionsWorker
+- [ ] UI RecurrenceScreen
 
 ---
 
+### US-05 Dashboard mensual
 
-
-\### US-05 Dashboard mensual
-
-Estado: TODO  
+Estado: REVIEW
 
 Criterios:
 
-\- saldo personal mes
-
-\- saldo familiar mes
-
-\- pendiente familia â†’ personal
-
-
+- saldo personal mes
+- saldo familiar mes
+- pendiente familia -> personal
 
 Tareas:
 
-\- \[ ] ComputeMonthlyBalanceRule
-
-\- \[ ] GetDashboardSummaryUseCase
-
-\- \[ ] DashboardScreen
+- [x] ComputeMonthlyBalanceRule
+- [x] GetDashboardSummaryUseCase
+- [x] DashboardScreen

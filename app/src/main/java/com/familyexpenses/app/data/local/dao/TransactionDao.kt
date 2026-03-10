@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 interface TransactionDao {
 
     @Upsert
-    suspend fun upsert(transaction: TransactionEntity)
+    suspend fun insertTransaction(transaction: TransactionEntity)
 
     @Query("SELECT * FROM transactions ORDER BY occurredAt DESC")
     fun observeTransactions(): Flow<List<TransactionEntity>>

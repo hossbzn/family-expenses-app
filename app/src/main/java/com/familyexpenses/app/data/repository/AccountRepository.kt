@@ -11,4 +11,6 @@ class AccountRepository @Inject constructor(
     private val accountDao: AccountDao,
 ) {
     fun observeAccounts(): Flow<List<AccountEntity>> = accountDao.observeAccounts()
+
+    suspend fun getAccountById(accountId: String): AccountEntity? = accountDao.getAccountById(accountId)
 }

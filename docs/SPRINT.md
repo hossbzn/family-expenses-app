@@ -1,58 +1,52 @@
-\# SPRINT ACTUAL
+# SPRINT ACTUAL
 
+Objetivo: persistencia basica + primeras pantallas funcionales del MVP
 
+## En progreso
 
-Objetivo: persistencia básica + verificación UI
+### US-01 Registrar gasto personal
 
-
-
-\## En progreso
-
-
-
-\### US-01 Registrar gasto personal
-
-Estado: IN\_PROGRESS
-
-
+Estado: REVIEW
 
 Tareas:
 
-\- \[x] Entities Room
+- [x] Entities Room
+- [x] DAO transactions
+- [x] AppDatabase
+- [x] Seed inicial
+- [x] AddExpenseUseCase
+- [x] AddTransactionViewModel
+- [x] AddTransactionScreen
 
-\- \[ ] DAO transactions
+Pendiente funcional:
 
-\- \[x] AppDatabase
-
-\- \[x] Seed inicial
-
-\- \[x] DevHomeScreen
-
-
-
----
-
-
-
-\## Próximo
-
-
-
-\- US-05 Dashboard
-
-\- US-02 Gasto familiar pagado con personal
-
-
+- [ ] Reflejar el movimiento en historial
 
 ---
 
+### US-05 Dashboard mensual
 
+Estado: REVIEW
 
-\## Hecho
+Tareas:
 
+- [x] ComputeMonthlyBalanceRule
+- [x] GetDashboardSummaryUseCase
+- [x] DashboardScreen
 
+---
 
-\- \[x] Crear proyecto Android base
+## Proximo
 
-\- \[x] Definir entidades Room
+- US-02 Gasto familiar pagado con personal
+- US-03 Liquidar pendiente familiar -> personal
+- US-04 Movimientos recurrentes
 
+---
+
+## Hecho
+
+- [x] Crear proyecto Android base
+- [x] Definir entidades Room
+- [x] Dashboard inicial conectado a Room
+- [x] Formulario basico de alta de gasto

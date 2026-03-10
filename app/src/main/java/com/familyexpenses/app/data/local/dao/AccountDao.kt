@@ -15,6 +15,9 @@ interface AccountDao {
     @Query("SELECT * FROM accounts ORDER BY createdAt ASC")
     fun observeAccounts(): Flow<List<AccountEntity>>
 
+    @Query("SELECT * FROM accounts WHERE id = :accountId LIMIT 1")
+    suspend fun getAccountById(accountId: String): AccountEntity?
+
     @Query("SELECT COUNT(*) FROM accounts")
     suspend fun countAccounts(): Int
 }

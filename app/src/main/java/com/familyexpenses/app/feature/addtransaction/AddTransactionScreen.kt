@@ -5,9 +5,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -26,6 +29,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -58,11 +65,9 @@ fun AddTransactionRoute(
         uiState = uiState,
         snackbarHostState = snackbarHostState,
         onBack = onBack,
-        onTypeSelected = viewModel::onTypeSelected,
         onAmountChanged = viewModel::onAmountChanged,
         onNoteChanged = viewModel::onNoteChanged,
         onCategorySelected = viewModel::onCategorySelected,
-        onAccountSelected = viewModel::onAccountSelected,
         onPaidFromPersonalChanged = viewModel::onPaidFromPersonalChanged,
         onSave = viewModel::save,
     )
@@ -74,14 +79,21 @@ fun AddTransactionScreen(
     uiState: AddTransactionUiState,
     snackbarHostState: SnackbarHostState,
     onBack: () -> Unit,
-    onTypeSelected: (TransactionType) -> Unit,
     onAmountChanged: (String) -> Unit,
     onNoteChanged: (String) -> Unit,
     onCategorySelected: (String) -> Unit,
-    onAccountSelected: (String) -> Unit,
     onPaidFromPersonalChanged: (Boolean) -> Unit,
     onSave: () -> Unit,
 ) {
+    val scrollState = rememberScrollState()
+    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+        keyboardController?.show()
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -95,67 +107,38 @@ fun AddTransactionScreen(
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
     ) { innerPadding ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(22.dp),
+                .padding(innerPadding)
+                .imePadding()
+                .padding(horizontal = 20.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            item {
-                Text(
-                    text = "Entrada rapida con el minimo ruido posible.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(scrollState),
+                verticalArrangement = Arrangement.spacedBy(18.dp),
+            ) {
+                OutlinedTextField(
+                    value = uiState.amountInput,
+                    onValueChange = onAmountChanged,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester),
+                    singleLine = true,
+                    placeholder = {
+                        Text(
+                            text = "0,00",
+                            style = MaterialTheme.typography.displaySmall,
+                        )
+                    },
+                    textStyle = MaterialTheme.typography.displaySmall,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    shape = RoundedCornerShape(18.dp),
                 )
-            }
 
-            item {
-                SectionBlock(title = "Tipo") {
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        FilterChip(
-                            selected = uiState.selectedType == TransactionType.EXPENSE,
-                            onClick = { onTypeSelected(TransactionType.EXPENSE) },
-                            label = { Text("Gasto") },
-                            shape = RoundedCornerShape(12.dp),
-                        )
-                        FilterChip(
-                            selected = uiState.selectedType == TransactionType.INCOME,
-                            enabled = !uiState.paidFromPersonal,
-                            onClick = { onTypeSelected(TransactionType.INCOME) },
-                            label = { Text("Ingreso") },
-                            shape = RoundedCornerShape(12.dp),
-                        )
-                    }
-                }
-            }
-
-            item {
-                SectionBlock(title = "Importe") {
-                    OutlinedTextField(
-                        value = uiState.amountInput,
-                        onValueChange = onAmountChanged,
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        label = { Text("0,00") },
-                        shape = RoundedCornerShape(14.dp),
-                    )
-                }
-            }
-
-            item {
-                SectionBlock(title = "Nota") {
-                    OutlinedTextField(
-                        value = uiState.noteInput,
-                        onValueChange = onNoteChanged,
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text("Opcional") },
-                        shape = RoundedCornerShape(14.dp),
-                    )
-                }
-            }
-
-            item {
                 SectionBlock(title = "Categoria") {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         if (uiState.categoryOptions.isEmpty()) {
@@ -176,69 +159,44 @@ fun AddTransactionScreen(
                         }
                     }
                 }
-            }
 
-            item {
-                SectionBlock(title = "Cuenta") {
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        uiState.accountOptions.forEach { account ->
-                            FilterChip(
-                                selected = uiState.selectedAccountId == account.id,
-                                enabled = !uiState.paidFromPersonal,
-                                onClick = { onAccountSelected(account.id) },
-                                label = { Text(account.name) },
-                                shape = RoundedCornerShape(12.dp),
-                            )
-                        }
-                    }
-                }
-            }
-
-            item {
-                SectionBlock(title = "Pagado con cuenta personal") {
-                    Text(
-                        text = if (uiState.selectedType == TransactionType.INCOME) {
-                            "Solo aplica a gastos familiares."
-                        } else {
-                            "Activalo solo si el gasto pertenece a familia pero se pago desde una cuenta personal."
-                        },
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    if (uiState.selectedType == TransactionType.EXPENSE) {
+                if (uiState.selectedType == TransactionType.EXPENSE) {
+                    SectionBlock(title = "Pagado con personal") {
                         Switch(
                             checked = uiState.paidFromPersonal,
                             onCheckedChange = onPaidFromPersonalChanged,
                         )
                     }
-                    if (uiState.paidFromPersonal) {
-                        Text(
-                            text = "La cuenta queda forzada a Familiar y se generara pendiente familia a personal.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
+                }
+
+                SectionBlock(title = "Nota") {
+                    OutlinedTextField(
+                        value = uiState.noteInput,
+                        onValueChange = onNoteChanged,
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        label = { Text("Opcional") },
+                        shape = RoundedCornerShape(14.dp),
+                    )
                 }
             }
 
-            item {
-                Button(
-                    onClick = onSave,
-                    enabled = !uiState.isSaving,
-                    modifier = Modifier.fillMaxWidth(),
-                    contentPadding = PaddingValues(vertical = 16.dp),
-                    shape = RoundedCornerShape(14.dp),
-                ) {
-                    Text(
-                        if (uiState.isSaving) {
-                            "Guardando..."
-                        } else if (uiState.selectedType == TransactionType.INCOME) {
-                            "Guardar ingreso"
-                        } else {
-                            "Guardar gasto"
-                        },
-                    )
-                }
+            Button(
+                onClick = onSave,
+                enabled = !uiState.isSaving,
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(vertical = 16.dp),
+                shape = RoundedCornerShape(14.dp),
+            ) {
+                Text(
+                    if (uiState.isSaving) {
+                        "Guardando..."
+                    } else if (uiState.selectedType == TransactionType.INCOME) {
+                        "Guardar ingreso"
+                    } else {
+                        "Guardar gasto"
+                    },
+                )
             }
         }
     }

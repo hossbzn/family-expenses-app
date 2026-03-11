@@ -8,7 +8,7 @@ La aplicacion permite registrar ingresos y gastos personales y familiares en loc
 - Seed inicial con cuentas `Personal` y `Familiar`.
 - Categorias iniciales de ejemplo.
 - Dashboard mensual conectado a Room con saldo personal, saldo familiar y pendiente familia a personal.
-- Alta manual de ingresos y gastos desde un unico formulario.
+- Alta manual de ingresos y gastos desde un formulario simplificado con importe destacado y teclado numerico.
 - Historial basico de movimientos con lista unica y orden descendente.
 
 ## Reglas contables clave
@@ -23,8 +23,11 @@ La aplicacion permite registrar ingresos y gastos personales y familiares en loc
 3. Revisar el dashboard mensual.
 4. En `Saldo personal`, usar `+` para anadir un ingreso personal o `-` para anadir un gasto personal.
 5. En `Saldo familiar`, usar `+` para anadir un ingreso familiar o `-` para anadir un gasto familiar.
-6. Si el gasto familiar fue pagado con cuenta personal, activar el switch dentro del formulario.
-7. Usar `Ver historial` para revisar los movimientos guardados.
+6. En el formulario, introducir primero el importe.
+7. Elegir categoria y, si aplica, activar `Pagado con personal`.
+8. Anadir una nota solo si hace falta.
+9. Guardar el movimiento.
+10. Usar `Ver historial` para revisar los movimientos guardados.
 
 ## Pantalla principal
 - `Saldo personal`: ingresos menos gastos personales del mes. Si un gasto se marco como pagado con personal pero pertenece a familia, no descuenta aqui.
@@ -32,6 +35,12 @@ La aplicacion permite registrar ingresos y gastos personales y familiares en loc
 - `Pendiente familia a personal`: suma de entradas abiertas en `reimbursement_ledger`.
 - Cada saldo tiene acceso rapido `+ / -` para abrir el formulario ya preconfigurado.
 
+## Alta de movimiento
+- El tipo de movimiento llega preconfigurado desde el acceso rapido y no se cambia dentro del formulario.
+- El importe aparece en grande al abrir la pantalla y solicita teclado numerico decimal automaticamente.
+- Debajo se muestran solo los campos necesarios: categoria, `Pagado con personal`, nota y guardar.
+- En gastos familiares pagados con personal, el switch genera pendiente familia a personal y fuerza la logica contable correspondiente.
+
 ## Limitaciones actuales
 - El historial todavia no tiene filtros, agrupacion por dia ni edicion.
-- La liquidacion completa y los movimientos recurrentes siguen pendientes segun `docs/SPRINT.md`.
+- Los movimientos recurrentes siguen pendientes segun `docs/SPRINT.md`.

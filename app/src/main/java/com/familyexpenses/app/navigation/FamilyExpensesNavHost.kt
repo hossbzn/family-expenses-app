@@ -55,6 +55,15 @@ fun FamilyExpensesNavHost() {
                         ),
                     )
                 },
+                onAddFamilyExpensePaidFromPersonalClick = {
+                    navController.navigate(
+                        buildAddTransactionRoute(
+                            accountId = DatabaseSeeder.FAMILY_ACCOUNT_ID,
+                            type = TransactionType.EXPENSE,
+                            familyPaidFromPersonal = true,
+                        ),
+                    )
+                },
                 onHistoryClick = {
                     navController.navigate("history")
                 },

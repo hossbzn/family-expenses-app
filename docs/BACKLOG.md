@@ -27,7 +27,7 @@ Tareas:
 
 ### US-02 Registrar gasto familiar pagado con personal
 
-Estado: REVIEW
+Estado: DONE
 
 Criterios:
 

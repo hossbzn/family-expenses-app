@@ -35,9 +35,21 @@ Tareas:
 
 ---
 
+### US-02 Gasto familiar pagado con personal
+
+Estado: DONE
+
+Tareas:
+
+- [x] Regla de validacion para forzar cuenta familiar
+- [x] Creacion de `reimbursement_ledger`
+- [x] Pendiente reflejado en dashboard
+- [x] Acceso rapido desde dashboard al flujo preconfigurado
+
+---
+
 ## Proximo
 
-- US-02 Gasto familiar pagado con personal
 - US-03 Liquidar pendiente familiar -> personal
 - US-04 Movimientos recurrentes
 

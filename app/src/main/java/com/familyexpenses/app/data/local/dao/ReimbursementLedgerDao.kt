@@ -14,4 +14,10 @@ interface ReimbursementLedgerDao {
 
     @Query("SELECT * FROM reimbursement_ledger WHERE status = 'OPEN' ORDER BY createdAt ASC")
     fun observeOpenEntries(): Flow<List<ReimbursementLedgerEntity>>
+
+    @Query("SELECT * FROM reimbursement_ledger WHERE status = 'OPEN' ORDER BY createdAt ASC")
+    suspend fun getOpenEntries(): List<ReimbursementLedgerEntity>
+
+    @Query("UPDATE reimbursement_ledger SET status = 'SETTLED', settledAt = :settledAt WHERE id IN (:ledgerIds)")
+    suspend fun markEntriesAsSettled(ledgerIds: List<String>, settledAt: Long)
 }

@@ -6,6 +6,7 @@ Fase 1 completada.
 Fase 2 completada.  
 Fase 3 completada en su parte basica.  
 Fase 4 completada en su primer corte funcional.  
+Fase 5 completada en su primer corte funcional.  
 Fase 6 completada en su primer corte.
 
 ---
@@ -51,10 +52,10 @@ Objetivo: proyecto Android compilando.
 
 ## Fase 5 - Liquidacion
 
-- [ ] Pantalla PendingSettlement
-- [ ] Boton liquidar
-- [ ] Creacion Settlement
-- [ ] Reset del pendiente
+- [x] Pantalla PendingSettlement
+- [x] Boton liquidar
+- [x] Creacion Settlement
+- [x] Reset del pendiente
 
 ---
 

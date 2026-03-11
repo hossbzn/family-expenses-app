@@ -46,7 +46,7 @@ Tareas:
 
 ### US-03 Liquidar pendiente familiar -> personal
 
-Estado: TODO
+Estado: DONE
 
 Criterios:
 
@@ -57,9 +57,9 @@ Criterios:
 
 Tareas:
 
-- [ ] UseCase CreateFullSettlementUseCase
-- [ ] PendingSettlementScreen
-- [ ] DAO updateLedgerStatus
+- [x] UseCase CreateFullSettlementUseCase
+- [x] PendingSettlementScreen
+- [x] DAO updateLedgerStatus
 
 ---
 

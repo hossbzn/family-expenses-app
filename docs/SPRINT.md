@@ -48,9 +48,21 @@ Tareas:
 
 ---
 
+### US-03 Liquidar pendiente familiar -> personal
+
+Estado: DONE
+
+Tareas:
+
+- [x] CreateFullSettlementUseCase
+- [x] PendingSettlementScreen
+- [x] Liquidacion total de ledger abierto
+- [x] Pendiente reseteado a 0 tras liquidar
+
+---
+
 ## Proximo
 
-- US-03 Liquidar pendiente familiar -> personal
 - US-04 Movimientos recurrentes
 
 ---

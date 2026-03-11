@@ -33,6 +33,7 @@ fun DashboardRoute(
     onAddFamilyIncomeClick: () -> Unit,
     onAddFamilyExpenseClick: () -> Unit,
     onAddFamilyExpensePaidFromPersonalClick: () -> Unit,
+    onPendingSettlementClick: () -> Unit,
     onHistoryClick: () -> Unit,
     viewModel: DashboardViewModel = hiltViewModel(),
 ) {
@@ -44,6 +45,7 @@ fun DashboardRoute(
         onAddFamilyIncomeClick = onAddFamilyIncomeClick,
         onAddFamilyExpenseClick = onAddFamilyExpenseClick,
         onAddFamilyExpensePaidFromPersonalClick = onAddFamilyExpensePaidFromPersonalClick,
+        onPendingSettlementClick = onPendingSettlementClick,
         onHistoryClick = onHistoryClick,
     )
 }
@@ -56,6 +58,7 @@ fun DashboardScreen(
     onAddFamilyIncomeClick: () -> Unit,
     onAddFamilyExpenseClick: () -> Unit,
     onAddFamilyExpensePaidFromPersonalClick: () -> Unit,
+    onPendingSettlementClick: () -> Unit,
     onHistoryClick: () -> Unit,
 ) {
     Scaffold { innerPadding ->
@@ -102,6 +105,16 @@ fun DashboardScreen(
                 shape = RoundedCornerShape(14.dp),
             ) {
                 Text("Anadir gasto familiar pagado con personal")
+            }
+
+            OutlinedButton(
+                onClick = onPendingSettlementClick,
+                enabled = uiState.pendingReimbursementMinor > 0L,
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(vertical = 16.dp),
+                shape = RoundedCornerShape(14.dp),
+            ) {
+                Text("Liquidar pendiente")
             }
 
             Button(

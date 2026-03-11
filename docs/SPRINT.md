@@ -32,6 +32,7 @@ Tareas:
 - [x] GetDashboardSummaryUseCase
 - [x] DashboardScreen
 - [x] Acciones rapidas + / - por saldo
+- [x] Ajuste responsive con scroll de seguridad
 
 ---
 
@@ -61,9 +62,24 @@ Tareas:
 
 ---
 
+### US-04 Movimientos recurrentes
+
+Estado: DONE
+
+Tareas:
+
+- [x] Regla mensual a dia 1
+- [x] GenerateRecurringTransactionsUseCase
+- [x] Worker de generacion
+- [x] Generacion pendiente al abrir la app
+- [x] RecurrenceScreen y alta de regla
+- [x] Fecha inicio y fecha fin opcional
+
+---
+
 ## Proximo
 
-- US-04 Movimientos recurrentes
+- Revisar UX y siguientes mejoras del MVP
 
 ---
 

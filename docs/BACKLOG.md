@@ -65,19 +65,21 @@ Tareas:
 
 ### US-04 Movimientos recurrentes
 
-Estado: IN_PROGRESS
+Estado: DONE
 
 Criterios:
 
 - Regla con next_run_at
 - Worker genera movimientos pendientes
 - source = AUTO_RECURRENT
+- Permite fecha inicio y fecha fin opcional
 
 Tareas:
 
 - [x] RecurrenceRule DAO
-- [ ] Worker GenerateRecurringTransactionsWorker
-- [ ] UI RecurrenceScreen
+- [x] Worker GenerateRecurringTransactionsWorker
+- [x] UI RecurrenceScreen
+- [x] Rango de vigencia en reglas mensuales
 
 ---
 

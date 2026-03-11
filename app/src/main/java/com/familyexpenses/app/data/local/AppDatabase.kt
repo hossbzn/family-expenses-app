@@ -1,6 +1,5 @@
 package com.familyexpenses.app.data.local
 
-import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
@@ -32,10 +31,7 @@ import com.familyexpenses.app.data.local.entity.UserEntity
         SettlementEntity::class,
         SettlementItemEntity::class,
     ],
-    version = 2,
-    autoMigrations = [
-        AutoMigration(from = 1, to = 2),
-    ],
+    version = 4,
     exportSchema = true,
 )
 @TypeConverters(RoomConverters::class)

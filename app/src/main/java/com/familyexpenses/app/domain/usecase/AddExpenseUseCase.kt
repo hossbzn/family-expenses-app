@@ -1,6 +1,7 @@
 package com.familyexpenses.app.domain.usecase
 
 import com.familyexpenses.app.core.model.AccountType
+import com.familyexpenses.app.core.model.TransactionSource
 import com.familyexpenses.app.core.model.TransactionType
 import com.familyexpenses.app.data.local.entity.TransactionEntity
 import com.familyexpenses.app.data.repository.AccountRepository
@@ -42,6 +43,8 @@ class AddExpenseUseCase @Inject constructor(
                 amountMinor = request.amountMinor,
                 paidFromPersonal = request.type == TransactionType.EXPENSE && request.paidFromPersonal,
                 note = request.note?.takeIf { it.isNotBlank() },
+                source = TransactionSource.MANUAL,
+                recurrenceRuleId = null,
                 occurredAt = request.occurredAt,
                 createdAt = System.currentTimeMillis(),
             ),

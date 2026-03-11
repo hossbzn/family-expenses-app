@@ -1,9 +1,11 @@
 package com.familyexpenses.app.data.local.entity
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.familyexpenses.app.core.model.TransactionSource
 import com.familyexpenses.app.core.model.TransactionType
 
 @Entity(
@@ -35,6 +37,8 @@ data class TransactionEntity(
     val amountMinor: Long,
     val paidFromPersonal: Boolean = false,
     val note: String? = null,
+    @ColumnInfo(defaultValue = "MANUAL") val source: TransactionSource = TransactionSource.MANUAL,
+    val recurrenceRuleId: String? = null,
     val occurredAt: Long,
     val createdAt: Long,
 )

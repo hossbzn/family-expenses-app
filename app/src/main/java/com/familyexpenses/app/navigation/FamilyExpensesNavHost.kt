@@ -12,6 +12,7 @@ import com.familyexpenses.app.feature.addtransaction.AddTransactionRoute
 import com.familyexpenses.app.feature.addtransaction.AddTransactionViewModel
 import com.familyexpenses.app.feature.dashboard.DashboardRoute
 import com.familyexpenses.app.feature.history.HistoryRoute
+import com.familyexpenses.app.feature.recurrence.RecurrenceRoute
 import com.familyexpenses.app.feature.settlement.PendingSettlementRoute
 
 @Composable
@@ -68,6 +69,9 @@ fun FamilyExpensesNavHost() {
                 onPendingSettlementClick = {
                     navController.navigate("pending-settlement")
                 },
+                onRecurringClick = {
+                    navController.navigate("recurrence")
+                },
                 onHistoryClick = {
                     navController.navigate("history")
                 },
@@ -101,6 +105,11 @@ fun FamilyExpensesNavHost() {
         }
         composable("pending-settlement") {
             PendingSettlementRoute(
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable("recurrence") {
+            RecurrenceRoute(
                 onBack = { navController.popBackStack() },
             )
         }

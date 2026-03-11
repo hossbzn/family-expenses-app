@@ -1,6 +1,7 @@
 package com.familyexpenses.app.feature.dashboard
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -8,7 +9,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -34,6 +37,7 @@ fun DashboardRoute(
     onAddFamilyExpenseClick: () -> Unit,
     onAddFamilyExpensePaidFromPersonalClick: () -> Unit,
     onPendingSettlementClick: () -> Unit,
+    onRecurringClick: () -> Unit,
     onHistoryClick: () -> Unit,
     viewModel: DashboardViewModel = hiltViewModel(),
 ) {
@@ -46,6 +50,7 @@ fun DashboardRoute(
         onAddFamilyExpenseClick = onAddFamilyExpenseClick,
         onAddFamilyExpensePaidFromPersonalClick = onAddFamilyExpensePaidFromPersonalClick,
         onPendingSettlementClick = onPendingSettlementClick,
+        onRecurringClick = onRecurringClick,
         onHistoryClick = onHistoryClick,
     )
 }
@@ -59,71 +64,83 @@ fun DashboardScreen(
     onAddFamilyExpenseClick: () -> Unit,
     onAddFamilyExpensePaidFromPersonalClick: () -> Unit,
     onPendingSettlementClick: () -> Unit,
+    onRecurringClick: () -> Unit,
     onHistoryClick: () -> Unit,
 ) {
+    val scrollState = rememberScrollState()
+
     Scaffold { innerPadding ->
-        Column(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = 20.dp, vertical = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
+                .padding(innerPadding),
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            val compactLayout = maxHeight < 760.dp
+            val horizontalPadding = if (compactLayout) 16.dp else 20.dp
+            val verticalPadding = if (compactLayout) 16.dp else 24.dp
+            val sectionSpacing = if (compactLayout) 16.dp else 24.dp
+            val actionPadding = if (compactLayout) 14.dp else 16.dp
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = horizontalPadding, vertical = verticalPadding),
+                verticalArrangement = Arrangement.spacedBy(sectionSpacing),
+            ) {
                 Text(
                     text = "Dashboard mensual",
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = if (compactLayout) {
+                        MaterialTheme.typography.headlineSmall
+                    } else {
+                        MaterialTheme.typography.headlineMedium
+                    },
                 )
-                Text(
-                    text = "Balance limpio del mes actual.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+
+                SummaryCard(
+                    title = "Personal",
+                    amountMinor = uiState.personalBalanceMinor,
+                    onPlusClick = onAddPersonalIncomeClick,
+                    onMinusClick = onAddPersonalExpenseClick,
                 )
-            }
+                SummaryCard(
+                    title = "Familiar",
+                    amountMinor = uiState.familyBalanceMinor,
+                    onPlusClick = onAddFamilyIncomeClick,
+                    onMinusClick = onAddFamilyExpenseClick,
+                )
+                SummaryCard(
+                    title = "Pendiente familia a personal",
+                    amountMinor = uiState.pendingReimbursementMinor,
+                )
 
-            SummaryCard(
-                title = "Saldo personal",
-                amountMinor = uiState.personalBalanceMinor,
-                onPlusClick = onAddPersonalIncomeClick,
-                onMinusClick = onAddPersonalExpenseClick,
-            )
-            SummaryCard(
-                title = "Saldo familiar",
-                amountMinor = uiState.familyBalanceMinor,
-                onPlusClick = onAddFamilyIncomeClick,
-                onMinusClick = onAddFamilyExpenseClick,
-            )
-            SummaryCard(
-                title = "Pendiente familia a personal",
-                amountMinor = uiState.pendingReimbursementMinor,
-            )
+                OutlinedButton(
+                    onClick = onPendingSettlementClick,
+                    enabled = uiState.pendingReimbursementMinor > 0L,
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(vertical = actionPadding),
+                    shape = RoundedCornerShape(14.dp),
+                ) {
+                    Text("Liquidar pendiente")
+                }
 
-            OutlinedButton(
-                onClick = onAddFamilyExpensePaidFromPersonalClick,
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(vertical = 16.dp),
-                shape = RoundedCornerShape(14.dp),
-            ) {
-                Text("Anadir gasto familiar pagado con personal")
-            }
+                OutlinedButton(
+                    onClick = onRecurringClick,
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(vertical = actionPadding),
+                    shape = RoundedCornerShape(14.dp),
+                ) {
+                    Text("Recurrentes")
+                }
 
-            OutlinedButton(
-                onClick = onPendingSettlementClick,
-                enabled = uiState.pendingReimbursementMinor > 0L,
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(vertical = 16.dp),
-                shape = RoundedCornerShape(14.dp),
-            ) {
-                Text("Liquidar pendiente")
-            }
-
-            Button(
-                onClick = onHistoryClick,
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(vertical = 16.dp),
-                shape = RoundedCornerShape(14.dp),
-            ) {
-                Text("Ver historial")
+                Button(
+                    onClick = onHistoryClick,
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(vertical = actionPadding),
+                    shape = RoundedCornerShape(14.dp),
+                ) {
+                    Text("Ver historial")
+                }
             }
         }
     }

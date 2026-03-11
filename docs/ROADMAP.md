@@ -7,7 +7,8 @@ Fase 2 completada.
 Fase 3 completada en su parte basica.  
 Fase 4 completada en su primer corte funcional.  
 Fase 5 completada en su primer corte funcional.  
-Fase 6 completada en su primer corte.
+Fase 6 completada en su primer corte.  
+Fase 7 completada en su version MVP con rango de vigencia.
 
 ---
 
@@ -65,14 +66,16 @@ Objetivo: proyecto Android compilando.
 - [x] Saldo familiar mensual
 - [x] Pendiente familia -> personal
 - [x] Acciones rapidas por saldo (+ / -)
+- [x] Layout adaptable con scroll de seguridad
 - [ ] Ultimos movimientos
 
 ---
 
 ## Fase 7 - Recurrentes
 
-- [ ] Reglas recurrentes
-- [ ] Worker de generacion
+- [x] Reglas recurrentes
+- [x] Worker de generacion
+- [x] Rango con fecha inicio y fecha fin opcional
 - [ ] Edicion de reglas
 
 ---

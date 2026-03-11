@@ -5,6 +5,7 @@ import com.familyexpenses.app.core.model.AccountType
 import com.familyexpenses.app.core.model.CategoryType
 import com.familyexpenses.app.core.model.LedgerStatus
 import com.familyexpenses.app.core.model.RecurrenceFrequency
+import com.familyexpenses.app.core.model.TransactionSource
 import com.familyexpenses.app.core.model.TransactionType
 
 class RoomConverters {
@@ -26,6 +27,12 @@ class RoomConverters {
 
     @TypeConverter
     fun fromTransactionType(value: TransactionType): String = value.name
+
+    @TypeConverter
+    fun toTransactionSource(value: String): TransactionSource = TransactionSource.valueOf(value)
+
+    @TypeConverter
+    fun fromTransactionSource(value: TransactionSource): String = value.name
 
     @TypeConverter
     fun toRecurrenceFrequency(value: String): RecurrenceFrequency = RecurrenceFrequency.valueOf(value)

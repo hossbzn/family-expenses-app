@@ -30,10 +30,11 @@ La aplicacion permite registrar ingresos y gastos personales y familiares en loc
 10. Usar `Ver historial` para revisar los movimientos guardados.
 
 ## Pantalla principal
-- `Saldo personal`: ingresos menos gastos personales del mes. Si un gasto se marco como pagado con personal pero pertenece a familia, no descuenta aqui.
-- `Saldo familiar`: ingresos menos gastos familiares del mes.
+- `Personal`: ingresos menos gastos personales del mes. Si un gasto se marco como pagado con personal pero pertenece a familia, no descuenta aqui.
+- `Familiar`: ingresos menos gastos familiares del mes.
 - `Pendiente familia a personal`: suma de entradas abiertas en `reimbursement_ledger`.
 - Cada saldo tiene acceso rapido `+ / -` para abrir el formulario ya preconfigurado.
+- El dashboard usa un layout adaptable con scroll de seguridad para que no se pierdan acciones en pantallas mas bajas.
 
 ## Alta de movimiento
 - El tipo de movimiento llega preconfigurado desde el acceso rapido y no se cambia dentro del formulario.
@@ -41,6 +42,16 @@ La aplicacion permite registrar ingresos y gastos personales y familiares en loc
 - Debajo se muestran solo los campos necesarios: categoria, `Pagado con personal`, nota y guardar.
 - En gastos familiares pagados con personal, el switch genera pendiente familia a personal y fuerza la logica contable correspondiente.
 
+## Recurrentes
+- Existe una pantalla de reglas recurrentes accesible desde el dashboard.
+- En el MVP actual, todas las reglas recurrentes se generan el dia 1 de cada mes.
+- Cada regla permite indicar `fecha inicio` obligatoria y `fecha fin` opcional.
+- La primera generacion se normaliza siempre al siguiente dia 1 valido dentro del rango indicado.
+- Inicio y fin se configuran desde campos de fecha preparados para abrir un selector de calendario.
+- Si la app se abre tarde, los movimientos pendientes se generan automaticamente al arrancar.
+- Cuando una regla supera su `fecha fin`, deja de generar y pasa a estado finalizado.
+- Los movimientos creados por este flujo se guardan como `AUTO_RECURRENT` y quedan vinculados a su regla.
+
 ## Limitaciones actuales
 - El historial todavia no tiene filtros, agrupacion por dia ni edicion.
-- Los movimientos recurrentes siguen pendientes segun `docs/SPRINT.md`.
+- La edicion de reglas recurrentes aun no esta disponible en el MVP actual.

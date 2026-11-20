@@ -55,3 +55,12 @@ La aplicacion permite registrar ingresos y gastos personales y familiares en loc
 ## Limitaciones actuales
 - El historial todavia no tiene filtros, agrupacion por dia ni edicion.
 - La edicion de reglas recurrentes aun no esta disponible en el MVP actual.
+
+
+---
+
+## Especificación V6 aprobada para futuro desarrollo
+
+El contenido anterior es el **manual de la implementación previa**, no el funcionamiento actual de V6. El diseño V6 está documentado en **docs/V6_SPEC.md** y todavía no se ha implementado.
+
+En V6 se mostrará caja real por cuenta, se distinguirán pagadora y responsable, se admitirán adelantos en ambas direcciones y devoluciones parciales mediante movimiento de caja; nueva navegación Inicio / Movimientos / Análisis; categorías favoritas manuales; copias y restauración local, sin PIN ni nube. Los flujos recurrentes existentes se conservarán y requerirán revisión al migrar.

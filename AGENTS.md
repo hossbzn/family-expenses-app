@@ -240,3 +240,14 @@ Cuando trabajes:
 2. implementa solo el alcance pedido
 3. menciona riesgos o dudas si las hay
 4. deja el proyecto compilando
+
+
+---
+
+## Política de evolución V6 (aprobada 2026-11-20)
+
+Lee **docs/V6_SPEC.md** antes de planificar o implementar cualquier historia V6. Es la **fuente de verdad funcional y visual V6** y prevalece sobre reglas anteriores de este archivo y de docs/sdd.md que sean incompatibles. Rutas reales del repositorio: docs/sdd.md, docs/BACKLOG.md, docs/SPRINT.md, docs/V6_SPEC.md. Mantener estado histórico DONE intacto: no significa conformidad V6.
+
+Cambios críticos V6: dos cuentas Familia/Personal; caja real vinculada a pagadora, gasto imputado a responsable; adelantos bidireccionales; devolución parcial o total con transferencia real; transferencias normales sin compensación; registro rápido con dos selectores separados; Inicio/Movimientos/Análisis; categorías 7 favoritas manuales para gastos y lista manual para ingresos; exportar CSV y copia/restauración local; sin nube, login ni PIN. Código Android Kotlin/Compose/Room existente se mantiene salvo evolución planificada y migrada.
+
+**Hasta aprobación para programar:** trabajar solo en documentación. No cambiar código, esquemas, tests ni marcar historias V6 como DONE. Mantener y probar funcionalidades recurrentes previas en la futura migración. No seguir la instrucción antigua de «liquidación siempre total» ni la de «liquidación sin movimiento de caja» para V6.

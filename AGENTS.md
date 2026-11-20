@@ -1,253 +1,50 @@
-# AGENTS.md
+# AGENTS.md — Family Expenses V6
 
-## Proyecto
-App Android en Kotlin para control de gastos personales y familiares.
+## Misión
+Evolucionar la aplicación Android Kotlin/Jetpack Compose hacia **Family Expenses V6**. En la fase presente **SOLO documentación**; no modificar código, esquemas, pruebas ni marcar historias como DONE hasta autorización explícita.
 
-## Objetivo del producto
-La app debe permitir gestionar:
-- ingresos y gastos personales
-- ingresos y gastos familiares
-- gastos familiares pagados con cuenta personal
-- deuda acumulada familia → personal
-- liquidación total de esa deuda
-- movimientos recurrentes automáticos
+## Fuentes de verdad — rutas y precedencia
+1. `docs/V6_SPEC.md`: decisiones funcionales y visuales aprobadas V6.
+2. `docs/sdd.md`: especificación técnica y criterios V6 alineados con la anterior.
+3. `docs/BACKLOG.md`: historias y estados V6.
+4. `docs/SPRINT.md`: plan de trabajo y autorización de implementación.
+5. `docs/Documentacion.md`: manual de comportamiento **objetivo**, no evidencia de implementación.
+6. `docs/archive/MVP_LEGACY.md`: referencia histórica únicamente. **No aplicar reglas heredadas incompatibles**.
 
-Objetivo UX principal:
-- registrar un gasto en menos de 3 segundos
+Si documentos V6 divergen, detenerse y proponer corrección antes de cambiar código. No inferir que un DONE del MVP significa DONE en V6.
 
----
+## Reglas contables INNEGOCIABLES
+- Dos cuentas visibles: Familia y Personal; modelo ampliable.
+- Gasto: `payingAccountId` (dinero que sale) y `responsibleAccountId` (imputación analítica), **ambos independientes**.
+- El gasto descuenta únicamente el saldo real de la pagadora. El gasto cuenta analíticamente para responsable una sola vez.
+- Diferentes cuentas generan adelanto de pagadora a responsable, también Familia→Personal.
+- Deuda neta firmada y trazable; devoluciones **parciales o completas** mueven dinero de caja de cuenta deudora a acreedora, reducen deuda y NO crean ingreso/gasto estadístico.
+- Transferencia normal y devolución son tipos seleccionados explícitamente, NUNCA compensar automáticamente.
+- Ajuste de saldo registrado con motivo y fuera de estadísticas de gasto/ingreso.
+- Cambiar/eliminar movimientos recalcula saldos y deuda preservando consistencia del historial.
+- Importes EUR en céntimos como Long; no usar Float/Double para contabilidad.
+- No usar el antiguo booleano `paidFromPersonal` como modelo objetivo; planificar migración.
 
-## Fuente de verdad
-Antes de hacer cambios, lee siempre estos archivos:
-1. `docs/SDD.md`
-2. `docs/BACKLOG.md`
-3. `docs/SPRINT.md`
+## UX V6
+- Minimalista Material Design 3 blanco/negro/grises. Inicio: Familia negra, Personal gris claro, saldos reales, botones Gasto/Ingreso, adelantos visibles a 0, sin resumen mensual ni recientes.
+- Navegación inferior **Inicio / Movimientos / Análisis**; Ajustes en cabecera.
+- Nuevo gasto: teclado propio con coma/C/retroceso; 7 favoritas manuales + Más; **dos selectores** pagadora/responsable; última categoría y combinación, fecha hoy, detalles plegados, Guardar sin paso adicional.
+- Nuevo ingreso: categorías con orden manual sin favoritas.
+- Movimientos: dos líneas por fila, filtro principal por cuenta responsable de gasto, periodos mes/12 meses/año/personalizado, sin resumen mensual.
+- Análisis: Categorías y Evolución, una serie Gastos o Ingresos, al entrar en Movimientos conservar filtros al volver.
+- Cuenta: saldo real, transferir, movimientos, adelantos; sin recientes. Adelantos: saldo neto e historial único con filtros.
+- Datos: CSV, copia completa/restauración; local offline, sin PIN, nube ni login.
 
-Si hay conflicto:
-- `docs/SDD.md` define el comportamiento del producto
-- `docs/BACKLOG.md` define qué historias existen
-- `docs/SPRINT.md` define qué hay que implementar ahora
+## Stack y arquitectura existente
+Kotlin, Jetpack Compose, Room, Hilt, ViewModel + StateFlow, Navigation Compose, WorkManager. Capas data/domain/ui, repositorios, DAOs, use cases pequeños; cálculo contable en domain, UI solo presentación. Usar migraciones Room y transacciones atómicas cuando se autorice, nunca destrucción/reseed de datos existentes. Conserva recurrentes y verifica que cumplan nuevas reglas de imputación/caja.
 
-No inventes requisitos fuera de esos documentos.
+## Proceso obligatorio
+1. Antes de cualquier cambio, leer las fuentes V6 y revisar código/estado de la historia activa cuando se autorice.
+2. En esta fase solo docs: no implementar funcionalidades ni alterar compilación.
+3. Proponer cambios por historia, criterios de aceptación y pruebas antes de programar.
+4. Marcar DONE solo al implementar, probar y verificar la historia concreta.
+5. Ante incompatibilidad de datos antiguos (p. ej. liquidaciones sin movimiento de caja), documentar caso y pedir decisión; **no inventar dinero ni pagos históricos**.
+6. Tras autorización, cambios pequeños y testeables, compilar, pasar tests, mantener docs y manual al día.
 
----
-
-## Stack técnico obligatorio
-- Kotlin
-- Jetpack Compose
-- Room
-- Hilt
-- ViewModel
-- StateFlow
-- Navigation Compose
-- WorkManager
-
-No añadas librerías nuevas salvo que sean estrictamente necesarias.
-
----
-
-## Principios de arquitectura
-- Offline-first
-- Arquitectura por capas: `data`, `domain`, `ui`
-- Room es la source of truth
-- Casos de uso pequeños y testeables
-- La lógica de negocio debe vivir en `domain`, no en Composables
-- Los Composables deben ser simples y centrados en renderizado/acciones UI
-- Los ViewModels coordinan estado y casos de uso
-- Usa `Flow` en DAO y repositorios donde tenga sentido
-- Importes siempre en `minor units` usando `Long`
-
----
-
-## Reglas de dominio críticas
-
-### Cuentas
-- En el MVP existen dos cuentas iniciales: `Personal` y `Familiar`
-- El modelo debe soportar múltiples cuentas en el futuro
-- Todo movimiento pertenece a una cuenta
-
-### Categorías
-- Todo gasto debe tener categoría obligatoria
-- La app trae categorías iniciales, pero son editables
-- No borrar categorías con movimientos asociados
-
-### Caso especial clave
-Existe un tipo de gasto especial:
-- gasto familiar pagado con cuenta personal
-
-Si:
-- `account = FAMILY`
-- `paidFromPersonal = true`
-
-Entonces:
-- afecta al saldo mensual familiar
-- NO afecta al saldo mensual personal
-- genera una entrada en `reimbursement_ledger`
-
-### Pendiente familia → personal
-- El pendiente se calcula sumando gastos familiares pagados con cuenta personal no liquidados
-- Debe ser trazable por gasto
-- Si se edita o borra un gasto afectado, el pendiente se recalcula
-
-### Liquidación
-- La liquidación siempre es total
-- No hay liquidaciones parciales en MVP
-- Liquidar no crea movimientos en cuentas
-- Liquidar crea un `Settlement`
-- Liquidar marca todos los registros pendientes del `reimbursement_ledger` como `SETTLED`
-- Tras liquidar, el pendiente mostrado debe ser 0
-
-### Recurrentes
-- Los movimientos recurrentes se generan solo cuando llega su fecha
-- Si la app se abre más tarde, se deben generar los recurrentes pendientes
-- Los movimientos generados deben marcarse como `AUTO_RECURRENT`
-- Editar un movimiento generado no modifica la regla recurrente
-- Borrar un movimiento generado no elimina la regla recurrente
-
----
-
-## Reglas de UX
-
-### Direccion visual
-- La app debe seguir un estilo minimalista y black and white
-- Priorizar blanco, negro y escala de grises
-- Evitar colores decorativos innecesarios
-- Si se usan iconos, deben ser simples, monocromos y minimalistas
-- Evitar interfaces recargadas o con demasiados botones visibles a la vez
-
-### Dashboard
-Debe mostrar:
-- saldo personal del mes
-- saldo familiar del mes
-- pendiente familia → personal
-
-Debe incluir accesos rápidos:
-- `+ Añadir gasto`
-- `+ Gasto familiar pagado con personal`
-
-### Historial
-- Lista única
-- Agrupado por día
-- Orden descendente
-- Filtros:
-  - Todo
-  - Personal
-  - Familiar
-  - Recurrentes
-  - Pagados con personal
-
-### Añadir gasto
-- Flujo importe primero
-- Fecha por defecto = hoy
-- Recordar última categoría usada
-- Recordar última cuenta usada
-- Si se activa `pagado con cuenta personal`, la cuenta debe forzarse a `Familiar`
-
-### Quick expense
-Debe existir un flujo de gasto ultrarrápido usando valores por defecto:
-- importe
-- última categoría
-- última cuenta
-- fecha de hoy
-
----
-
-## Convenciones de implementación
-
-### Entidades recomendadas
-- `UserEntity`
-- `AccountEntity`
-- `CategoryEntity`
-- `TransactionEntity`
-- `RecurrenceRuleEntity`
-- `ReimbursementLedgerEntity`
-- `SettlementEntity`
-- `SettlementItemEntity`
-
-### Convenciones de nombres
-- Sufijo `Entity` para Room
-- Sufijo `Dao` para DAO
-- Sufijo `Repository` para repositorios
-- Sufijo `UseCase` para casos de uso
-- Sufijo `ViewModel` para viewmodels
-- Pantallas Compose con sufijo `Screen`
-
-### Base de datos
-- Usa índices donde tenga sentido
-- Usa claves foráneas si no complican innecesariamente la implementación
-- Evita duplicados en datos seed
-- El seed inicial debe ejecutarse solo una vez
-
-### Borrado
-- Prefiere borrado lógico si simplifica consistencia
-- Si eliges borrado físico, asegúrate de no romper relaciones
-
----
-
-## Forma de trabajar
-- Trabaja solo sobre la historia o tareas activas de `docs/SPRINT.md`
-- No implementes historias futuras salvo que sea necesario para compilar
-- Haz cambios pequeños, claros y revisables
-- Mantén siempre el proyecto compilando
-- Antes de hacer cambios, explica brevemente qué archivos vas a crear o modificar
-- Después de cambios grandes, resume lo implementado
-- Si detectas una inconsistencia con el SDD, detente y explícalo en vez de inventar una solución
-- Crea fichero en 'docs/Documentacion.md' que contenga un manual de la aplicación
-
----
-
-## Prioridades
-Orden típico de trabajo:
-1. Entities
-2. DAO
-3. Database
-4. Repositorios
-5. Casos de uso
-6. ViewModels
-7. Pantallas
-8. Workers
-9. Tests
-
----
-
-## Qué no hacer
-- No añadir sincronización cloud
-- No añadir login real
-- No añadir multiusuario real todavía
-- No añadir exportaciones
-- No añadir estadísticas avanzadas
-- No rehacer arquitectura sin necesidad
-- No mover archivos masivamente sin explicarlo
-- No meter lógica de negocio compleja dentro de Compose
-- No cambiar reglas contables del producto
-
----
-
-## Criterio de calidad
-Antes de dar una tarea por terminada, verifica:
-- compila
-- sigue el SDD
-- no rompe historias previas
-- nombres consistentes
-- sin lógica duplicada obvia
-- sin dependencias innecesarias
-
----
-
-## Modo de respuesta esperado
-Cuando trabajes:
-1. indica qué vas a tocar
-2. implementa solo el alcance pedido
-3. menciona riesgos o dudas si las hay
-4. deja el proyecto compilando
-
-
----
-
-## Política de evolución V6 (aprobada 2026-11-20)
-
-Lee **docs/V6_SPEC.md** antes de planificar o implementar cualquier historia V6. Es la **fuente de verdad funcional y visual V6** y prevalece sobre reglas anteriores de este archivo y de docs/sdd.md que sean incompatibles. Rutas reales del repositorio: docs/sdd.md, docs/BACKLOG.md, docs/SPRINT.md, docs/V6_SPEC.md. Mantener estado histórico DONE intacto: no significa conformidad V6.
-
-Cambios críticos V6: dos cuentas Familia/Personal; caja real vinculada a pagadora, gasto imputado a responsable; adelantos bidireccionales; devolución parcial o total con transferencia real; transferencias normales sin compensación; registro rápido con dos selectores separados; Inicio/Movimientos/Análisis; categorías 7 favoritas manuales para gastos y lista manual para ingresos; exportar CSV y copia/restauración local; sin nube, login ni PIN. Código Android Kotlin/Compose/Room existente se mantiene salvo evolución planificada y migrada.
-
-**Hasta aprobación para programar:** trabajar solo en documentación. No cambiar código, esquemas, tests ni marcar historias V6 como DONE. Mantener y probar funcionalidades recurrentes previas en la futura migración. No seguir la instrucción antigua de «liquidación siempre total» ni la de «liquidación sin movimiento de caja» para V6.
+## No introducir en V6
+Nube, sincronización, multiusuario, login, PIN, OCR bancario ni nuevas cuentas desde UI. Sin dependencias gratuitas o no justificadas, sin borrar recurrentes, sin reglas contables heredadas de saldo mensual por cuenta responsable ni liquidación solo total.

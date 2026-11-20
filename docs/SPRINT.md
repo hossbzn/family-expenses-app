@@ -91,3 +91,18 @@ Tareas:
 - [x] Formulario basico de alta de gasto
 - [x] Historial basico con navegacion
 - [x] Alta simplificada desde saldo personal y familiar
+
+
+---
+
+## Próxima fase — Planificación V6 (solo documentación; NO iniciada en código)
+
+El sprint y las tareas DONE de arriba describen el MVP anterior. **No convertirlas automáticamente en tareas V6 terminadas.** La documentación aprobada reside en docs/V6_SPEC.md. No se ha autorizado programación en la fase actual.
+
+Orden de trabajo propuesto cuando se autorice: (1) auditoría de entidades, migración y tests para caja real y adeudos bidireccionales; (2) formularios, Inicio y detalle de cuenta; (3) Movimientos y Análisis; (4) categorías y gestión de datos; (5) QA Android, accesibilidad y restauración. Mantener recurrentes y garantizar migración sin pérdida de historial.
+
+### Checklist previo a desarrollo
+- [ ] Revisar diferencias entre código existente y V6_SPEC
+- [ ] Diseñar migración de datos y pruebas de saldos/adelantos
+- [ ] Validar pantallas en 360 y 412 dp
+- [ ] Autorizar explícitamente comienzo de implementación

@@ -353,3 +353,10 @@ Paquetes:
 North star metric:
 
 - Tiempo medio de registro de gasto < 3 segundos
+
+
+---
+
+## ANEXO V6 — Requisitos aprobados (2026-11-20)
+
+**Atención: la implementación descrita arriba es la versión anterior.** Para cualquier evolución V6, **docs/V6_SPEC.md prevalece** donde existan contradicciones. En particular, cambian los saldos (caja real, no gasto atribuido), adelantos bidireccionales, devolución parcial que mueve caja, dos selectores de cuenta, navegación, análisis, exportación y respaldos. El stack Android existente permanece. No asumir que el código actual implementa V6.

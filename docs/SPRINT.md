@@ -1,93 +1,33 @@
-# SPRINT ACTUAL
+# SPRINT — Preparación de Family Expenses V6
 
-Objetivo: persistencia basica + primeras pantallas funcionales del MVP
+**Estado actual:** documentación V6 alineada; **implementación NO AUTORIZADA / NO INICIADA**.
+**Fuente de verdad:** [V6_SPEC.md](V6_SPEC.md) → [sdd.md](sdd.md) → [BACKLOG.md](BACKLOG.md).
 
-## Completadas
+## Objetivo de la fase actual (documentación)
+- [x] Cerrar decisiones visuales y funcionales V6.
+- [x] Definir reglas de caja vs cuenta responsable y deuda neta bidireccional.
+- [x] Reescribir SDD y AGENTS con V6 como única norma activa.
+- [x] Organizar backlog V6 y separar registro histórico del MVP.
+- [ ] Revisar y aprobar esta propuesta documental en PR.
+- [ ] Autorizar explícitamente desarrollo V6.
 
-### US-01 Registrar gasto personal
+## Sprint V6-S1 propuesto — pendiente de autorización
+**Meta:** motor contable correcto, migración segura y pruebas antes de rediseñar UI.
+- [ ] V6-12: auditar código actual, esquema Room, datos y efectos de settlements anteriores.
+- [ ] V6-01: diseñar/implementar cuentas pagadora y responsable y cálculo de caja real.
+- [ ] V6-02: deuda neta bidireccional y devolución parcial que mueve caja.
+- [ ] Especificar tratamiento de liquidaciones históricas sin movimientos de caja; bloquear conversión ambigua.
+- [ ] Tests unitarios, migración y regresión; conservar reglas recurrentes.
+**Criterio de salida:** test de Personal paga 80 € de Familia y devolución 30 €, saldos correctos, sin doble gasto, migración sin pérdida.
 
-Estado: DONE
+## Sprint V6-S2 propuesto — pendiente
+V6-03 formulario Nuevo gasto, V6-10 Nuevo ingreso, V6-04 Inicio, V6-07 detalle/transferencias. Accesibilidad de pantallas compactas.
 
-Tareas:
+## Sprint V6-S3 propuesto — pendiente
+V6-05 Movimientos, V6-06 Análisis, V6-08 Adelantos; drill-down y restauración de filtros/estado.
 
-- [x] Entities Room
-- [x] DAO transactions
-- [x] AppDatabase
-- [x] Seed inicial
-- [x] AddExpenseUseCase
-- [x] AddTransactionViewModel
-- [x] AddTransactionScreen
-- [x] Historial basico visible
-- [x] Selector de tipo para ingreso y gasto
+## Sprint V6-S4 propuesto — pendiente
+V6-09 Categorías, V6-11 copia/restauración/CSV, V6-13 QA Android, offline y regresión final.
 
----
-
-### US-05 Dashboard mensual
-
-Estado: DONE
-
-Tareas:
-
-- [x] ComputeMonthlyBalanceRule
-- [x] GetDashboardSummaryUseCase
-- [x] DashboardScreen
-- [x] Acciones rapidas + / - por saldo
-- [x] Ajuste responsive con scroll de seguridad
-
----
-
-### US-02 Gasto familiar pagado con personal
-
-Estado: DONE
-
-Tareas:
-
-- [x] Regla de validacion para forzar cuenta familiar
-- [x] Creacion de `reimbursement_ledger`
-- [x] Pendiente reflejado en dashboard
-- [x] Acceso rapido desde dashboard al flujo preconfigurado
-
----
-
-### US-03 Liquidar pendiente familiar -> personal
-
-Estado: DONE
-
-Tareas:
-
-- [x] CreateFullSettlementUseCase
-- [x] PendingSettlementScreen
-- [x] Liquidacion total de ledger abierto
-- [x] Pendiente reseteado a 0 tras liquidar
-
----
-
-### US-04 Movimientos recurrentes
-
-Estado: DONE
-
-Tareas:
-
-- [x] Regla mensual a dia 1
-- [x] GenerateRecurringTransactionsUseCase
-- [x] Worker de generacion
-- [x] Generacion pendiente al abrir la app
-- [x] RecurrenceScreen y alta de regla
-- [x] Fecha inicio y fecha fin opcional
-
----
-
-## Proximo
-
-- Revisar UX y siguientes mejoras del MVP
-
----
-
-## Hecho
-
-- [x] Crear proyecto Android base
-- [x] Definir entidades Room
-- [x] Dashboard inicial conectado a Room
-- [x] Formulario basico de alta de gasto
-- [x] Historial basico con navegacion
-- [x] Alta simplificada desde saldo personal y familiar
+## Reglas de ejecución
+No interpretar el antiguo MVP como V6 ya terminada. Actualizar estado de historias solo tras evidencia verificable. Si un cambio afecta saldos o histórico, priorizar transacciones atómicas, migración y pruebas. No alterar el código en esta fase documental.

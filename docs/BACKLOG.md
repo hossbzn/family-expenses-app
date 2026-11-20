@@ -99,3 +99,28 @@ Tareas:
 - [x] GetDashboardSummaryUseCase
 - [x] DashboardScreen
 - [x] Acciones rapidas + / - en saldo personal y familiar
+
+
+---
+
+## V6 — Backlog aprobado para planificar (NO IMPLEMENTADO)
+
+Los estados DONE anteriores reflejan el MVP existente y requieren rediseño/migración para cumplir V6. Fuente: docs/V6_SPEC.md. Todas las historias siguientes están **TODO**, sin tareas ejecutadas:
+
+| ID | Prioridad | Historia | Estado |
+|---|---|---|---|
+| V6-01 | P0 | Contabilidad de caja real: pagar vs responsable, saldos iniciales y ajustes auditables | TODO |
+| V6-02 | P0 | Adelantos bidireccionales, deuda neta, devolución parcial/completa con transferencia de caja | TODO |
+| V6-03 | P0 | Nuevo gasto rápido: teclado propio, 7 favoritas, dos selectores, último uso, detalles plegados | TODO |
+| V6-04 | P0 | Inicio: tarjetas Familia/Personal, acciones rápidas y adelantos siempre visibles | TODO |
+| V6-05 | P1 | Movimientos: filas compactas, filtros por responsable, búsqueda, edición y borrado | TODO |
+| V6-06 | P1 | Análisis: Categorías y Evolución, ingresos/gastos separados y drill-down | TODO |
+| V6-07 | P1 | Cuenta/transferencia: normal vs devolución explícita, saldo y ajustes | TODO |
+| V6-08 | P1 | Historial único de adelantos y devoluciones filtrable | TODO |
+| V6-09 | P1 | Categorías personalizables, favoritas manuales, archivo sin pérdida histórica | TODO |
+| V6-10 | P1 | Nuevo ingreso con categorías ordenadas manualmente | TODO |
+| V6-11 | P1 | Datos: exportación CSV, backup completo, restauración validada | TODO |
+| V6-12 | P0 | Migración de datos y pruebas de regresión de caja/deuda/recurrentes | TODO |
+| V6-13 | P1 | Validación visual Android 360/412 dp, accesibilidad y uso offline | TODO |
+
+Criterio transversal: no marcar DONE hasta implementar, probar y validar comportamiento V6; no destruir datos históricos ni funcionalidad recurrente existente. Sin sincronización cloud, usuarios múltiples ni PIN en V6.

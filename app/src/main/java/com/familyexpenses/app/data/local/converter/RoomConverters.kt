@@ -7,6 +7,7 @@ import com.familyexpenses.app.core.model.LedgerStatus
 import com.familyexpenses.app.core.model.RecurrenceFrequency
 import com.familyexpenses.app.core.model.TransactionSource
 import com.familyexpenses.app.core.model.TransactionType
+import com.familyexpenses.app.core.model.TransferType
 
 class RoomConverters {
 
@@ -45,4 +46,10 @@ class RoomConverters {
 
     @TypeConverter
     fun fromLedgerStatus(value: LedgerStatus): String = value.name
+
+    @TypeConverter
+    fun toTransferType(value: String): TransferType = TransferType.valueOf(value)
+
+    @TypeConverter
+    fun fromTransferType(value: TransferType): String = value.name
 }

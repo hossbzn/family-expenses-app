@@ -22,6 +22,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -39,11 +45,30 @@ fun DashboardRoute(
     onPendingSettlementClick: () -> Unit,
     onRecurringClick: () -> Unit,
     onHistoryClick: () -> Unit,
+    savedTransactionId: String? = null,
+    onClearSavedTransactionId: () -> Unit = {},
     viewModel: DashboardViewModel = hiltViewModel(),
 ) {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(savedTransactionId) {
+        if (!savedTransactionId.isNullOrBlank()) {
+            val result = snackbarHostState.showSnackbar(
+                message = "Gasto guardado",
+                actionLabel = "DESHACER",
+                duration = SnackbarDuration.Short,
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                viewModel.undoExpense(savedTransactionId)
+            }
+            onClearSavedTransactionId()
+        }
+    }
+
     DashboardScreen(
         uiState = uiState.value,
+        snackbarHostState = snackbarHostState,
         onAddPersonalIncomeClick = onAddPersonalIncomeClick,
         onAddPersonalExpenseClick = onAddPersonalExpenseClick,
         onAddFamilyIncomeClick = onAddFamilyIncomeClick,
@@ -58,6 +83,7 @@ fun DashboardRoute(
 @Composable
 fun DashboardScreen(
     uiState: DashboardUiState,
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onAddPersonalIncomeClick: () -> Unit,
     onAddPersonalExpenseClick: () -> Unit,
     onAddFamilyIncomeClick: () -> Unit,
@@ -69,7 +95,9 @@ fun DashboardScreen(
 ) {
     val scrollState = rememberScrollState()
 
-    Scaffold { innerPadding ->
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+    ) { innerPadding ->
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()

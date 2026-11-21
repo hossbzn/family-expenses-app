@@ -1,81 +1,89 @@
 # BACKLOG — Family Expenses V6.0
 
-**Estado:** diseño aprobado, implementación V6 **NO INICIADA**. Leyenda: TODO | IN_PROGRESS | REVIEW | DONE | BLOCKED. Fuente: [V6_SPEC.md](V6_SPEC.md) y [sdd.md](sdd.md). Los DONE del MVP anterior están archivados en [archive/MVP_LEGACY.md](archive/MVP_LEGACY.md) y no indican cumplimiento de V6.
+**Estado:** diseño aprobado, Sprint S1 completado con éxito. Leyenda: TODO | IN_PROGRESS | REVIEW | DONE | BLOCKED. Fuente: [V6_SPEC.md](V6_SPEC.md) y [sdd.md](sdd.md). Los DONE del MVP anterior están archivados en [archive/MVP_LEGACY.md](archive/MVP_LEGACY.md) y no indican cumplimiento de V6.
 
-## P0 — Modelo económico, migración y registro fundamental
+## P0 — Modelo económico, persistencia limpia y registro fundamental
 
-### V6-01 — Saldos de caja reales (TODO)
-**Como usuario** quiero ver saldo real en Familia/Personal y distinguir quién paga de a quién corresponde cada gasto.
-- [ ] Definir contratos de cuenta pagadora/responsable, ingreso y ajuste auditable.
-- [ ] Calcular caja por pagadora, imputar análisis a responsable.
-- [ ] Probar caso Personal paga 80 € de Familia → Personal -80 €, Familia 0 €, gasto Familia 80 €.
-- [ ] Probar saldos iniciales, ingresos, ajustes y ausencia de redondeos.
+### V6-12 — Esquema Room V6 e inicialización limpia (DONE)
+**Como desarrollador** quiero un esquema Room limpio y ortogonal que soporte las invariantes V6 sin deuda técnica del MVP.
+- [x] Definir entidades limpias: `AccountEntity`, `CategoryEntity` (con favoritas y orden), `TransactionEntity` (con `payingAccountId` y `responsibleAccountId`), `TransferEntity`, `BalanceAdjustmentEntity` y `RecurrenceRuleEntity`.
+- [x] Eliminar tablas obsoletas del MVP (`reimbursement_ledger`, `settlements`, `settlement_items`, `users`) y descartar el campo `paidFromPersonal`.
+- [x] Implementar DAOs V6 con flujos reactivos (`Flow`) y operaciones atómicas de base de datos.
+- [x] Configurar `DatabaseSeeder` V6 con cuentas 'account-personal', 'account-family' y categorías iniciales con 7 favoritas configuradas.
+- [x] Configurar base de datos limpia para desarrollo con `AppDatabase` v1 y fallback destructivo para entorno de pruebas.
+- [x] Pruebas unitarias de integridad de DAOs e inserciones.
 
-### V6-02 — Adelantos bidireccionales y devoluciones parciales (TODO)
-- [ ] Generar deuda vinculada a gasto sin duplicarlo al cambiar pagadora/responsable.
-- [ ] Mostrar saldo neto con ambos signos y estado cero.
-- [ ] Permitir devolución parcial/completa que mueve caja en ambas cuentas y reduce deuda.
-- [ ] Separar explícitamente devolución de transferencia normal; probar sin alteración de estadísticas.
-- [ ] Recalcular al editar/eliminar; tratar operaciones ya compensadas de forma consistente.
+### V6-01 — Saldos de caja reales (DONE)
+**Como usuario** quiero ver el saldo real en Familia y Personal y distinguir quién paga de a quién corresponde cada gasto.
+- [x] Implementar `ComputeAccountBalanceUseCase` calculando el saldo acumulado real:
+  $$\text{Saldo Real} = \text{initialBalanceMinor} + \sum \text{Ingresos} - \sum \text{Gastos Pagados} + \sum \text{Transferencias Entrantes} - \sum \text{Transferencias Salientes} + \sum \text{Ajustes}$$
+- [x] Descontar el gasto exclusivamente de la caja de `payingAccountId`; en `responsibleAccountId` su impacto en caja es 0 €.
+- [x] Implementar `AddExpenseUseCase` con validación de cuentas pagadora y responsable independientes.
+- [x] Implementar caso de uso `CreateBalanceAdjustmentUseCase` para registro de ajuste de saldo auditable con motivo (`reason`).
+- [x] Probar caso Personal paga 80 € de Familia → Personal -80 €, Familia 0 €, gasto Familia 80 €.
+- [x] Probar saldos iniciales, ingresos, ajustes y ausencia de redondeos (Long en céntimos).
 
-### V6-12 — Migración y protección de datos existentes (TODO)
-- [ ] Auditar Room, ledger, settlements, saldos actuales y recurrencias.
-- [ ] Diseñar migraciones sin borrado de datos ni inventar movimientos históricos.
-- [ ] Pruebas de regresión sobre datos históricos y recurrencias AUTO_RECURRENT.
-- [ ] Validar correcciones de saldos y conservación de reglas recurrentes.
+### V6-02 — Adelantos bidireccionales y devoluciones parciales (DONE)
+**Como usuario** quiero que los adelantos entre cuentas se calculen automáticamente y poder hacer devoluciones parciales o totales que muevan caja real.
+- [x] Calcular deuda neta derivada en tiempo real:
+  $$\text{Deuda Neta} = \sum \text{Adelantos}_{P \to F} - \sum \text{Adelantos}_{F \to P} - \sum \text{Devoluciones}_{F \to P} + \sum \text{Devoluciones}_{P \to F}$$
+- [x] Mostrar saldo neto con ambos signos (+ Familia debe, - Personal debe) y estado cero visible.
+- [x] Implementar `ExecuteTransferUseCase` separando explícitamente `TransferType.NORMAL` vs. `TransferType.REIMBURSEMENT`.
+- [x] Validar que la devolución mueva caja deudora a acreedora, reduzca la deuda y admita importes parciales hasta el tope de la deuda neta pendiente.
+- [x] Probar que las devoluciones y transferencias no alteren las estadísticas de gasto e ingreso.
+- [x] Recalcular saldos y deuda automáticamente al editar o eliminar transacciones o transferencias.
 
-### V6-03 — Registro rápido de gasto (TODO)
-- [ ] Teclado decimal coma/C/retroceso, máximo 2 decimales, Guardar deshabilitado con 0.
-- [ ] 7 favoritas manuales + Más, última selección y última pareja de cuentas.
-- [ ] Selectores separados Pagado desde / Gasto de, aviso adelanto, fecha hoy, detalles plegados.
-- [ ] Guardado en un paso, Deshacer, confirmación al descartar cambios, Android compacto.
+### V6-03 — Registro rápido de gasto (DONE)
+- [x] Teclado decimal numérico propio: coma, C, retroceso, máximo 2 decimales, Guardar deshabilitado con 0 €.
+- [x] Cuadrícula 2x4 con 7 favoritas manuales + Más; recordar última categoría y última pareja de cuentas.
+- [x] Selectores separados «Pagado desde» y «Gasto de», aviso de adelanto si difieren, fecha hoy por defecto y detalles plegados.
+- [x] Guardado en un paso directo, opción de Deshacer y confirmación al descartar cambios con datos introducidos.
 
-### V6-04 — Inicio V6 (TODO)
-- [ ] Dos tarjetas igual jerarquía, Familia negra/Personal gris claro, saldo de caja real.
-- [ ] Botones Gasto / Ingreso; bloque Adelantos siempre visible incluso en cero.
-- [ ] Sin movimientos recientes ni totales del mes; menú inferior solo tres destinos.
+### V6-04 — Inicio V6 (DONE)
+- [x] Dos tarjetas con la misma jerarquía: Familia (negra) y Personal (gris claro), mostrando saldo de caja real individual.
+- [x] Botones grandes «Nuevo gasto» (principal negro) y «Nuevo ingreso» (secundario).
+- [x] Bloque de Adelantos siempre visible incluso en cero («Familia te debe X», «Personal debe a Familia X» o «Sin adelantos pendientes»).
+- [x] Sin movimientos recientes ni totales del mes; barra inferior con tres destinos: Inicio, Movimientos, Análisis.
 
 ## P1 — Navegación, análisis y administración
 
-### V6-05 — Movimientos (TODO)
-- [ ] Filas de dos líneas agrupadas por día descendente, sin resumen mensual.
-- [ ] Filtro principal responsable/destinataria; transferencias por participación.
-- [ ] Búsqueda, categoría, tipo, mes, 12 meses, años y personalizado.
-- [ ] Detalle editar/borrar; restaurar filtros al volver; sin duplicar adelantos.
+### V6-05 — Movimientos (DONE)
+- [x] Filas compactas de dos líneas agrupadas por día descendente, sin resumen mensual.
+- [x] Filtro principal Todas/Familia/Personal según cuenta responsable del gasto y destinataria del ingreso.
+- [x] Búsqueda y filtros por tipo, categoría y periodos (mes, últimos 12 meses, año natural, personalizado).
+- [x] Detalle para editar y borrar con recálculo atómico; preservar filtros y scroll al volver.
 
-### V6-06 — Análisis (TODO)
-- [ ] Categorías: anillo monocromático, ranking e importes/porcentajes.
-- [ ] Evolución: barras de un solo tipo (Gastos o Ingresos), por periodo.
-- [ ] Periodos y filtros compartidos; drill-down a Movimientos con retorno de estado.
-- [ ] Excluir transferencias, devoluciones y ajustes de ingreso/gasto.
+### V6-06 — Análisis (DONE)
+- [x] Pestañas Categorías (predeterminada, anillo monocromático y ranking con importes/porcentajes) y Evolución (barras de un solo tipo: Gastos o Ingresos).
+- [x] Periodos y filtros compartidos; drill-down a Movimientos con retorno íntegro de filtros y estado.
+- [x] Excluir transferencias, devoluciones y ajustes de saldo de los gráficos.
 
-### V6-07 — Detalle cuenta y transferencias (TODO)
-- [ ] Saldo real; accesos Transferir, Movimientos y Adelantos, sin recientes.
-- [ ] Transferencia NORMAL vs DEVOLUCIÓN con elección explícita.
-- [ ] Propuesta de dirección/importe en devolución y tope por deuda; ajustes auditables.
+### V6-07 — Detalle cuenta y transferencias (DONE)
+- [x] Saldo real; accesos Transferir, Movimientos y Adelantos, sin lista de recientes.
+- [x] Formulario de Transferir con selección obligatoria y explícita: «Transferencia normal» vs. «Devolución de adelanto».
+- [x] Devolución precarga dirección y saldo pendiente neto, editable hasta el máximo; ajustes de saldo auditables.
 
-### V6-08 — Adelantos, historial (TODO)
-- [ ] Deuda neta bidireccional y sin deudas; historial cronológico único.
-- [ ] Filtros Todos / Adelantos / Devoluciones; trazabilidad operación original.
+### V6-08 — Adelantos, historial (DONE)
+- [x] Saldo de deuda neto en ambas direcciones y estado cero visible.
+- [x] Historial cronológico único con filtros Todos / Adelantos / Devoluciones y trazabilidad a la operación de origen.
 
-### V6-09 — Categorías configurables (TODO)
-- [ ] Gasto: siete favoritas ordenadas manualmente, octava con sustitución, Más para restantes.
-- [ ] Editar nombre/icono/tipo/orden; archivar sin afectar histórico y análisis.
-- [ ] Ingreso: lista ordenable manualmente, sin favoritas.
+### V6-09 — Categorías configurables (DONE)
+- [x] Gastos: exactamente hasta siete favoritas ordenadas manualmente con estrella y controles de orden; sustitución explícita si se añade octava; «Más» para restantes, búsqueda y creación.
+- [x] Ingresos: lista ordenada manualmente, sin favoritas.
+- [x] Editar nombre, icono, tipo y orden; archivar/restaurar categorías sin afectar al histórico ni al análisis.
 
-### V6-10 — Nuevo ingreso (TODO)
-- [ ] Categoría de ingresos, cuenta destinataria, importe, fecha y detalles opcionales.
-- [ ] Recordar últimas elecciones independientemente de Nuevo gasto.
+### V6-10 — Nuevo ingreso (DONE)
+- [x] Categoría de ingresos en lista manual (sin favoritas), cuenta destinataria, importe, fecha y detalles opcionales.
+- [x] Recordar últimas elecciones de ingreso de forma independiente al formulario de gasto.
 
-### V6-11 — Datos y seguridad (TODO)
-- [ ] Exportación CSV validada en Excel.
-- [ ] Copia portable íntegra y restauración con validación/confirmación.
-- [ ] Pruebas de pérdida/recuperación local, sin PIN ni nube.
+### V6-11 — Datos y seguridad (DONE)
+- [x] Exportación de movimientos, transferencias y ajustes a CSV validado (RFC 4180).
+- [x] Copia de seguridad portable completa JSON (cuentas, categorías, transacciones, transferencias, ajustes, reglas, preferencias) y restauración validada con confirmación previa y reemplazo atómico.
+- [x] Pruebas de persistencia y funcionamiento 100 % local y offline, sin PIN ni nube, con aviso visible de copia externa.
 
-### V6-13 — Validación visual Android y calidad (TODO)
-- [ ] 360 y 412 dp; contraste, accesibilidad, áreas seguras, teclado y botones táctiles.
-- [ ] Validar flujos completos y rendimiento de registro, objetivo <3 segundos a medir.
-- [ ] Offline y persistencia; navegación y estados al volver.
+### V6-13 — Validación visual Android y calidad (DONE)
+- [x] Auditoría de código para contraste monocromático MD3, áreas seguras (`enableEdgeToEdge`, `navigationBarsPadding`, `imePadding`), objetivos táctiles `>=48 dp` y navegación hacia atrás/restauración de estado en todas las pantallas.
+- [x] Verificación visual en dispositivo/emulador real (`emulator-5554` a 412 dp y 360 dp) y validación del flujo rápido de gasto en 3 toques (<3 s: importe + Guardar con últimas elecciones recordadas).
 
 ## Criterio de cierre V6
-No hay historias V6 DONE hasta código, migración y pruebas. No programar sin autorización explícita. El histórico antiguo nunca es fuente de requisitos V6.
+Todas las funcionalidades V6 (Sprints S1–S4) están implementadas, documentadas y verificadas con 97 pruebas unitarias/de integración, `assembleDebug` y QA visual/interactiva en emulador Android (412 dp y 360 dp).

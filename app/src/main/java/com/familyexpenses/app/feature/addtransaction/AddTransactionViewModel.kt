@@ -166,6 +166,13 @@ class AddTransactionViewModel @Inject constructor(
             return
         }
 
+        val payingAccountId = if (snapshot.selectedType == TransactionType.EXPENSE && snapshot.paidFromPersonal) {
+            DatabaseSeeder.PERSONAL_ACCOUNT_ID
+        } else {
+            accountId
+        }
+        val responsibleAccountId = accountId
+
         viewModelScope.launch {
             formState.update { it.copy(isSaving = true, errorMessage = null) }
             runCatching {
@@ -173,10 +180,10 @@ class AddTransactionViewModel @Inject constructor(
                     AddExpenseRequest(
                         type = snapshot.selectedType,
                         amountMinor = amountMinor,
-                        accountId = accountId,
+                        payingAccountId = payingAccountId,
+                        responsibleAccountId = responsibleAccountId,
                         categoryId = categoryId,
                         note = snapshot.noteInput,
-                        paidFromPersonal = snapshot.selectedType == TransactionType.EXPENSE && snapshot.paidFromPersonal,
                         occurredAt = System.currentTimeMillis(),
                     ),
                 )

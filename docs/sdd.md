@@ -1,77 +1,125 @@
 # SDD — Family Expenses V6.0 (Android)
 
-**Estado:** especificación objetivo aprobada; no implementada todavía. **Fuente de verdad:** [V6_SPEC.md](V6_SPEC.md). Fecha: 2026-11-20.
+**Estado:** especificación técnica objetivo aprobada; diseño limpio autorizado. **Fuente de verdad:** [V6_SPEC.md](V6_SPEC.md). Fecha: 2026-11-20.
 
 ## 1. Objetivo y alcance
-Aplicación Android offline-first que sustituye registro de gastos e ingresos y seguimiento de adelantos familiares. Dos cuentas iniciales y únicas en V6: **Familia** y **Personal**. Diseño ampliable a más cuentas, sin exponer alta de cuentas todavía. Registro rápido (<3 segundos como objetivo a medir, no garantía).
+Aplicación Android offline-first que sustituye el registro de gastos e ingresos y el seguimiento de adelantos familiares. Dos cuentas iniciales y únicas en V6: **Familia** y **Personal**. Diseño ampliable a más cuentas en el modelo de datos, sin exponer alta de cuentas en la UI. Registro rápido (<3 segundos como objetivo a medir, no garantía).
 
-**Incluido V6:** saldos reales de caja, ingresos, gastos con cuenta pagadora/responsable separadas, adelantos bidireccionales, devoluciones parciales o totales, transferencias normales, ajustes auditables, categorías configurables, 7 favoritas manuales en gastos, lista manual en ingresos, Movimientos, Análisis, exportación CSV, copias/restauración local, recurrencias existentes conservadas y adaptadas a las nuevas reglas.
+**Decisión de persistencia:** Al no existir usuarios reales ni datos históricos de producción que preservar (confirmado por el usuario), se adopta un **reinicio limpio del esquema de persistencia (Esquema V6 limpio)**. Esto elimina la necesidad de migraciones complejas desde el MVP, descarta tablas obsoletas (`reimbursement_ledger`, `settlements`, `settlement_items`) y erradica por completo el booleano `paidFromPersonal`.
 
-**Excluido V6:** cloud sync, multiusuario, login, PIN adicional, OCR, conexión bancaria y creación de cuentas adicionales en UI.
+**Incluido V6:** saldos reales de caja, ingresos, gastos con cuenta pagadora y cuenta responsable independientes, adelantos bidireccionales derivados en tiempo real, devoluciones parciales o totales que mueven caja y reducen deuda, transferencias normales, ajustes de saldo auditables, categorías configurables (7 favoritas manuales en gastos, lista manual en ingresos), Movimientos, Análisis, exportación CSV, copias y restauración local, y conservación de recurrencias automáticas mensuales adaptadas a las nuevas reglas.
+
+**Excluido V6:** sincronización en la nube, multiusuario, login, PIN adicional, OCR, conexión bancaria y creación de cuentas adicionales desde la UI.
 
 ## 2. Invariantes de dominio (obligatorios)
-1. Cada gasto tiene `responsibleAccountId` y `payingAccountId`. El gasto pertenece a la responsable para presupuestos/análisis, pero **solo descuenta caja de la pagadora**.
-2. Saldo real de cuenta: apertura + ingresos recibidos - gastos efectivamente pagados + transferencias entrantes - salientes + ajustes; NO es un saldo mensual por responsabilidad.
-3. Si pagadora ≠ responsable, crear un adelanto vinculado al gasto en dirección pagadora → responsable, con trazabilidad y sin gasto duplicado.
-4. Deuda neta firmada: adelantos Personal→Familia - adelantos Familia→Personal - devoluciones Familia→Personal + devoluciones Personal→Familia. Positivo significa Familia debe a Personal. Negativo significa Personal debe a Familia.
-5. Transferencia normal mueve caja entre cuentas, sin cambiar deuda ni generar ingreso/gasto estadístico.
-6. Devolución es una transferencia explícitamente clasificada como devolución; mueve caja, reduce deuda neta y admite importe parcial. El origen/destino propuesto depende del signo de la deuda y el importe no supera el pendiente neto.
-7. Ajustar saldo genera operación auditable con motivo, no ingreso o gasto estadístico.
-8. Editar o eliminar gasto, adelanto o devolución requiere recalcular saldos y deuda, con reglas de consistencia si ya hay devoluciones vinculadas.
-9. Importes como `Long` en céntimos, EUR, transacciones de base de datos atómicas para efectos contables, identificadores estables y sin redondeos binarios.
+1. **Dualidad ortogonal Pagadora vs. Responsable:** Cada gasto tiene `payingAccountId` (de qué caja sale efectivamente el dinero) y `responsibleAccountId` (a qué cuenta se imputa el gasto para presupuestos y análisis).
+2. **Impacto en caja estricto:** El gasto **solo descuenta caja de la pagadora**. En la cuenta responsable, su impacto en caja es estrictamente 0 € si no fue pagado por ella.
+3. **Saldo real acumulado de caja:**
+   $$\text{Saldo Real} = \text{initialBalanceMinor} + \sum \text{Ingresos} - \sum \text{Gastos Pagados} + \sum \text{Transferencias Entrantes} - \sum \text{Transferencias Salientes} + \sum \text{Ajustes}$$
+   Nunca deducir saldos reales de la cuenta responsable ni compensar deudas de forma automática.
+4. **Adelanto automático bidireccional:** Si `payingAccountId != responsibleAccountId`, nace automáticamente un adelanto de la pagadora a la responsable por el importe del gasto.
+5. **Deuda neta firmada:**
+   $$\text{Deuda Neta} = \sum \text{Adelantos}_{P \to F} - \sum \text{Adelantos}_{F \to P} - \sum \text{Devoluciones}_{F \to P} + \sum \text{Devoluciones}_{P \to F}$$
+   * Signo positivo: Familia debe a Personal.
+   * Signo negativo: Personal debe a Familia.
+   * Cero: sin deudas pendientes.
+6. **Transferencia normal:** Mueve dinero de caja entre cuentas (`sourceAccountId` $\to$ `destinationAccountId`), con impacto neutro en deuda y sin generar ingreso ni gasto estadístico.
+7. **Devolución de adelanto:** Transferencia explícitamente clasificada como `REIMBURSEMENT`. Mueve caja de la cuenta deudora a la acreedora, reduce la deuda neta y admite importe parcial o total hasta el tope de la deuda pendiente. No genera ingreso ni gasto estadístico.
+8. **Ajuste de saldo auditable:** Operación registrada con motivo explicativo (`reason`) y delta en céntimos; fuera de ingresos y gastos ordinarios.
+9. **Recálculo consistente:** Modificar o eliminar gastos o transferencias recalcula automáticamente saldos de caja y deuda neta.
+10. **Precisión numérica:** Importes siempre como `Long` en céntimos (EUR). Sin redondeos ni tipos de coma flotante.
 
-**Ejemplo obligatorio:** Personal paga 80 EUR de una compra atribuida a Familia: Personal -80 de caja, Familia 0 de caja, gasto de Familia +80 en análisis, deuda Familia→Personal +80. Familia devuelve 30: Familia -30 de caja, Personal +30 de caja, deuda 50, sin ingresos/gastos nuevos.
+**Ejemplo obligatorio:** Personal paga 80 EUR de una compra atribuida a Familia: Personal -80 de caja, Familia 0 de caja, gasto de Familia +80 en análisis, deuda Familia $\to$ Personal +80. Familia devuelve 30: Familia -30 de caja, Personal +30 de caja, deuda 50, sin ingresos ni gastos nuevos.
 
-## 3. Modelo objetivo orientativo (detallar migración antes de tocar Room)
-- `Account`: id estable, tipo FAMILY|PERSONAL, nombre, icono, saldo inicial, activo, timestamps.
-- `Category`: id, nombre, icono, tipo EXPENSE|INCOME, orden manual, favorita y posición de favorita cuando proceda, archivada, timestamps.
-- `Transaction`: id, tipo EXPENSE|INCOME, importe en céntimos, responsable para gasto, pagadora para gasto, destinataria para ingreso, categoría, fecha, descripción/nota, origen MANUAL|AUTO_RECURRENT, regla recurrente opcional, timestamps.
-- `Transfer`: id, origen, destino, importe, tipo NORMAL|REIMBURSEMENT, fecha, motivo, timestamps; no tratar como ingreso/gasto.
-- `Advance`: referencia a gasto, pagadora, responsable, importe o derivado verificable del gasto; no duplicar entradas contables.
-- `BalanceAdjustment`: id, cuenta, delta, motivo, fecha, timestamps.
-- `RecurrenceRule`: conservar funcionalidad mensual y adaptarla a pagadora/responsable o destinataria.
-- `Settings`: categorías/última selección, preferencias y versión de esquema.
+## 3. Modelo de persistencia Room V6 (Limpio)
+El esquema se compone de 6 entidades limpias sin residuos del MVP:
 
-**Nota:** son entidades conceptuales, no instrucciones para crear tablas directamente. Revisar esquema y migrar registros de `paid_from_personal`, `ReimbursementLedger` y `Settlement` sin duplicar operaciones de caja. Los registros históricos del sistema anterior pueden requerir decisión explícita de conversión porque sus liquidaciones no movían caja. **No inventar transferencias históricas** ni alterar saldos sin revisión.
+### `AccountEntity` (`accounts`)
+* `id: String` (PK, 'account-personal', 'account-family')
+* `name: String` ("Personal", "Familiar")
+* `type: AccountType` (PERSONAL, FAMILY)
+* `currencyCode: String` ("EUR")
+* `initialBalanceMinor: Long`
+* `isArchived: Boolean`
+* `createdAt: Long`
+
+### `CategoryEntity` (`categories`)
+* `id: String` (PK)
+* `name: String`
+* `icon: String` (nombre o identificador del icono MD3)
+* `type: CategoryType` (EXPENSE, INCOME)
+* `orderIndex: Int` (para ordenación manual)
+* `isFavorite: Boolean` (para las 7 favoritas en EXPENSE)
+* `favoritePosition: Int?` (1 a 7, nulo si no es favorita)
+* `isArchived: Boolean`
+* `createdAt: Long`
+
+### `TransactionEntity` (`transactions`)
+* `id: String` (PK)
+* `type: TransactionType` (EXPENSE, INCOME)
+* `amountMinor: Long` (> 0)
+* `payingAccountId: String` (FK `accounts.id`) -> cuenta de origen del dinero en gasto o destinataria en ingreso.
+* `responsibleAccountId: String` (FK `accounts.id`) -> cuenta imputada en gasto (en ingreso coincide con payingAccountId).
+* `categoryId: String` (FK `categories.id`)
+* `occurredAt: Long` (timestamp del movimiento)
+* `note: String?`
+* `source: TransactionSource` (MANUAL, AUTO_RECURRENT)
+* `recurrenceRuleId: String?` (FK `recurrence_rules.id`, opcional)
+* `createdAt: Long`
+
+### `TransferEntity` (`transfers`)
+* `id: String` (PK)
+* `type: TransferType` (NORMAL, REIMBURSEMENT)
+* `sourceAccountId: String` (FK `accounts.id`)
+* `destinationAccountId: String` (FK `accounts.id`)
+* `amountMinor: Long` (> 0)
+* `occurredAt: Long`
+* `note: String?`
+* `createdAt: Long`
+
+### `BalanceAdjustmentEntity` (`balance_adjustments`)
+* `id: String` (PK)
+* `accountId: String` (FK `accounts.id`)
+* `amountDeltaMinor: Long` (positivo o negativo)
+* `reason: String`
+* `occurredAt: Long`
+* `createdAt: Long`
+
+### `RecurrenceRuleEntity` (`recurrence_rules`)
+* `id: String` (PK)
+* `type: TransactionType` (EXPENSE, INCOME)
+* `payingAccountId: String` (FK `accounts.id`)
+* `responsibleAccountId: String` (FK `accounts.id`)
+* `categoryId: String` (FK `categories.id`)
+* `amountMinor: Long`
+* `note: String?`
+* `frequency: RecurrenceFrequency` (MONTHLY)
+* `dayOfMonth: Int` (1)
+* `startAt: Long`
+* `endAt: Long?`
+* `nextOccurrenceAt: Long`
+* `isActive: Boolean`
+* `createdAt: Long`
 
 ## 4. Pantallas y navegación
-### Inicio
-Tarjetas de saldo real Familia (negra) y Personal (gris claro), dos acciones grandes Gasto e Ingreso; adelantos siempre visibles incluso con deuda 0. Sin total agregado, gráficos, movimientos recientes ni balance mensual. Ajustes en cabecera. Barra inferior Inicio / Movimientos / Análisis.
+* **Inicio:** Tarjetas de saldo real Familia (negra) y Personal (gris claro), dos botones grandes Gasto e Ingreso; adelantos siempre visibles (incluso con deuda 0 €). Sin totales mensuales ni lista de recientes. Barra inferior: Inicio / Movimientos / Análisis. Ajustes en cabecera.
+* **Nuevo gasto:** Teclado numérico propio (coma, 2 decimales, C, retroceso, importe inicial 0). 7 favoritas manuales + Más en 2x4. Dos selectores separados «Pagado desde» y «Gasto de», recordando última combinación y categoría. Detalles plegados. Guardar en un paso con Deshacer.
+* **Nuevo ingreso:** Importe, cuenta destinataria, lista manual de categorías de ingreso (sin favoritas), fecha y notas opcionales.
+* **Movimientos:** Filas de dos líneas por día descendente, sin resumen mensual. Filtro principal Todas/Familia/Personal por cuenta responsable (en gastos) y destinataria (en ingresos). Periodos: mes, 12 meses móviles, año natural, personalizado. Adelantos mostrados como un único gasto con indicación de pagadora.
+* **Análisis:** Pestañas Categorías y Evolución. Gastos imputados a cuenta responsable. Exclusión de transferencias, devoluciones y ajustes de saldo. Drill-down a Movimientos con retorno de filtros.
+* **Detalle de cuenta y transferencias:** Saldo real, Transferir, Movimientos y Adelantos. Transferencia NORMAL vs. DEVOLUCIÓN con elección explícita.
+* **Adelantos:** Saldo neto en ambas direcciones con estado cero visible, historial cronológico único con filtros Todos / Adelantos / Devoluciones y trazabilidad.
+* **Ajustes y datos:** Categorías configurables, copia completa portable y exportación CSV.
 
-### Nuevo gasto
-Importe con teclado numérico propio: coma, máximo 2 decimales, C, retroceso. Cuadrícula 2x4 con 7 favoritas manuales más «Más». **Dos selectores independientes** «Pagado desde» y «Gasto de»; recordar última combinación y categoría. Importe 0 al abrir, hoy por defecto, detalles opcionales plegados. Aviso de adelanto si las cuentas difieren. Guardar en una sola pantalla; deshabilitado si importe 0; confirmación si se sale con cambios. Guardado vuelve a Inicio y ofrece Deshacer.
+## 5. Persistencia, recurrencias y seguridad
+* Kotlin, Jetpack Compose, Room, Hilt, ViewModel/StateFlow, Navigation Compose, WorkManager.
+* Arquitectura `data / domain / feature`. Cálculos contables exclusivamente en dominio; UI solo de presentación.
+* Transacciones atómicas de Room (`withTransaction`) para cualquier operación que altere saldos o deudas.
+* Recurrencias automáticas procesadas por WorkManager aplicando las mismas reglas contables de pagadora/responsable que las transacciones manuales.
 
-### Nuevo ingreso
-Importe, cuenta destinataria, categoría de ingreso ordenada manualmente (sin favoritas), fecha y detalles opcionales. Recordar últimas elecciones de ingreso independientemente del gasto.
-
-### Movimientos
-Filas de **dos líneas** agrupadas por día, orden descendente, sin resumen de periodo. Filtros Todas/Familia/Personal según cuenta responsable del gasto, destinataria del ingreso y participación en transferencias. Búsqueda y filtros por tipo, categoría y periodo. Periodos: mes, últimos 12 meses, año natural, personalizado. Adelantos representados por **un solo gasto** con indicación de pagadora. Abrir detalle para editar/eliminar; preservar filtros y scroll al volver.
-
-### Análisis
-Pestañas Categorías (predeterminada, anillo y ranking) y Evolución (una sola serie de barras). Selector Gastos/Ingresos por separado, filtro cuenta y periodo. Gastos imputados a responsable. Excluir transferencias, devoluciones y ajustes. Pulsar categoría/barra abre Movimientos filtrado; volver recupera pestaña, filtros y selección. Meses futuros sin barra, no falsos ceros.
-
-### Detalle de cuenta
-Saldo real, Transferir, Movimientos y Adelantos. Sin lista reciente. Transferir exige elección explícita de Normal o Devolución; esta última propone dirección e importe pendiente y admite devolución parcial. Saldo inicial configurado; posteriores correcciones mediante ajustes auditables.
-
-### Adelantos
-Saldo neto en ambas direcciones, estado sin deudas visible, historial cronológico único con filtros Todos/Adelantos/Devoluciones, trazabilidad del gasto y devoluciones.
-
-### Ajustes y datos
-Categorías de gastos: hasta siete favoritas ordenadas manualmente; octava requiere sustitución, «Más» da acceso al resto y creación. Categorías de ingresos orden manual sin favoritas. Archivo conserva histórico. Dos cuentas renombrables, sin creación de nuevas. Exportación CSV; copia completa portable; restauración validada y con confirmación antes de sustituir. Sin PIN, login ni sincronización.
-
-## 5. Persistencia, recurrencias y protección de datos
-Kotlin, Jetpack Compose, Room, Hilt, ViewModel/StateFlow, Navigation Compose, WorkManager. Arquitectura `data/domain/ui`; cálculos contables en dominio y transacciones de Room; UI sin contabilidad embebida. Offline y almacenamiento local en un dispositivo. Copia guardada fuera del móvil necesaria para recuperación fiable. Identificadores globalmente estables para futura sincronización (sin implementarla).
-
-Las recurrencias existentes deben seguir funcionando; al emitir un gasto recurrente se debe aplicar la misma regla pagadora/responsable/adelanto que a uno manual. No eliminar funcionalidad previa.
-
-## 6. Criterios de aceptación y QA
-- Casos de caja y deuda en ambas direcciones, devolución parcial/totales y transferencia normal explícita.
-- Migración de datos antiguos sin pérdida, sin gastos duplicados y sin reconstruir como pagos reales liquidaciones antiguas sin evidencia.
-- Edición/borrado y saldos coherentes con datos históricos y devoluciones existentes.
-- Análisis no incluye transferencias, ajustes ni devoluciones en ingresos/gastos.
-- Categorías archivadas siguen visibles en histórico.
-- Restauración sobre datos existentes requiere comprobación y confirmación; exportación CSV usable.
-- Android 360/412 dp, objetivos táctiles en torno a 48 dp, contraste, áreas seguras, teclado, accesibilidad y offline.
-
-## 7. Estado de implementación
-Esta SDD especifica el **objetivo V6**, no la versión actualmente compilada. Las historias de [BACKLOG.md](BACKLOG.md) permanecen TODO hasta desarrollo y pruebas; [SPRINT.md](SPRINT.md) gobierna el siguiente trabajo autorizado. Historial MVP conservado en `docs/archive/MVP_LEGACY.md` para referencia, **nunca como requisito vigente**. No programar sin autorización expresa.
+## 6. Criterios de aceptación contables
+1. Personal paga 80 € de compra familiar: Personal -80 € de caja, Familia 0 € de caja, gasto analítico Familia 80 €, deuda Familia $\to$ Personal +80 €.
+2. Devolución parcial de Familia a Personal de 30 €: Familia -30 € de caja, Personal +30 € de caja, deuda restante 50 €, sin nuevo ingreso ni gasto.
+3. Transferencia normal entre cuentas: mueve caja, no altera deuda ni estadísticas.
+4. Ajuste de saldo auditable: modifica caja con motivo, fuera de estadísticas.
+5. Edición y borrado recalculan saldos y deudas consistentemente.

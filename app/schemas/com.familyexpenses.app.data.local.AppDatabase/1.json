@@ -2,46 +2,8 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "f4f1ed3cb8067f321206d076bcfd090e",
+    "identityHash": "4aea59698ce0b042d6415d198fe0a40d",
     "entities": [
-      {
-        "tableName": "users",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `isActive` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
-        "fields": [
-          {
-            "fieldPath": "id",
-            "columnName": "id",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "name",
-            "columnName": "name",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "isActive",
-            "columnName": "isActive",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "createdAt",
-            "columnName": "createdAt",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "id"
-          ]
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
       {
         "tableName": "accounts",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `currencyCode` TEXT NOT NULL, `initialBalanceMinor` INTEGER NOT NULL, `isArchived` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
@@ -100,7 +62,7 @@
       },
       {
         "tableName": "categories",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `icon` TEXT NOT NULL, `type` TEXT NOT NULL, `orderIndex` INTEGER NOT NULL, `isFavorite` INTEGER NOT NULL, `favoritePosition` INTEGER, `isArchived` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -115,9 +77,39 @@
             "notNull": true
           },
           {
+            "fieldPath": "icon",
+            "columnName": "icon",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
             "fieldPath": "type",
             "columnName": "type",
             "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "orderIndex",
+            "columnName": "orderIndex",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isFavorite",
+            "columnName": "isFavorite",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "favoritePosition",
+            "columnName": "favoritePosition",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "isArchived",
+            "columnName": "isArchived",
+            "affinity": "INTEGER",
             "notNull": true
           },
           {
@@ -138,25 +130,13 @@
       },
       {
         "tableName": "transactions",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `accountId` TEXT NOT NULL, `categoryId` TEXT, `type` TEXT NOT NULL, `amountMinor` INTEGER NOT NULL, `paidFromPersonal` INTEGER NOT NULL, `note` TEXT, `occurredAt` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`accountId`) REFERENCES `accounts`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT , FOREIGN KEY(`categoryId`) REFERENCES `categories`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `type` TEXT NOT NULL, `amountMinor` INTEGER NOT NULL, `payingAccountId` TEXT NOT NULL, `responsibleAccountId` TEXT NOT NULL, `categoryId` TEXT NOT NULL, `occurredAt` INTEGER NOT NULL, `note` TEXT, `source` TEXT NOT NULL DEFAULT 'MANUAL', `recurrenceRuleId` TEXT, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`payingAccountId`) REFERENCES `accounts`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT , FOREIGN KEY(`responsibleAccountId`) REFERENCES `accounts`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT , FOREIGN KEY(`categoryId`) REFERENCES `categories`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT )",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
             "affinity": "TEXT",
             "notNull": true
-          },
-          {
-            "fieldPath": "accountId",
-            "columnName": "accountId",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "categoryId",
-            "columnName": "categoryId",
-            "affinity": "TEXT",
-            "notNull": false
           },
           {
             "fieldPath": "type",
@@ -171,8 +151,26 @@
             "notNull": true
           },
           {
-            "fieldPath": "paidFromPersonal",
-            "columnName": "paidFromPersonal",
+            "fieldPath": "payingAccountId",
+            "columnName": "payingAccountId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "responsibleAccountId",
+            "columnName": "responsibleAccountId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "categoryId",
+            "columnName": "categoryId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "occurredAt",
+            "columnName": "occurredAt",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -181,6 +179,247 @@
             "columnName": "note",
             "affinity": "TEXT",
             "notNull": false
+          },
+          {
+            "fieldPath": "source",
+            "columnName": "source",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'MANUAL'"
+          },
+          {
+            "fieldPath": "recurrenceRuleId",
+            "columnName": "recurrenceRuleId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_transactions_payingAccountId",
+            "unique": false,
+            "columnNames": [
+              "payingAccountId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_transactions_payingAccountId` ON `${TABLE_NAME}` (`payingAccountId`)"
+          },
+          {
+            "name": "index_transactions_responsibleAccountId",
+            "unique": false,
+            "columnNames": [
+              "responsibleAccountId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_transactions_responsibleAccountId` ON `${TABLE_NAME}` (`responsibleAccountId`)"
+          },
+          {
+            "name": "index_transactions_categoryId",
+            "unique": false,
+            "columnNames": [
+              "categoryId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_transactions_categoryId` ON `${TABLE_NAME}` (`categoryId`)"
+          },
+          {
+            "name": "index_transactions_occurredAt",
+            "unique": false,
+            "columnNames": [
+              "occurredAt"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_transactions_occurredAt` ON `${TABLE_NAME}` (`occurredAt`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "accounts",
+            "onDelete": "RESTRICT",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "payingAccountId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "accounts",
+            "onDelete": "RESTRICT",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "responsibleAccountId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "categories",
+            "onDelete": "RESTRICT",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "categoryId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "transfers",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `type` TEXT NOT NULL, `sourceAccountId` TEXT NOT NULL, `destinationAccountId` TEXT NOT NULL, `amountMinor` INTEGER NOT NULL, `occurredAt` INTEGER NOT NULL, `note` TEXT, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`sourceAccountId`) REFERENCES `accounts`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT , FOREIGN KEY(`destinationAccountId`) REFERENCES `accounts`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sourceAccountId",
+            "columnName": "sourceAccountId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "destinationAccountId",
+            "columnName": "destinationAccountId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "amountMinor",
+            "columnName": "amountMinor",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "occurredAt",
+            "columnName": "occurredAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_transfers_sourceAccountId",
+            "unique": false,
+            "columnNames": [
+              "sourceAccountId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_transfers_sourceAccountId` ON `${TABLE_NAME}` (`sourceAccountId`)"
+          },
+          {
+            "name": "index_transfers_destinationAccountId",
+            "unique": false,
+            "columnNames": [
+              "destinationAccountId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_transfers_destinationAccountId` ON `${TABLE_NAME}` (`destinationAccountId`)"
+          },
+          {
+            "name": "index_transfers_occurredAt",
+            "unique": false,
+            "columnNames": [
+              "occurredAt"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_transfers_occurredAt` ON `${TABLE_NAME}` (`occurredAt`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "accounts",
+            "onDelete": "RESTRICT",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "sourceAccountId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "accounts",
+            "onDelete": "RESTRICT",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "destinationAccountId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "balance_adjustments",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `accountId` TEXT NOT NULL, `amountDeltaMinor` INTEGER NOT NULL, `reason` TEXT NOT NULL, `occurredAt` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`accountId`) REFERENCES `accounts`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "accountId",
+            "columnName": "accountId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "amountDeltaMinor",
+            "columnName": "amountDeltaMinor",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reason",
+            "columnName": "reason",
+            "affinity": "TEXT",
+            "notNull": true
           },
           {
             "fieldPath": "occurredAt",
@@ -203,22 +442,22 @@
         },
         "indices": [
           {
-            "name": "index_transactions_accountId",
+            "name": "index_balance_adjustments_accountId",
             "unique": false,
             "columnNames": [
               "accountId"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_transactions_accountId` ON `${TABLE_NAME}` (`accountId`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_balance_adjustments_accountId` ON `${TABLE_NAME}` (`accountId`)"
           },
           {
-            "name": "index_transactions_categoryId",
+            "name": "index_balance_adjustments_occurredAt",
             "unique": false,
             "columnNames": [
-              "categoryId"
+              "occurredAt"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_transactions_categoryId` ON `${TABLE_NAME}` (`categoryId`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_balance_adjustments_occurredAt` ON `${TABLE_NAME}` (`occurredAt`)"
           }
         ],
         "foreignKeys": [
@@ -232,23 +471,12 @@
             "referencedColumns": [
               "id"
             ]
-          },
-          {
-            "table": "categories",
-            "onDelete": "RESTRICT",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "categoryId"
-            ],
-            "referencedColumns": [
-              "id"
-            ]
           }
         ]
       },
       {
         "tableName": "recurrence_rules",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `transactionId` TEXT NOT NULL, `frequency` TEXT NOT NULL, `intervalCount` INTEGER NOT NULL, `dayOfMonth` INTEGER, `dayOfWeek` INTEGER, `nextOccurrenceAt` INTEGER NOT NULL, `isActive` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`transactionId`) REFERENCES `transactions`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `type` TEXT NOT NULL, `payingAccountId` TEXT NOT NULL, `responsibleAccountId` TEXT NOT NULL, `categoryId` TEXT NOT NULL, `amountMinor` INTEGER NOT NULL, `note` TEXT, `frequency` TEXT NOT NULL, `dayOfMonth` INTEGER NOT NULL, `startAt` INTEGER NOT NULL, `endAt` INTEGER, `nextOccurrenceAt` INTEGER NOT NULL, `isActive` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`payingAccountId`) REFERENCES `accounts`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT , FOREIGN KEY(`responsibleAccountId`) REFERENCES `accounts`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT , FOREIGN KEY(`categoryId`) REFERENCES `categories`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT )",
         "fields": [
           {
             "fieldPath": "id",
@@ -257,10 +485,40 @@
             "notNull": true
           },
           {
-            "fieldPath": "transactionId",
-            "columnName": "transactionId",
+            "fieldPath": "type",
+            "columnName": "type",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "payingAccountId",
+            "columnName": "payingAccountId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "responsibleAccountId",
+            "columnName": "responsibleAccountId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "categoryId",
+            "columnName": "categoryId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "amountMinor",
+            "columnName": "amountMinor",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT",
+            "notNull": false
           },
           {
             "fieldPath": "frequency",
@@ -269,20 +527,20 @@
             "notNull": true
           },
           {
-            "fieldPath": "intervalCount",
-            "columnName": "intervalCount",
+            "fieldPath": "dayOfMonth",
+            "columnName": "dayOfMonth",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "dayOfMonth",
-            "columnName": "dayOfMonth",
+            "fieldPath": "startAt",
+            "columnName": "startAt",
             "affinity": "INTEGER",
-            "notNull": false
+            "notNull": true
           },
           {
-            "fieldPath": "dayOfWeek",
-            "columnName": "dayOfWeek",
+            "fieldPath": "endAt",
+            "columnName": "endAt",
             "affinity": "INTEGER",
             "notNull": false
           },
@@ -313,115 +571,40 @@
         },
         "indices": [
           {
-            "name": "index_recurrence_rules_transactionId",
+            "name": "index_recurrence_rules_payingAccountId",
             "unique": false,
             "columnNames": [
-              "transactionId"
+              "payingAccountId"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_recurrence_rules_transactionId` ON `${TABLE_NAME}` (`transactionId`)"
-          }
-        ],
-        "foreignKeys": [
-          {
-            "table": "transactions",
-            "onDelete": "CASCADE",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "transactionId"
-            ],
-            "referencedColumns": [
-              "id"
-            ]
-          }
-        ]
-      },
-      {
-        "tableName": "reimbursement_ledger",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `familyAccountId` TEXT NOT NULL, `personalAccountId` TEXT NOT NULL, `sourceTransactionId` TEXT NOT NULL, `amountMinor` INTEGER NOT NULL, `status` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `settledAt` INTEGER, PRIMARY KEY(`id`), FOREIGN KEY(`familyAccountId`) REFERENCES `accounts`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT , FOREIGN KEY(`personalAccountId`) REFERENCES `accounts`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT , FOREIGN KEY(`sourceTransactionId`) REFERENCES `transactions`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT )",
-        "fields": [
-          {
-            "fieldPath": "id",
-            "columnName": "id",
-            "affinity": "TEXT",
-            "notNull": true
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_recurrence_rules_payingAccountId` ON `${TABLE_NAME}` (`payingAccountId`)"
           },
           {
-            "fieldPath": "familyAccountId",
-            "columnName": "familyAccountId",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "personalAccountId",
-            "columnName": "personalAccountId",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "sourceTransactionId",
-            "columnName": "sourceTransactionId",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "amountMinor",
-            "columnName": "amountMinor",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "status",
-            "columnName": "status",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "createdAt",
-            "columnName": "createdAt",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "settledAt",
-            "columnName": "settledAt",
-            "affinity": "INTEGER",
-            "notNull": false
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "id"
-          ]
-        },
-        "indices": [
-          {
-            "name": "index_reimbursement_ledger_familyAccountId",
+            "name": "index_recurrence_rules_responsibleAccountId",
             "unique": false,
             "columnNames": [
-              "familyAccountId"
+              "responsibleAccountId"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_reimbursement_ledger_familyAccountId` ON `${TABLE_NAME}` (`familyAccountId`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_recurrence_rules_responsibleAccountId` ON `${TABLE_NAME}` (`responsibleAccountId`)"
           },
           {
-            "name": "index_reimbursement_ledger_personalAccountId",
+            "name": "index_recurrence_rules_categoryId",
             "unique": false,
             "columnNames": [
-              "personalAccountId"
+              "categoryId"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_reimbursement_ledger_personalAccountId` ON `${TABLE_NAME}` (`personalAccountId`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_recurrence_rules_categoryId` ON `${TABLE_NAME}` (`categoryId`)"
           },
           {
-            "name": "index_reimbursement_ledger_sourceTransactionId",
+            "name": "index_recurrence_rules_nextOccurrenceAt",
             "unique": false,
             "columnNames": [
-              "sourceTransactionId"
+              "nextOccurrenceAt"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_reimbursement_ledger_sourceTransactionId` ON `${TABLE_NAME}` (`sourceTransactionId`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_recurrence_rules_nextOccurrenceAt` ON `${TABLE_NAME}` (`nextOccurrenceAt`)"
           }
         ],
         "foreignKeys": [
@@ -430,7 +613,7 @@
             "onDelete": "RESTRICT",
             "onUpdate": "NO ACTION",
             "columns": [
-              "familyAccountId"
+              "payingAccountId"
             ],
             "referencedColumns": [
               "id"
@@ -441,136 +624,18 @@
             "onDelete": "RESTRICT",
             "onUpdate": "NO ACTION",
             "columns": [
-              "personalAccountId"
+              "responsibleAccountId"
             ],
             "referencedColumns": [
               "id"
             ]
           },
           {
-            "table": "transactions",
+            "table": "categories",
             "onDelete": "RESTRICT",
             "onUpdate": "NO ACTION",
             "columns": [
-              "sourceTransactionId"
-            ],
-            "referencedColumns": [
-              "id"
-            ]
-          }
-        ]
-      },
-      {
-        "tableName": "settlements",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `settledAt` INTEGER NOT NULL, `note` TEXT, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
-        "fields": [
-          {
-            "fieldPath": "id",
-            "columnName": "id",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "settledAt",
-            "columnName": "settledAt",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "note",
-            "columnName": "note",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "createdAt",
-            "columnName": "createdAt",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "id"
-          ]
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "settlement_items",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `settlementId` TEXT NOT NULL, `ledgerId` TEXT NOT NULL, `amountMinor` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`settlementId`) REFERENCES `settlements`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`ledgerId`) REFERENCES `reimbursement_ledger`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT )",
-        "fields": [
-          {
-            "fieldPath": "id",
-            "columnName": "id",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "settlementId",
-            "columnName": "settlementId",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ledgerId",
-            "columnName": "ledgerId",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "amountMinor",
-            "columnName": "amountMinor",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "id"
-          ]
-        },
-        "indices": [
-          {
-            "name": "index_settlement_items_settlementId",
-            "unique": false,
-            "columnNames": [
-              "settlementId"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_settlement_items_settlementId` ON `${TABLE_NAME}` (`settlementId`)"
-          },
-          {
-            "name": "index_settlement_items_ledgerId",
-            "unique": false,
-            "columnNames": [
-              "ledgerId"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_settlement_items_ledgerId` ON `${TABLE_NAME}` (`ledgerId`)"
-          }
-        ],
-        "foreignKeys": [
-          {
-            "table": "settlements",
-            "onDelete": "CASCADE",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "settlementId"
-            ],
-            "referencedColumns": [
-              "id"
-            ]
-          },
-          {
-            "table": "reimbursement_ledger",
-            "onDelete": "RESTRICT",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "ledgerId"
+              "categoryId"
             ],
             "referencedColumns": [
               "id"
@@ -582,7 +647,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f4f1ed3cb8067f321206d076bcfd090e')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4aea59698ce0b042d6415d198fe0a40d')"
     ]
   }
 }

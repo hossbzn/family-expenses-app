@@ -1,13 +1,10 @@
 package com.familyexpenses.app.domain.usecase
 
-import com.familyexpenses.app.core.model.AccountType
 import com.familyexpenses.app.core.model.TransactionSource
-import com.familyexpenses.app.core.model.TransactionType
 import com.familyexpenses.app.data.local.entity.TransactionEntity
 import com.familyexpenses.app.data.repository.AccountRepository
 import com.familyexpenses.app.data.repository.ExpenseRepository
 import com.familyexpenses.app.data.repository.RecurringRepository
-import com.familyexpenses.app.data.seed.DatabaseSeeder
 import com.familyexpenses.app.domain.model.RecurringGenerationResult
 import com.familyexpenses.app.domain.rule.MonthlyRecurrenceRule
 import java.util.UUID
@@ -32,29 +29,25 @@ class GenerateRecurringTransactionsUseCase @Inject constructor(
             )
 
             if (occurrences.dueOccurrences.isNotEmpty()) {
-                val account = accountRepository.getAccountById(rule.accountId) ?: continue
+                accountRepository.getAccountById(rule.payingAccountId) ?: continue
+                accountRepository.getAccountById(rule.responsibleAccountId) ?: continue
 
                 occurrences.dueOccurrences.forEach { occurrenceAt ->
                     val transactionId = UUID.randomUUID().toString()
-                    expenseRepository.addExpense(
+                    expenseRepository.addTransaction(
                         transaction = TransactionEntity(
                             id = transactionId,
-                            accountId = rule.accountId,
-                            categoryId = rule.categoryId,
                             type = rule.type,
                             amountMinor = rule.amountMinor,
-                            paidFromPersonal = rule.type == TransactionType.EXPENSE && rule.paidFromPersonal,
+                            payingAccountId = rule.payingAccountId,
+                            responsibleAccountId = rule.responsibleAccountId,
+                            categoryId = rule.categoryId,
                             note = rule.note,
                             source = TransactionSource.AUTO_RECURRENT,
                             recurrenceRuleId = rule.id,
                             occurredAt = occurrenceAt,
                             createdAt = now,
                         ),
-                        createReimbursementLedger = rule.type == TransactionType.EXPENSE &&
-                            account.type == AccountType.FAMILY &&
-                            rule.paidFromPersonal,
-                        familyAccountId = DatabaseSeeder.FAMILY_ACCOUNT_ID,
-                        personalAccountId = DatabaseSeeder.PERSONAL_ACCOUNT_ID,
                     )
                     generatedCount++
                 }

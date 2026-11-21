@@ -27,7 +27,7 @@ class ComputeMonthlyBalanceRule @Inject constructor() {
                 return@fold totals
             }
 
-            when (accountTypesById[transaction.accountId]) {
+            when (accountTypesById[transaction.payingAccountId]) {
                 AccountType.PERSONAL -> totals.copy(
                     personalBalanceMinor = totals.personalBalanceMinor + transaction.personalDelta(),
                 )

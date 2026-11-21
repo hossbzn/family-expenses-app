@@ -156,16 +156,23 @@ class RecurrenceViewModel @Inject constructor(
             }
         }
 
+        val payingAccountId = if (snapshot.selectedType == TransactionType.EXPENSE && snapshot.paidFromPersonal) {
+            DatabaseSeeder.PERSONAL_ACCOUNT_ID
+        } else {
+            accountId
+        }
+        val responsibleAccountId = accountId
+
         viewModelScope.launch {
             formState.update { it.copy(isSaving = true, errorMessage = null) }
             runCatching {
                 createMonthlyRecurringRuleUseCase(
                     RecurringRuleDraft(
                         type = snapshot.selectedType,
-                        accountId = accountId,
+                        payingAccountId = payingAccountId,
+                        responsibleAccountId = responsibleAccountId,
                         categoryId = categoryId,
                         amountMinor = amountMinor,
-                        paidFromPersonal = snapshot.paidFromPersonal,
                         note = snapshot.noteInput,
                         startAt = startAt,
                         endAt = endAt,

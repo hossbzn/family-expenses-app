@@ -23,10 +23,10 @@ class RecurringRepository @Inject constructor(
             RecurrenceRuleEntity(
                 id = ruleId,
                 type = draft.type,
-                accountId = draft.accountId,
+                payingAccountId = draft.payingAccountId,
+                responsibleAccountId = draft.responsibleAccountId,
                 categoryId = draft.categoryId,
                 amountMinor = draft.amountMinor,
-                paidFromPersonal = draft.paidFromPersonal,
                 note = draft.note?.takeIf { it.isNotBlank() },
                 startAt = draft.startAt,
                 endAt = draft.endAt,

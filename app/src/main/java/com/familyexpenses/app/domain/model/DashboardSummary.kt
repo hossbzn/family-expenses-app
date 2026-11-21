@@ -1,7 +1,7 @@
 package com.familyexpenses.app.domain.model
 
 data class DashboardSummary(
-    val personalBalanceMinor: Long = 0L,
-    val familyBalanceMinor: Long = 0L,
-    val pendingReimbursementMinor: Long = 0L,
+    val personalCashBalanceMinor: Long = 0L,
+    val familyCashBalanceMinor: Long = 0L,
+    val netDebtMinor: Long = 0L, // Positivo: Familia debe a Personal. Negativo: Personal debe a Familia.
 )

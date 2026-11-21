@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.familyexpenses.app.core.model.RecurrenceFrequency
 import com.familyexpenses.app.core.model.TransactionType
 
 @Entity(
@@ -12,7 +13,13 @@ import com.familyexpenses.app.core.model.TransactionType
         ForeignKey(
             entity = AccountEntity::class,
             parentColumns = ["id"],
-            childColumns = ["accountId"],
+            childColumns = ["payingAccountId"],
+            onDelete = ForeignKey.RESTRICT,
+        ),
+        ForeignKey(
+            entity = AccountEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["responsibleAccountId"],
             onDelete = ForeignKey.RESTRICT,
         ),
         ForeignKey(
@@ -23,18 +30,22 @@ import com.familyexpenses.app.core.model.TransactionType
         ),
     ],
     indices = [
-        Index("accountId"),
+        Index("payingAccountId"),
+        Index("responsibleAccountId"),
         Index("categoryId"),
+        Index("nextOccurrenceAt"),
     ],
 )
 data class RecurrenceRuleEntity(
     @PrimaryKey val id: String,
     val type: TransactionType,
-    val accountId: String,
+    val payingAccountId: String,
+    val responsibleAccountId: String,
     val categoryId: String,
     val amountMinor: Long,
-    val paidFromPersonal: Boolean = false,
     val note: String? = null,
+    val frequency: RecurrenceFrequency = RecurrenceFrequency.MONTHLY,
+    val dayOfMonth: Int = 1,
     val startAt: Long,
     val endAt: Long? = null,
     val nextOccurrenceAt: Long,

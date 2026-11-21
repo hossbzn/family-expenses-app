@@ -18,6 +18,9 @@ interface RecurrenceRuleDao {
     @Query("SELECT * FROM recurrence_rules ORDER BY nextOccurrenceAt ASC")
     fun observeRules(): Flow<List<RecurrenceRuleEntity>>
 
+    @Query("SELECT * FROM recurrence_rules WHERE id = :ruleId LIMIT 1")
+    suspend fun getRuleById(ruleId: String): RecurrenceRuleEntity?
+
     @Query("UPDATE recurrence_rules SET nextOccurrenceAt = :nextOccurrenceAt WHERE id = :ruleId")
     suspend fun updateNextOccurrence(ruleId: String, nextOccurrenceAt: Long)
 

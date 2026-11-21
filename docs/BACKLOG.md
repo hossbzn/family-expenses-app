@@ -85,5 +85,48 @@
 - [x] Auditoría de código para contraste monocromático MD3, áreas seguras (`enableEdgeToEdge`, `navigationBarsPadding`, `imePadding`), objetivos táctiles `>=48 dp` y navegación hacia atrás/restauración de estado en todas las pantallas.
 - [x] Verificación visual en dispositivo/emulador real (`emulator-5554` a 412 dp y 360 dp) y validación del flujo rápido de gasto en 3 toques (<3 s: importe + Guardar con últimas elecciones recordadas).
 
+## P1/P2 — Recurrentes V6.1 (ESPECIFICADO, NO IMPLEMENTADO)
+**Fuente:** [RECURRENTES_V6_1.md](RECURRENTES_V6_1.md). Estas historias quedan TODO; requieren comprobar la compatibilidad con el motor V6-01/V6-02 ya documentado como DONE y auditar la migración de reglas instaladas (REC-01). No alterar datos históricos del móvil.
+
+### REC-01 — Auditoría y migración segura (TODO, P0)
+- [ ] Auditar reglas/Worker/Room existentes y reglas mensuales día 1, datos reales instalados.
+- [ ] Diseñar esquema con regla, ocurrencia y transacción económica vinculadas; migración no destructiva.
+- [ ] Tests de actualización desde base antigua y preservación de movimientos/recurrentes.
+
+### REC-02 — Edición y ciclo de vida (TODO, P1)
+- [ ] Editar solo futuras ocurrencias, dejando instantáneas existentes intactas.
+- [ ] Pausar/reactivar, archivar/restaurar, finalizar y consultar historial.
+- [ ] Reactivar archivada con nueva fecha de inicio (próxima ejecución futura por defecto), sin recuperar periodos suspendidos.
+
+### REC-03 — Frecuencias y calendario (TODO, P1)
+- [ ] Semanal, mensual (día 1-31), cada 2/3/6 meses y anual.
+- [ ] Último día si fecha nominal no existe; ancla de intervalos; inicio obligatorio y fin opcional.
+- [ ] No duplicar ejecuciones por reintentos, cambios de fecha o reconciliación.
+
+### REC-04 — Modos y generación de ocurrencias (TODO, P1)
+- [ ] Modo por regla automático o pendiente de confirmar.
+- [ ] Automático registra por motor económico V6; pendiente no modifica caja/deuda/análisis.
+- [ ] Recuperar fechas activas vencidas al reabrir, omitiendo períodos pausados/archivados.
+
+### REC-05 — Bandeja y gestión individual (TODO, P1)
+- [ ] Mostrar pendientes, revisar importe/fecha (programada por defecto), confirmar.
+- [ ] Posponer revisión sin alterar fecha económica o futuras fechas; omitir ejecución sin generar gasto.
+- [ ] No cambiar pendientes al editar su regla.
+
+### REC-06 — Confirmación múltiple (TODO, P1)
+- [ ] Selección y revisión de fechas e importes por ocurrencia.
+- [ ] Confirmación atómica todo-o-nada e idempotente; tratar errores sin duplicar.
+
+### REC-07 — Inicio y avisos (TODO, P2)
+- [ ] Aviso discreto y acceso a pendientes desde Inicio, siempre que existan.
+- [ ] Notificaciones Android opcionales desde Ajustes, agrupadas, respetando permiso y sin repetición molesta.
+- [ ] Notificaciones no condicionan generación local.
+
+### REC-08 — QA y respaldo (TODO, P1)
+- [ ] Tests de caja/adelantos entre pagadora y responsable; ingresos recurrentes.
+- [ ] Integración WorkManager, Room, migración y actualizaciones sin pérdida.
+- [ ] Backup/restauración incorpora reglas/ocurrencias y vínculos cuando esté implementado.
+
+
 ## Criterio de cierre V6
 Todas las funcionalidades V6 (Sprints S1–S4) están implementadas, documentadas y verificadas con 97 pruebas unitarias/de integración, `assembleDebug` y QA visual/interactiva en emulador Android (412 dp y 360 dp).

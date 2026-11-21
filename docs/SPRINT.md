@@ -95,3 +95,19 @@
   - Unificada paleta estrictamente monocromática MD3 (eliminado acento verde en `HistoryScreen`) y verificados objetivos táctiles `>= 48dp` en chips y controles interactivos.
   - Actualizado `docs/Documentacion.md` al estado real de implementación V6.
   - Verificación real en emulador (`emulator-5554`) a 412 dp y 360 dp en Inicio, Nuevo gasto, Movimientos, Detalle de movimiento, Análisis, Ajustes, Categorías y Datos y seguridad; validado flujo de gasto rápido en 3 toques (`<3 s`) y recálculo tras borrado.
+
+---
+
+## Línea de trabajo propuesta — Recurrentes V6.1 (sin autorización de programación)
+**Fuente:** [RECURRENTES_V6_1.md](RECURRENTES_V6_1.md), historias REC-01 a REC-08 de [BACKLOG.md](BACKLOG.md).
+
+**Puerta previa:** verificar que los componentes V6-01/V6-02 marcados DONE son reutilizables y auditar por separado la migración de los recurrentes existentes. El código V6 actual ya declara completadas las historias V6; eso no valida automáticamente una actualización de instalaciones anteriores ni una migración no destructiva.
+
+- **REC-S0 — Diseño y auditoría:** REC-01. Examinar Room, Worker, compatibilidad de instalaciones existentes y estrategia de migración. Sin código hasta autorización.
+- **REC-S1 — Reglas y calendario:** REC-02/REC-03. Edición futura, estados, archivo/restauración, frecuencias y tests de calendario.
+- **REC-S2 — Ejecuciones:** REC-04/REC-05. Motor idempotente, modo automático/pendiente, reconciliación y revisión individual.
+- **REC-S3 — Experiencia y calidad:** REC-06/REC-07/REC-08. Confirmación múltiple atómica, avisos/permiso, backup, migración y regresión en dispositivo.
+- **Criterio de salida:** cero duplicados, saldos/deudas correctos tras confirmar, cero efecto de pendientes, ninguna pérdida de datos reales, pruebas en móvil, sin generar periodos pausados.
+
+**Situación:** diseño funcional aprobado y documentado; **todas las historias REC siguen TODO**. Este plan no autoriza implementar ni modificar el APK instalado.
+

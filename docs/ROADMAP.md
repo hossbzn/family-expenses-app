@@ -9,20 +9,20 @@
 - [ ] Auditoría de compatibilidad del código y de la base local instalada.
 - [ ] Aprobación explícita para programar.
 
-## Etapa 1 — Fundamentos contables V6 (pendiente)
-- [ ] V6-12: auditar Room, movimientos antiguos, liquidaciones y recurrentes.
-- [ ] V6-01: caja real y distinción cuenta pagadora/responsable.
-- [ ] V6-02: deuda bidireccional y devoluciones parciales que mueven caja.
-- [ ] Migraciones no destructivas y pruebas de regresión con datos de instalaciones existentes.
+## Etapa 1 — Fundamentos contables V6 (marcados DONE en backlog, verificar en dispositivo)
+- [x] V6-12: persistencia V6 documentada como completada; **no asumir migración segura desde una instalación MVP antigua**.
+- [x] V6-01: caja real y distinción cuenta pagadora/responsable (marcado DONE).
+- [x] V6-02: deuda bidireccional y devoluciones parciales que mueven caja (marcado DONE).
+- [ ] Comprobar explícitamente migración no destructiva y pruebas con datos de instalaciones antiguas antes de actualizar el móvil.
 
-## Etapa 2 — Experiencia principal V6 (pendiente)
-- [ ] Registro rápido de gastos e ingresos y categoría favorita.
-- [ ] Inicio con saldos reales, adelantos y navegación definitiva.
-- [ ] Movimientos, cuentas, transferencias, análisis y categorías.
-- [ ] Copia/restauración y QA Android.
+## Etapa 2 — Experiencia principal V6 (marcada DONE en backlog, verificar en dispositivo)
+- [x] Registro rápido de gastos e ingresos y categoría favorita (marcado DONE).
+- [x] Inicio con saldos reales, adelantos y navegación definitiva (marcado DONE).
+- [x] Movimientos, cuentas, transferencias, análisis y categorías (marcado DONE).
+- [x] Copia/restauración y QA Android (marcado DONE).
 
 ## Etapa 3 — Recurrentes V6.1 (pendiente)
-**Dependencia:** motor de operaciones económicas de Etapa 1 listo para integrar recurrentes sin reglas antiguas incompatibles.
+**Dependencia:** verificar integración con motor de operaciones V6 marcado DONE y la preservación de datos instalados; la migración desde MVP sigue siendo un riesgo no resuelto por marcar V6 como DONE.
 - [ ] REC-01: migración y protección de reglas existentes (puede comenzar como auditoría en Etapa 1).
 - [ ] REC-02/03: edición/archivo/pausa/reactivación y cuatro frecuencias.
 - [ ] REC-04: modos automático/pendiente y motor idempotente.

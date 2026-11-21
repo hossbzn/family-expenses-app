@@ -10,14 +10,23 @@ import kotlinx.coroutines.flow.Flow
 interface AccountDao {
 
     @Upsert
+    suspend fun upsert(account: AccountEntity)
+
+    @Upsert
     suspend fun upsertAll(accounts: List<AccountEntity>)
 
     @Query("SELECT * FROM accounts ORDER BY createdAt ASC")
     fun observeAccounts(): Flow<List<AccountEntity>>
+
+    @Query("SELECT * FROM accounts ORDER BY createdAt ASC")
+    suspend fun getAllAccounts(): List<AccountEntity>
 
     @Query("SELECT * FROM accounts WHERE id = :accountId LIMIT 1")
     suspend fun getAccountById(accountId: String): AccountEntity?
 
     @Query("SELECT COUNT(*) FROM accounts")
     suspend fun countAccounts(): Int
+
+    @Query("UPDATE accounts SET initialBalanceMinor = :initialBalanceMinor WHERE id = :accountId")
+    suspend fun updateInitialBalance(accountId: String, initialBalanceMinor: Long)
 }

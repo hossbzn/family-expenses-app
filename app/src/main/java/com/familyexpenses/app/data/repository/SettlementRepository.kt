@@ -1,63 +1,42 @@
 package com.familyexpenses.app.data.repository
 
-import androidx.room.withTransaction
-import com.familyexpenses.app.core.model.LedgerStatus
-import com.familyexpenses.app.data.local.AppDatabase
-import com.familyexpenses.app.data.local.dao.ReimbursementLedgerDao
-import com.familyexpenses.app.data.local.dao.SettlementDao
-import com.familyexpenses.app.data.local.entity.SettlementEntity
-import com.familyexpenses.app.data.local.entity.SettlementItemEntity
+import com.familyexpenses.app.core.model.TransactionType
+import com.familyexpenses.app.data.local.dao.AccountDao
+import com.familyexpenses.app.data.local.dao.TransactionDao
+import com.familyexpenses.app.data.local.dao.TransferDao
 import com.familyexpenses.app.domain.model.PendingSettlementSummary
-import java.util.UUID
+import com.familyexpenses.app.domain.usecase.ComputeNetDebtUseCase
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 
 @Singleton
 class SettlementRepository @Inject constructor(
-    private val database: AppDatabase,
-    private val reimbursementLedgerDao: ReimbursementLedgerDao,
-    private val settlementDao: SettlementDao,
+    private val accountDao: AccountDao,
+    private val transactionDao: TransactionDao,
+    private val transferDao: TransferDao,
+    private val computeNetDebtUseCase: ComputeNetDebtUseCase,
 ) {
 
-    fun observePendingSummary(): Flow<PendingSettlementSummary> = reimbursementLedgerDao.observeOpenEntries()
-        .map { openEntries ->
-            PendingSettlementSummary(
-                pendingAmountMinor = openEntries.sumOf { it.amountMinor },
-                pendingEntriesCount = openEntries.size,
-            )
+    fun observePendingSummary(): Flow<PendingSettlementSummary> = combine(
+        accountDao.observeAccounts(),
+        transactionDao.observeTransactions(),
+        transferDao.observeTransfers(),
+    ) { accounts, transactions, transfers ->
+        val netDebt = computeNetDebtUseCase.compute(
+            accounts = accounts,
+            transactions = transactions,
+            transfers = transfers,
+        )
+
+        val advancesCount = transactions.count {
+            it.type == TransactionType.EXPENSE && it.payingAccountId != it.responsibleAccountId
         }
 
-    suspend fun createFullSettlement(settledAt: Long = System.currentTimeMillis()): String {
-        return database.withTransaction {
-            val openEntries = reimbursementLedgerDao.getOpenEntries()
-            require(openEntries.isNotEmpty()) { "No hay pendiente por liquidar." }
-
-            val settlementId = UUID.randomUUID().toString()
-            settlementDao.upsertSettlement(
-                SettlementEntity(
-                    id = settlementId,
-                    amountMinor = openEntries.sumOf { it.amountMinor },
-                    settledAt = settledAt,
-                    createdAt = settledAt,
-                ),
-            )
-            settlementDao.upsertSettlementItems(
-                openEntries.map { entry ->
-                    SettlementItemEntity(
-                        id = UUID.randomUUID().toString(),
-                        settlementId = settlementId,
-                        ledgerId = entry.id,
-                        amountMinor = entry.amountMinor,
-                    )
-                },
-            )
-            reimbursementLedgerDao.markEntriesAsSettled(
-                ledgerIds = openEntries.map { it.id },
-                settledAt = settledAt,
-            )
-            settlementId
-        }
+        PendingSettlementSummary(
+            netDebtMinor = netDebt,
+            pendingAdvancesCount = advancesCount,
+        )
     }
 }

@@ -14,7 +14,13 @@ import com.familyexpenses.app.core.model.TransactionType
         ForeignKey(
             entity = AccountEntity::class,
             parentColumns = ["id"],
-            childColumns = ["accountId"],
+            childColumns = ["payingAccountId"],
+            onDelete = ForeignKey.RESTRICT,
+        ),
+        ForeignKey(
+            entity = AccountEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["responsibleAccountId"],
             onDelete = ForeignKey.RESTRICT,
         ),
         ForeignKey(
@@ -25,20 +31,22 @@ import com.familyexpenses.app.core.model.TransactionType
         ),
     ],
     indices = [
-        Index("accountId"),
+        Index("payingAccountId"),
+        Index("responsibleAccountId"),
         Index("categoryId"),
+        Index("occurredAt"),
     ],
 )
 data class TransactionEntity(
     @PrimaryKey val id: String,
-    val accountId: String,
-    val categoryId: String?,
     val type: TransactionType,
     val amountMinor: Long,
-    val paidFromPersonal: Boolean = false,
+    val payingAccountId: String,
+    val responsibleAccountId: String,
+    val categoryId: String,
+    val occurredAt: Long,
     val note: String? = null,
     @ColumnInfo(defaultValue = "MANUAL") val source: TransactionSource = TransactionSource.MANUAL,
     val recurrenceRuleId: String? = null,
-    val occurredAt: Long,
     val createdAt: Long,
 )

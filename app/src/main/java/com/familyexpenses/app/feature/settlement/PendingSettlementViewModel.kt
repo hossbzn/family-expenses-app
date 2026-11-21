@@ -31,8 +31,8 @@ class PendingSettlementViewModel @Inject constructor(
         screenState,
     ) { summary, state ->
         PendingSettlementUiState(
-            pendingAmountMinor = summary.pendingAmountMinor,
-            pendingEntriesCount = summary.pendingEntriesCount,
+            netDebtMinor = summary.netDebtMinor,
+            pendingAdvancesCount = summary.pendingAdvancesCount,
             isSettling = state.isSettling,
             errorMessage = state.errorMessage,
         )
@@ -43,7 +43,7 @@ class PendingSettlementViewModel @Inject constructor(
     )
 
     fun settle() {
-        if (uiState.value.pendingEntriesCount == 0) {
+        if (uiState.value.pendingAdvancesCount == 0) {
             screenState.update { it.copy(errorMessage = "No hay pendiente por liquidar.") }
             return
         }
@@ -68,11 +68,14 @@ class PendingSettlementViewModel @Inject constructor(
 }
 
 data class PendingSettlementUiState(
-    val pendingAmountMinor: Long = 0L,
-    val pendingEntriesCount: Int = 0,
+    val netDebtMinor: Long = 0L,
+    val pendingAdvancesCount: Int = 0,
     val isSettling: Boolean = false,
     val errorMessage: String? = null,
-)
+) {
+    val pendingAmountMinor: Long get() = netDebtMinor
+    val pendingEntriesCount: Int get() = pendingAdvancesCount
+}
 
 private data class PendingSettlementScreenState(
     val isSettling: Boolean = false,

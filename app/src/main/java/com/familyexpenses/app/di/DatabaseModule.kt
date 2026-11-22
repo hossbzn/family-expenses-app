@@ -6,6 +6,7 @@ import com.familyexpenses.app.data.local.AppDatabase
 import com.familyexpenses.app.data.local.dao.AccountDao
 import com.familyexpenses.app.data.local.dao.BalanceAdjustmentDao
 import com.familyexpenses.app.data.local.dao.CategoryDao
+import com.familyexpenses.app.data.local.dao.RecurrenceOccurrenceDao
 import com.familyexpenses.app.data.local.dao.RecurrenceRuleDao
 import com.familyexpenses.app.data.local.dao.TransactionDao
 import com.familyexpenses.app.data.local.dao.TransferDao
@@ -48,4 +49,7 @@ object DatabaseModule {
 
     @Provides
     fun provideRecurrenceRuleDao(database: AppDatabase): RecurrenceRuleDao = database.recurrenceRuleDao()
+
+    @Provides
+    fun provideRecurrenceOccurrenceDao(database: AppDatabase): RecurrenceOccurrenceDao = database.recurrenceOccurrenceDao()
 }

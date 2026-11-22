@@ -85,10 +85,16 @@
 - [x] Auditoría de código para contraste monocromático MD3, áreas seguras (`enableEdgeToEdge`, `navigationBarsPadding`, `imePadding`), objetivos táctiles `>=48 dp` y navegación hacia atrás/restauración de estado en todas las pantallas.
 - [x] Verificación visual en dispositivo/emulador real (`emulator-5554` a 412 dp y 360 dp) y validación del flujo rápido de gasto en 3 toques (<3 s: importe + Guardar con últimas elecciones recordadas).
 
-## P1/P2 — Recurrentes V6.1 (ESPECIFICADO, NO IMPLEMENTADO)
-**Fuente:** [RECURRENTES_V6_1.md](RECURRENTES_V6_1.md). Estas historias quedan TODO; requieren comprobar la compatibilidad con el motor V6-01/V6-02 ya documentado como DONE y auditar la migración de reglas instaladas (REC-01). No alterar datos históricos del móvil.
+## P1/P2 — Recurrentes V6.1 (ESPECIFICADO, EN DESARROLLO)
+**Fuente:** [RECURRENTES_V6_1.md](RECURRENTES_V6_1.md). No alterar datos históricos del móvil.
 
-### REC-01 — Auditoría y migración segura (TODO, P0)
+### REC-01 — Auditoría y esquema Room de ocurrencias (DONE, P0)
+- [x] Auditar reglas/Worker/Room existentes y definir enums para frecuencia (Semanal, Mensual, Multi-mes, Anual), modos (Automático/Pendiente) y estados de regla (Activa, Pausada, Archivada, Finalizada).
+- [x] Diseñar e implementar las entidades Room `RecurrenceRuleEntity` y `RecurrenceOccurrenceEntity` con soporte de instantáneas de importes y vinculación con `TransactionEntity`.
+- [x] Implementar `RecurrenceOccurrenceDao` y actualizar `RecurrenceRuleDao` y `AppDatabase` v1/v2.
+- [x] Pruebas unitarias de esquema y modelos (`RecurrenceSchemaTest`).
+
+### REC-02 — Edición y ciclo de vida (IN_PROGRESS, P1)
 - [ ] Auditar reglas/Worker/Room existentes y reglas mensuales día 1, datos reales instalados.
 - [ ] Diseñar esquema con regla, ocurrencia y transacción económica vinculadas; migración no destructiva.
 - [ ] Tests de actualización desde base antigua y preservación de movimientos/recurrentes.

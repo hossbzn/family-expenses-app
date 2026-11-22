@@ -182,11 +182,15 @@ class BackupRestoreUseCase @Inject constructor(
                                 "amountMinor" to JsonNumber(rule.amountMinor),
                                 "note" to nullableJsonString(rule.note),
                                 "frequency" to JsonString(rule.frequency.name),
-                                "dayOfMonth" to JsonNumber(rule.dayOfMonth.toLong()),
+                                "intervalCount" to (rule.intervalCount?.let { JsonNumber(it.toLong()) } ?: JsonNull),
+                                "dayOfWeek" to (rule.dayOfWeek?.let { JsonNumber(it.toLong()) } ?: JsonNull),
+                                "dayOfMonth" to (rule.dayOfMonth?.let { JsonNumber(it.toLong()) } ?: JsonNull),
+                                "monthOfYear" to (rule.monthOfYear?.let { JsonNumber(it.toLong()) } ?: JsonNull),
+                                "mode" to JsonString(rule.mode.name),
+                                "status" to JsonString(rule.status.name),
                                 "startAt" to JsonNumber(rule.startAt),
                                 "endAt" to (rule.endAt?.let { JsonNumber(it) } ?: JsonNull),
                                 "nextOccurrenceAt" to JsonNumber(rule.nextOccurrenceAt),
-                                "isActive" to JsonBoolean(rule.isActive),
                                 "createdAt" to JsonNumber(rule.createdAt),
                             ),
                         )
@@ -293,6 +297,23 @@ class BackupRestoreUseCase @Inject constructor(
 
         val rules = root.getArray("recurrenceRules").items.map { elem ->
             val obj = elem as? JsonObject ?: throw IllegalArgumentException("Regla recurrente inválida en copia.")
+            val frequencyStr = obj.entries["frequency"]?.let { (it as? JsonString)?.value } ?: "MONTHLY"
+            val statusStr = obj.entries["status"]?.let { (it as? JsonString)?.value }
+            val legacyIsActive = obj.entries["isActive"]?.let { (it as? JsonBoolean)?.value }
+            
+            val status = when {
+                statusStr != null -> enumValue<com.familyexpenses.app.core.model.RecurrenceRuleStatus>(statusStr, "estado")
+                legacyIsActive == false -> com.familyexpenses.app.core.model.RecurrenceRuleStatus.PAUSED
+                else -> com.familyexpenses.app.core.model.RecurrenceRuleStatus.ACTIVE
+            }
+
+            val modeStr = obj.entries["mode"]?.let { (it as? JsonString)?.value }
+            val mode = if (modeStr != null) {
+                enumValue<com.familyexpenses.app.core.model.RecurrenceExecutionMode>(modeStr, "modo")
+            } else {
+                com.familyexpenses.app.core.model.RecurrenceExecutionMode.AUTOMATIC
+            }
+
             RecurrenceRuleEntity(
                 id = obj.getString("id"),
                 type = enumValue<TransactionType>(obj.getString("type"), "tipo de regla recurrente"),
@@ -301,12 +322,16 @@ class BackupRestoreUseCase @Inject constructor(
                 categoryId = obj.getString("categoryId"),
                 amountMinor = obj.getLong("amountMinor"),
                 note = obj.getNullableString("note"),
-                frequency = enumValue<RecurrenceFrequency>(obj.getString("frequency"), "frecuencia"),
-                dayOfMonth = obj.getInt("dayOfMonth"),
+                frequency = enumValue<RecurrenceFrequency>(frequencyStr, "frecuencia"),
+                intervalCount = obj.entries["intervalCount"]?.let { (it as? JsonNumber)?.value?.toInt() },
+                dayOfWeek = obj.entries["dayOfWeek"]?.let { (it as? JsonNumber)?.value?.toInt() },
+                dayOfMonth = obj.entries["dayOfMonth"]?.let { (it as? JsonNumber)?.value?.toInt() } ?: 1,
+                monthOfYear = obj.entries["monthOfYear"]?.let { (it as? JsonNumber)?.value?.toInt() },
+                mode = mode,
+                status = status,
                 startAt = obj.getLong("startAt"),
                 endAt = obj.getNullableLong("endAt"),
                 nextOccurrenceAt = obj.getLong("nextOccurrenceAt"),
-                isActive = obj.getBoolean("isActive"),
                 createdAt = obj.getLong("createdAt"),
             )
         }

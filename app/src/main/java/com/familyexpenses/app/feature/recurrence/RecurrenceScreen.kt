@@ -238,8 +238,14 @@ fun RecurrenceScreen(
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
+                            val statusText = when (rule.status) {
+                                com.familyexpenses.app.core.model.RecurrenceRuleStatus.ACTIVE -> "Activa"
+                                com.familyexpenses.app.core.model.RecurrenceRuleStatus.PAUSED -> "Pausada"
+                                com.familyexpenses.app.core.model.RecurrenceRuleStatus.ARCHIVED -> "Archivada"
+                                com.familyexpenses.app.core.model.RecurrenceRuleStatus.COMPLETED -> "Finalizada"
+                            }
                             Text(
-                                text = if (rule.isActive) "Activa" else "Finalizada",
+                                text = statusText,
                                 style = MaterialTheme.typography.labelLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )

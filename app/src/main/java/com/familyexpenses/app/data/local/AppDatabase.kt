@@ -13,8 +13,10 @@ import com.familyexpenses.app.data.local.dao.TransferDao
 import com.familyexpenses.app.data.local.entity.AccountEntity
 import com.familyexpenses.app.data.local.entity.BalanceAdjustmentEntity
 import com.familyexpenses.app.data.local.entity.CategoryEntity
+import com.familyexpenses.app.data.local.entity.RecurrenceOccurrenceEntity
 import com.familyexpenses.app.data.local.entity.RecurrenceRuleEntity
 import com.familyexpenses.app.data.local.entity.TransactionEntity
+import com.familyexpenses.app.data.local.dao.RecurrenceOccurrenceDao
 import com.familyexpenses.app.data.local.entity.TransferEntity
 
 @Database(
@@ -25,6 +27,7 @@ import com.familyexpenses.app.data.local.entity.TransferEntity
         TransferEntity::class,
         BalanceAdjustmentEntity::class,
         RecurrenceRuleEntity::class,
+        RecurrenceOccurrenceEntity::class,
     ],
     version = 1,
     exportSchema = true,
@@ -37,4 +40,5 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun transferDao(): TransferDao
     abstract fun balanceAdjustmentDao(): BalanceAdjustmentDao
     abstract fun recurrenceRuleDao(): RecurrenceRuleDao
+    abstract fun recurrenceOccurrenceDao(): RecurrenceOccurrenceDao
 }

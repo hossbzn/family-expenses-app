@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <exclude domain="database" path="family-expenses.db" />
+    <exclude domain="database" path="family-expenses.db-journal" />
+    <exclude domain="database" path="family-expenses.db-shm" />
+    <exclude domain="database" path="family-expenses.db-wal" />
+</full-backup-content>

@@ -8,11 +8,14 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.familyexpenses.app.data.seed.DatabaseSeeder
 import com.familyexpenses.app.data.worker.GenerateRecurringTransactionsWorker
-import com.familyexpenses.app.domain.usecase.GenerateRecurringTransactionsUseCase
+import com.familyexpenses.app.domain.usecase.ProcessRecurringRulesUseCase
 import dagger.hilt.android.HiltAndroidApp
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 @HiltAndroidApp
 class FamilyExpensesApp : Application(), Configuration.Provider {
@@ -24,7 +27,9 @@ class FamilyExpensesApp : Application(), Configuration.Provider {
     lateinit var databaseSeeder: DatabaseSeeder
 
     @Inject
-    lateinit var generateRecurringTransactionsUseCase: GenerateRecurringTransactionsUseCase
+    lateinit var processRecurringRulesUseCase: ProcessRecurringRulesUseCase
+
+    private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
@@ -33,9 +38,9 @@ class FamilyExpensesApp : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
-        runBlocking {
+        applicationScope.launch {
             databaseSeeder.seedDefaultsIfNeeded()
-            generateRecurringTransactionsUseCase()
+            processRecurringRulesUseCase()
         }
         scheduleRecurringGeneration()
     }

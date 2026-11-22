@@ -1,6 +1,6 @@
 # BACKLOG — Family Expenses V6.0
 
-**Estado:** V6, Recurrentes V6.1, Sistema Visual y Estabilización Senior COMPLETADOS (116 pruebas unitarias e integración en verde, `lintDebug` sin errores y `assembleDebug` correcto). Leyenda: TODO | IN_PROGRESS | REVIEW | DONE | BLOCKED. Fuente: [V6_SPEC.md](V6_SPEC.md), [sdd.md](sdd.md) y [RECURRENTES_V6_1.md](RECURRENTES_V6_1.md).
+**Estado:** V6 y Recurrentes V6.1 en fase de estabilización senior y verificación de pruebas. Leyenda: TODO | IN_PROGRESS | REVIEW | DONE | BLOCKED. Fuente: [V6_SPEC.md](V6_SPEC.md), [sdd.md](sdd.md) y [RECURRENTES_V6_1.md](RECURRENTES_V6_1.md).
 
 ## P0 — Modelo económico, persistencia limpia y registro fundamental
 

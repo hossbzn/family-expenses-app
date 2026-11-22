@@ -31,12 +31,12 @@ class NotificationHelper @Inject constructor(
         notificationManager.createNotificationChannel(channel)
     }
 
-    fun showPendingRecurrencesNotification(pendingCount: Int) {
-        if (pendingCount <= 0) return
+    fun showPendingRecurrencesNotification(pendingCount: Int): Boolean {
+        if (pendingCount <= 0) return false
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                return
+                return false
             }
         }
 
@@ -56,11 +56,12 @@ class NotificationHelper @Inject constructor(
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)
 
-        runCatching {
+        return runCatching {
             with(NotificationManagerCompat.from(context)) {
                 notify(NOTIFICATION_ID, builder.build())
             }
-        }
+            true
+        }.getOrDefault(false)
     }
 
     companion object {

@@ -26,14 +26,18 @@ class GenerateRecurringTransactionsWorker @AssistedInject constructor(
         processRecurringRulesUseCase()
 
         val notificationsEnabled = userPreferencesRepository.observeNotificationsEnabled().first()
-        if (notificationsEnabled) {
-            val pendingCount = recurrenceOccurrenceDao.getPendingOccurrences().size
-            val lastNotifiedCount = userPreferencesRepository.getLastNotifiedPendingCount()
-            if (pendingCount > 0 && pendingCount != lastNotifiedCount) {
-                notificationHelper.showPendingRecurrencesNotification(pendingCount)
-                userPreferencesRepository.setLastNotifiedPendingCount(pendingCount)
-            } else if (pendingCount == 0 && lastNotifiedCount != 0) {
-                userPreferencesRepository.setLastNotifiedPendingCount(0)
+        val duePending = recurrenceOccurrenceDao.getPendingOccurrences()
+        val currentFingerprint = duePending.map { it.id }.sorted().joinToString(",")
+        val lastNotifiedFingerprint = userPreferencesRepository.getLastNotifiedPendingFingerprint()
+
+        if (duePending.isEmpty()) {
+            if (lastNotifiedFingerprint.isNotEmpty()) {
+                userPreferencesRepository.setLastNotifiedPendingFingerprint("")
+            }
+        } else if (notificationsEnabled && currentFingerprint != lastNotifiedFingerprint) {
+            val shown = notificationHelper.showPendingRecurrencesNotification(duePending.size)
+            if (shown) {
+                userPreferencesRepository.setLastNotifiedPendingFingerprint(currentFingerprint)
             }
         }
 

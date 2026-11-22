@@ -9,6 +9,7 @@ import com.familyexpenses.app.domain.model.AddExpenseRequest
 import com.familyexpenses.app.domain.model.AddIncomeRequest
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 class ManagePendingOccurrencesUseCase @Inject constructor(
     private val transactionRunner: TransactionRunner,
@@ -17,8 +18,12 @@ class ManagePendingOccurrencesUseCase @Inject constructor(
     private val addIncomeUseCase: AddIncomeUseCase,
 ) {
 
-    fun observePendingOccurrences(): Flow<List<RecurrenceOccurrenceEntity>> {
-        return occurrenceDao.observePendingOccurrences()
+    fun observePendingOccurrences(now: Long = System.currentTimeMillis()): Flow<List<RecurrenceOccurrenceEntity>> {
+        return occurrenceDao.observePendingOccurrences().map { list ->
+            list.filter { occurrence ->
+                occurrence.reviewAt == null || occurrence.reviewAt <= now
+            }
+        }
     }
 
     suspend fun confirmOccurrence(
@@ -79,7 +84,7 @@ class ManagePendingOccurrencesUseCase @Inject constructor(
                     ?: throw IllegalArgumentException("La ocurrencia $id no existe.")
 
                 if (occurrence.status != OccurrenceStatus.PENDING) {
-                    continue // Ignore already processed ones for idempotency
+                    continue
                 }
 
                 val transactionId = if (occurrence.type == TransactionType.EXPENSE) {
@@ -141,7 +146,7 @@ class ManagePendingOccurrencesUseCase @Inject constructor(
 
         occurrenceDao.upsert(
             occurrence.copy(
-                reviewAt = newReviewAt, // Updates reviewAt without altering scheduledAt or economic date
+                reviewAt = newReviewAt,
             ),
         )
     }

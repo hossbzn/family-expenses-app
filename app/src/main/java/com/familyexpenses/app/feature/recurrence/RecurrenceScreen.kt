@@ -138,6 +138,7 @@ fun RecurrenceRoute(
         onConfirmOccurrence = viewModel::confirmOccurrence,
         onConfirmAllPending = viewModel::confirmAllPendingOccurrences,
         onSkipOccurrence = viewModel::skipOccurrence,
+        onPostponeOccurrence = viewModel::postponeOccurrence,
     )
 }
 
@@ -171,11 +172,13 @@ fun RecurrenceScreen(
     onConfirmOccurrence: (String, Long?, Long?) -> Unit,
     onConfirmAllPending: () -> Unit,
     onSkipOccurrence: (String) -> Unit,
+    onPostponeOccurrence: (String, Long) -> Unit,
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     var isFormVisible by remember { mutableStateOf(false) }
     var selectedStatusFilter by remember { mutableStateOf(RecurrenceRuleStatus.ACTIVE) }
     var occurrenceToEdit by remember { mutableStateOf<RecurrenceOccurrenceEntity?>(null) }
+    var occurrenceToPostpone by remember { mutableStateOf<RecurrenceOccurrenceEntity?>(null) }
     var selectedRuleDetail by remember { mutableStateOf<RecurrenceRuleEntity?>(null) }
 
     Scaffold(
@@ -246,6 +249,7 @@ fun RecurrenceScreen(
                     privacyModeEnabled = uiState.privacyModeEnabled,
                     onConfirm = { id -> onConfirmOccurrence(id, null, null) },
                     onEditBeforeConfirm = { occurrenceToEdit = it },
+                    onPostpone = { occurrenceToPostpone = it },
                     onConfirmAll = onConfirmAllPending,
                     onSkip = onSkipOccurrence,
                 )
@@ -386,6 +390,18 @@ fun RecurrenceScreen(
         )
     }
 
+    // Diálogo de posponer ocurrencia
+    occurrenceToPostpone?.let { occurrence ->
+        PostponeOccurrenceDialog(
+            occurrence = occurrence,
+            onDismiss = { occurrenceToPostpone = null },
+            onPostpone = { id, newReviewAt ->
+                onPostponeOccurrence(id, newReviewAt)
+                occurrenceToPostpone = null
+            },
+        )
+    }
+
     // Diálogo de detalle de regla
     selectedRuleDetail?.let { rule ->
         RuleDetailDialog(
@@ -405,6 +421,7 @@ private fun PendingOccurrencesContent(
     privacyModeEnabled: Boolean,
     onConfirm: (String) -> Unit,
     onEditBeforeConfirm: (RecurrenceOccurrenceEntity) -> Unit,
+    onPostpone: (RecurrenceOccurrenceEntity) -> Unit,
     onConfirmAll: () -> Unit,
     onSkip: (String) -> Unit,
 ) {
@@ -510,6 +527,9 @@ private fun PendingOccurrencesContent(
                         ) {
                             TextButton(onClick = { onSkip(occurrence.id) }) {
                                 Text("Omitir", color = Color.Gray)
+                            }
+                            TextButton(onClick = { onPostpone(occurrence) }) {
+                                Text("Posponer", color = PetroleumBluePrimary)
                             }
                             TextButton(onClick = { onEditBeforeConfirm(occurrence) }) {
                                 Text("Revisar")
@@ -1080,6 +1100,50 @@ private fun Long.toDateText(): String = Instant.ofEpochMilli(this)
     .atZone(ZoneId.systemDefault())
     .toLocalDate()
     .format(DateTimeFormatter.ofPattern("d MMM yyyy", Locale("es", "ES")))
+
+@Composable
+private fun PostponeOccurrenceDialog(
+    occurrence: RecurrenceOccurrenceEntity,
+    onDismiss: () -> Unit,
+    onPostpone: (id: String, newReviewAt: Long) -> Unit,
+) {
+    val zoneId = ZoneId.systemDefault()
+    val today = LocalDate.now(zoneId)
+    val defaultPostponedDate = today.plusDays(7).format(DateTimeFormatter.ISO_LOCAL_DATE)
+    var dateInput by remember { mutableStateOf(defaultPostponedDate) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Posponer recordatorio") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(
+                    text = "Selecciona la nueva fecha para revisar este movimiento. La fecha económica programada (${occurrence.scheduledAt.toDateText()}) no se modificará.",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                DateField(
+                    label = "Fecha de nueva revisión",
+                    value = dateInput,
+                    onDateSelected = { dateInput = it },
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    val newReviewAt = dateInput.toEpochMillisAtStartOfDayOrNull() ?: System.currentTimeMillis()
+                    onPostpone(occurrence.id, newReviewAt)
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = PetroleumBluePrimary),
+            ) {
+                Text("Posponer")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancelar") }
+        },
+    )
+}
 
 private fun Long.toIsoDateString(zoneId: ZoneId = ZoneId.systemDefault()): String =
     Instant.ofEpochMilli(this).atZone(zoneId).toLocalDate().format(DateTimeFormatter.ISO_LOCAL_DATE)

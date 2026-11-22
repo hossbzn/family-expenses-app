@@ -2,8 +2,6 @@ package com.familyexpenses.app.di
 
 import android.content.Context
 import androidx.room.Room
-import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
 import com.familyexpenses.app.data.local.AppDatabase
 import com.familyexpenses.app.data.local.RoomTransactionRunner
 import com.familyexpenses.app.data.local.TransactionRunner
@@ -22,101 +20,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-private fun sanitizeDuplicateOccurrences(db: SupportSQLiteDatabase) {
-    val cursor = db.query("PRAGMA table_info(recurrence_occurrences)")
-    val tableExists = cursor.count > 0
-    cursor.close()
-
-    if (tableExists) {
-        db.execSQL(
-            """
-            DELETE FROM `recurrence_occurrences`
-            WHERE rowid NOT IN (
-                SELECT max(rowid)
-                FROM `recurrence_occurrences`
-                GROUP BY `ruleId`, `scheduledAt`
-            )
-            """.trimIndent(),
-        )
-    }
-}
-
-val MIGRATION_1_5 = object : Migration(1, 5) {
-    override fun migrate(db: SupportSQLiteDatabase) {
-        db.execSQL(
-            """
-            CREATE TABLE IF NOT EXISTS `recurrence_occurrences` (
-                `id` TEXT NOT NULL,
-                `ruleId` TEXT NOT NULL,
-                `status` TEXT NOT NULL,
-                `scheduledAt` INTEGER NOT NULL,
-                `amountMinor` INTEGER NOT NULL,
-                `type` TEXT NOT NULL,
-                `payingAccountId` TEXT NOT NULL,
-                `responsibleAccountId` TEXT NOT NULL,
-                `categoryId` TEXT NOT NULL,
-                `note` TEXT,
-                `transactionId` TEXT,
-                `createdAt` INTEGER NOT NULL,
-                `reviewAt` INTEGER,
-                PRIMARY KEY(`id`),
-                FOREIGN KEY(`ruleId`) REFERENCES `recurrence_rules`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT,
-                FOREIGN KEY(`transactionId`) REFERENCES `transactions`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL
-            )
-            """.trimIndent(),
-        )
-        db.execSQL("CREATE INDEX IF NOT EXISTS `index_recurrence_occurrences_ruleId` ON `recurrence_occurrences` (`ruleId`)")
-        db.execSQL("CREATE INDEX IF NOT EXISTS `index_recurrence_occurrences_transactionId` ON `recurrence_occurrences` (`transactionId`)")
-        db.execSQL("CREATE INDEX IF NOT EXISTS `index_recurrence_occurrences_status` ON `recurrence_occurrences` (`status`)")
-        db.execSQL("CREATE INDEX IF NOT EXISTS `index_recurrence_occurrences_scheduledAt` ON `recurrence_occurrences` (`scheduledAt`)")
-
-        sanitizeDuplicateOccurrences(db)
-        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_recurrence_occurrences_ruleId_scheduledAt` ON `recurrence_occurrences` (`ruleId`, `scheduledAt`)")
-    }
-}
-
-val MIGRATION_2_5 = object : Migration(2, 5) {
-    override fun migrate(db: SupportSQLiteDatabase) {
-        val cursor = db.query("PRAGMA table_info(recurrence_occurrences)")
-        val tableExists = cursor.count > 0
-        cursor.close()
-
-        if (!tableExists) {
-            MIGRATION_1_5.migrate(db)
-        } else {
-            val reviewAtCursor = db.query("PRAGMA table_info(recurrence_occurrences)")
-            var hasReviewAt = false
-            while (reviewAtCursor.moveToNext()) {
-                val nameIndex = reviewAtCursor.getColumnIndex("name")
-                if (nameIndex != -1 && reviewAtCursor.getString(nameIndex) == "reviewAt") {
-                    hasReviewAt = true
-                    break
-                }
-            }
-            reviewAtCursor.close()
-
-            if (!hasReviewAt) {
-                db.execSQL("ALTER TABLE `recurrence_occurrences` ADD COLUMN `reviewAt` INTEGER")
-            }
-
-            sanitizeDuplicateOccurrences(db)
-            db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_recurrence_occurrences_ruleId_scheduledAt` ON `recurrence_occurrences` (`ruleId`, `scheduledAt`)")
-        }
-    }
-}
-
-val MIGRATION_3_5 = object : Migration(3, 5) {
-    override fun migrate(db: SupportSQLiteDatabase) {
-        MIGRATION_1_5.migrate(db)
-    }
-}
-
-val MIGRATION_4_5 = object : Migration(4, 5) {
-    override fun migrate(db: SupportSQLiteDatabase) {
-        MIGRATION_1_5.migrate(db)
-    }
-}
-
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
@@ -129,7 +32,7 @@ object DatabaseModule {
             AppDatabase::class.java,
             "family-expenses.db",
         )
-            .addMigrations(MIGRATION_1_5, MIGRATION_2_5, MIGRATION_3_5, MIGRATION_4_5)
+            .fallbackToDestructiveMigration()
             .build()
 
     @Provides

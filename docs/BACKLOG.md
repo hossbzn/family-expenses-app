@@ -1,6 +1,6 @@
 # BACKLOG — Family Expenses V6.0
 
-**Estado:** diseño aprobado, Sprint S1 completado con éxito. Leyenda: TODO | IN_PROGRESS | REVIEW | DONE | BLOCKED. Fuente: [V6_SPEC.md](V6_SPEC.md) y [sdd.md](sdd.md). Los DONE del MVP anterior están archivados en [archive/MVP_LEGACY.md](archive/MVP_LEGACY.md) y no indican cumplimiento de V6.
+**Estado:** V6, Recurrentes V6.1, Sistema Visual y Estabilización Senior COMPLETADOS (113 pruebas unitarias e integración en verde, `lintDebug` sin errores y `assembleDebug` correcto). Leyenda: TODO | IN_PROGRESS | REVIEW | DONE | BLOCKED. Fuente: [V6_SPEC.md](V6_SPEC.md), [sdd.md](sdd.md) y [RECURRENTES_V6_1.md](RECURRENTES_V6_1.md).
 
 ## P0 — Modelo económico, persistencia limpia y registro fundamental
 
@@ -323,4 +323,4 @@
 
 
 ## Criterio de cierre V6
-Todas las funcionalidades V6 (Sprints S1–S5) están implementadas, documentadas y verificadas con 111 pruebas unitarias/de integración, `assembleDebug` y QA visual/interactiva en emulador Android (412 dp y 360 dp).
+Todas las funcionalidades V6, Recurrentes V6.1, Sistema Visual Global, Modo de Privacidad y Estabilización Senior están implementadas, documentadas y verificadas con 113 pruebas unitarias/de integración en verde (`./gradlew testDebugUnitTest`), Android Lint sin errores (`./gradlew lintDebug`), compilación APK correcta (`./gradlew assembleDebug`) y QA visual/interactiva en emulador Android.

@@ -1,6 +1,6 @@
 # SPRINT — Plan de Desarrollo Family Expenses V6
 
-**Estado actual:** **Family Expenses V6 COMPLETADO (Sprints S1–S4 DONE)** — 97 pruebas unitarias en verde, `assembleDebug` correcto y QA visual/interactiva verificada en emulador (`emulator-5554`).
+**Estado actual:** **Family Expenses V6 COMPLETADO (Sprints S1–S5 y Estabilización Senior DONE)** — 113 pruebas unitarias en verde (`./gradlew testDebugUnitTest`), `./gradlew lintDebug` correcto, `./gradlew assembleDebug` correcto y QA visual/interactiva verificada en emulador.
 **Fuente de verdad:** [V6_SPEC.md](V6_SPEC.md) → [sdd.md](sdd.md) → [BACKLOG.md](BACKLOG.md).
 
 ## Sprint V6-S1: Motor Contable y Persistencia Limpia V6 (ESTADO: DONE)

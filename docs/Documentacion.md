@@ -44,4 +44,4 @@ V6 guarda los datos localmente y funciona 100 % sin conexión. Desde **Ajustes �
 Las reglas recurrentes mensuales siguen activas bajo **Ajustes → Movimientos recurrentes** y se ejecutan en segundo plano mediante WorkManager respetando `payingAccountId` y `responsibleAccountId` independientes.
 
 ## Estado de verificación
-Todos los módulos de V6 están implementados y verificados con 97 pruebas automatizadas (contables, repositorios, casos de uso, ViewModels y backup/CSV) y compilación APK (`assembleDebug`). Queda pendiente únicamente la validación visual interactiva en dispositivo/emulador real (360 y 412 dp) y la medición en uso real del objetivo UX de registro <3 segundos.
+Todos los módulos de V6, Recurrentes V6.1, Sistema Visual Global, Modo de Privacidad y Estabilización Senior están implementados y verificados con 113 pruebas unitarias e integración en verde (`./gradlew testDebugUnitTest`), Android Lint sin errores (`./gradlew lintDebug`), compilación APK correcta (`./gradlew assembleDebug`) y QA visual/interactiva en emulador Android (412 y 360 dp).

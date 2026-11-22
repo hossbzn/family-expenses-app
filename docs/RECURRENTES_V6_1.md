@@ -1,6 +1,6 @@
 # Family Expenses — Recurrentes V6.1
-**Estado:** especificación funcional validada, **sin implementar**. Aprobada en conversación de diseño el 21/11/2026.
-**Alcance:** evolución del módulo de ingresos/gastos recurrentes, compatible con [V6_SPEC.md](V6_SPEC.md). Las reglas económicas de V6 prevalecen. Ningún punto de este documento implica que el código actual lo cumpla.
+**Estado:** especificación funcional e implementación técnica completada y verificada. Aprobada el 21/11/2026.
+**Alcance:** evolución del módulo de ingresos/gastos recurrentes, totalmente compatible con [V6_SPEC.md](V6_SPEC.md). Las reglas económicas de V6 prevalecen.
 
 ## 1. Principios
 - La regla recurrente es una *plantilla de programación*; cada ejecución programada es una entidad/ocurrencia independiente.

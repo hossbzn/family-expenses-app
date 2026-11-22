@@ -149,6 +149,7 @@ class HomeViewModelTest {
             override fun observeOccurrencesByRule(ruleId: String): Flow<List<com.familyexpenses.app.data.local.entity.RecurrenceOccurrenceEntity>> = flowOf(emptyList())
             override fun observePendingOccurrences(): Flow<List<com.familyexpenses.app.data.local.entity.RecurrenceOccurrenceEntity>> = flowOf(emptyList())
             override suspend fun getPendingOccurrences(): List<com.familyexpenses.app.data.local.entity.RecurrenceOccurrenceEntity> = emptyList()
+            override suspend fun getAllOccurrences(): List<com.familyexpenses.app.data.local.entity.RecurrenceOccurrenceEntity> = emptyList()
             override suspend fun updateStatus(id: String, status: com.familyexpenses.app.core.model.OccurrenceStatus, transactionId: String?) {}
             override suspend fun hasOccurrenceForDate(ruleId: String, scheduledAt: Long): Boolean = false
         }

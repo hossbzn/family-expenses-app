@@ -171,5 +171,159 @@
 - [x] Botón "Confirmar todas" en la bandeja de pendientes con ejecución en lote e idempotente.
 
 
+## P1 — Sistema Visual Global, Rediseño de Inicio y Modo de Privacidad (TODO)
+
+### 1. Tokens del Sistema Visual
+- **Fondo y Superficies:** Background `#F8F9FA` (Blanco roto neutro), Surface `#FFFFFF` (Blanco puro para tarjetas, hojas y campos).
+- **Color Principal:** Primary `#1A3644` (Azul petróleo principal) para botones de acción, indicadores de pestañas, bordes de selección y elementos destacados.
+- **Colores Semánticos:**
+  - `SemanticGreen` (`#2E7D32` - Verde sobrio) para ingresos, saldos positivos y confirmaciones.
+  - `SemanticRed` (`#C62828` - Rojo carmesí apagado) para gastos, saldos negativos y acciones destructivas.
+  - **Invariante:** Nunca depender únicamente del color; combinar siempre con signos `+` / `−` e iconografía explicativa.
+- **Paridad de Cuentas:** Familia y Personal utilizan exactamente el mismo diseño, jerarquía y peso visual.
+- **Tipografía y Rejilla:** Escala MD3, rejilla base de `8 dp` (espaciados de 8 dp, 12 dp, 16 dp y 24 dp).
+- **Objetivos Táctiles:** Mínimo de `48 dp` $\times$ `48 dp` en todos los componentes interactivos (botones, chips, iconos, filas).
+- **Adaptabilidad:** Optimizado para Galaxy S25 base (360-412 dp), con scroll vertical antes que reducción de texto.
+- **Estados Explícitos:** Vacío, cargando, error, deshabilitado y confirmación.
+
+### 2. Matriz de Aplicación del Modo de Privacidad Global (`•••• €`)
+
+| Pantalla / Componente | Elementos Enmascarados (`•••• €`) | Elementos Visibles (No Enmascarados) |
+| :--- | :--- | :--- |
+| **Inicio** | Saldo Familia, Saldo Personal, Deuda en Adelantos, Importes de Últimos 3 Movimientos | Saludo, Nombres de cuenta, "Añadir ingreso", "Añadir gasto", Conceptos, Fechas, "Ver todos" |
+| **Movimientos y Filtros** | Importes numéricos de cada movimiento | Concepto, Fecha, Cuentas, Categoría, Iconos |
+| **Detalle de Movimiento** | Importe principal del movimiento | Cuentas pagadora/responsable, Categoría, Fecha, Nota |
+| **Análisis (Categorías y Evolución)** | Totales por categoría, porcentajes con cifra, etiquetas y valores en gráficos de barras | Nombres de categoría, ranking relativo, fechas/meses en ejes |
+| **Nuevo Gasto / Nuevo Ingreso** | Importe introducido en el campo (si se navega con privacidad activa) | Cuentas, Categorías, Teclas del teclado numérico, Fechas |
+| **Cuenta y Detalle** | Saldo disponible de la cuenta, Saldo inicial | Nombre de cuenta, Icono, Lista de acciones, Fechas |
+| **Adelantos e Historial** | Deuda neta ("Familia te debe •••• €"), Importes de adelantos/devoluciones | Nombres de cuenta, Dirección de deuda, Conceptos, Fechas |
+| **Transferencias / Devoluciones** | Saldo pendiente precargado, Importe a transferir | Cuentas origen/destino, Tipo de transferencia, Nota |
+| **Ajustes de Saldo** | Delta de importe y saldo resultante | Motivo del ajuste, Cuenta, Fecha |
+| **Categorías y Cuentas** | N/A (no maneja importes monetarios directos) | Nombres, Iconos, Pestañas, Favoritas |
+| **Datos, CSV y Backup JSON** | **NINGUNO (Cifras reales intactas en archivos y BD)** | Archivos CSV y JSON preservan datos numéricos reales |
+| **Módulo Recurrentes (Lista, Detalle, Formulario, Pendientes)** | Importe previsto de reglas, importes en tarjetas de pendientes, importes en revisión | Conceptos, Frecuencias, Próxima fecha, Estados (Activa/Pausada), Modos (Automático/Pendiente) |
+
+### 3. Inventario de Ajustes por Pantalla (`Pantalla actual -> Ajustes necesarios`)
+
+1. **Inicio:**
+   - *Actual:* Fondo monocromático blanco/negro/gris, Familia negra, Personal gris claro.
+   - *Ajustes:* Fondo blanco roto `#F8F9FA`, azul petróleo `#1A3644`, igual peso visual para Familia y Personal. Acciones rápidas "Añadir ingreso" (`+`) a la izquierda y "Añadir gasto" (`−`) a la derecha. Sección "Últimos movimientos" con 3 items más recientes, enlace "Ver todos" y estado vacío. Botón de ojo de privacidad en la cabecera.
+2. **Movimientos y filtros:**
+   - *Actual:* Lista monocromática de 2 líneas por día.
+   - *Ajustes:* Aplicar fondo blanco roto, azul petróleo en chips seleccionados y máscara `"•••• €"` en importes al activar privacidad.
+3. **Detalle y edición de movimiento:**
+   - *Actual:* Sheet/pantalla de edición monocromática.
+   - *Ajustes:* Azul petróleo en botones y campos, máscara `"•••• €"` en el importe si la privacidad está activa.
+4. **Análisis: categorías y evolución:**
+   - *Actual:* Gráficos monocromáticos con importes.
+   - *Ajustes:* Anillo y barras en azul petróleo. Al activar privacidad, ocultar importes en centro del anillo, ranking y etiquetas/escalas de ejes en el gráfico de barras.
+5. **Nuevo gasto:**
+   - *Actual:* Formulario con teclado numérico monocromático.
+   - *Ajustes:* Paleta azul petróleo, targets de 48 dp en teclado numérico, botón Guardar visible con teclado activo.
+6. **Nuevo ingreso:**
+   - *Actual:* Formulario de ingreso con lista manual.
+   - *Ajustes:* Paleta azul petróleo en selectores de categoría y cuenta.
+7. **Cuenta y detalle de cuenta:**
+   - *Actual:* Vista de cuenta con saldo real.
+   - *Ajustes:* Azul petróleo en tarjeta y botones. Enmascaramiento de saldo disponible e inicial si la privacidad está activa.
+8. **Adelantos e historial:**
+   - *Actual:* Tarjeta de deuda neta e historial.
+   - *Ajustes:* Azul petróleo en cabecera y chips. Enmascaramiento de la deuda neta e importes del historial con `"•••• €"`.
+9. **Transferencias y devoluciones:**
+   - *Actual:* Formulario de transferencia/devolución.
+   - *Ajustes:* Azul petróleo en selector de tipo. Saldo pendiente precargado enmascarado si la privacidad está activa.
+10. **Ajustes de saldo:**
+    - *Actual:* Formulario con motivo e importe.
+    - *Ajustes:* Paleta azul petróleo y campo de importe con soporte de privacidad.
+11. **Categorías:**
+    - *Actual:* Pestañas Gastos/Ingresos y reordenación.
+    - *Ajustes:* Azul petróleo en pestañas, botones de reordenación e icono de estrella de favoritas.
+12. **Ajustes de cuentas:**
+    - *Actual:* Formulario de edición de nombre e icono.
+    - *Ajustes:* Superficies en blanco puro sobre fondo blanco roto y azul petróleo en guardado.
+13. **Datos, copia de seguridad y restauración:**
+    - *Actual:* Exportación CSV y backup JSON.
+    - *Ajustes:* Paleta azul petróleo. Exportaciones e importaciones conservan cifras reales intactas.
+14. **Ajustes generales:**
+    - *Actual:* Hub de opciones de ajustes.
+    - *Ajustes:* Iconos de tarjetas en azul petróleo y fondo blanco roto.
+15. **Módulo de Recurrentes (Lista, Formulario, Detalle, Pendientes, Revisión):**
+    - *Actual:* Vistas MD3 monocromáticas.
+    - *Ajustes:* Aplicar paleta azul petróleo y máscara `"•••• €"` en importes previstos y pendientes cuando la privacidad esté activa.
+
+### 4. Componentes Compartidos a Documentar
+- `AccountCard`: Tarjeta de saldo real con paridad Familia/Personal e integración de `MoneyText`.
+- `MoneyText`: Componente centralizado para formateo de importes que evalúa el flag global de privacidad (`"•••• €"` o cifra real).
+- `MovementRow`: Fila compacta de 2 líneas (concepto + `MoneyText` en L1; categoría + cuentas + fecha en L2).
+- `PrimaryActionCard` / `QuickActionButton`: Botón de acción rápida con icono (`+` / `−`), alto mín. 48 dp y azul petróleo.
+- `EmptyState`: Vista para estados vacíos con ilustración/icono monocromático y texto explicativo.
+- `FilterChip`: Chip de selección con estado activo en azul petróleo (texto blanco) e inactivo en blanco roto con borde suave.
+- `MoneyInputField` y `NumericKeypad`: Teclado numérico táctil de 48 dp con coma, C y retroceso.
+- `ConfirmationDialog`: Diálogo modal MD3 para confirmaciones críticas.
+- `TopAppBar` y `NavigationBar`: Cabecera con título, Ojo de Privacidad (`contentDescription` dinámico) y Ajustes; barra inferior con indicador activo en azul petróleo.
+- `RecurrenceStatusBadge`: Chip compacto de estado de regla recurrente (Activa, Pausada, Archivada, Finalizada).
+
+---
+
+### Historias Propuestas (S5)
+
+### V6-14 — Rediseño visual de Inicio y sección de últimos 3 movimientos (TODO, P1)
+**Como usuario** quiero una pantalla de Inicio renovada con la nueva paleta de color y un vistazo rápido a mis últimos 3 movimientos.
+- [ ] Aplicar la paleta MD3: fondo blanco roto neutro (`#F8F9FA`), azul petróleo (`#1A3644`) y verde/rojo apagados.
+- [ ] Otorgar exactamente el mismo peso visual a las tarjetas de saldo real de Familia y Personal.
+- [ ] Botón "Añadir ingreso" (`+`) a la izquierda y "Añadir gasto" (`−`) a la derecha.
+- [ ] Sección "Últimos movimientos" en Inicio con los 3 movimientos más recientes (gastos, ingresos, transferencias, devoluciones, ajustes, recurrentes) en orden descendente por fecha y creación.
+- [ ] Cada fila muestra concepto/nota, fecha ("Hoy", "Ayer", "20 nov"), cuenta e importe formatado.
+- [ ] Botón "Ver todos" que navega a la pantalla completa de Movimientos.
+- [ ] Estado vacío explícito ("No hay movimientos registrados") cuando no existan operaciones.
+- [ ] Optimizado para Galaxy S25 (360-412 dp) con objetivos táctiles mín. 48 dp.
+- [ ] **Pruebas necesarias:**
+  - Unitarias (`HomeViewModelTest`): Emisión de exactamente los 3 últimos movimientos y gestión de estado vacío.
+  - UI Compose (`HomeScreenTest`): Maquetación, botones `+` / `−` y navegación al pulsar "Ver todos".
+
+### V6-15 — Modo de privacidad global para ocultar importes (TODO, P1)
+**Como usuario** quiero poder ocultar los importes numéricos en toda la app con un toque para consultar la información en público manteniendo la privacidad.
+- [ ] Botón de ojo con icono conmutables (`Visibility` / `VisibilityOff`) en la cabecera de Inicio junto a Ajustes.
+- [ ] Preferencia `privacyModeEnabled: Flow<Boolean>` en `UserPreferencesRepository` con persistencia en Preferences DataStore.
+- [ ] Reemplazar visualmente todos los importes por `"•••• €"` en Inicio, Movimientos, detalles, cuentas, Adelantos, Análisis y Recurrentes.
+- [ ] Ocultar escalas, etiquetas monetarias y valores numéricos en los gráficos de Análisis cuando la privacidad esté activa.
+- [ ] Mantener visibles conceptos, notas, fechas, nombres de cuenta, categorías y frecuencias.
+- [ ] `contentDescription` dinámico: "Ocultar importes" cuando están visibles y "Mostrar importes" cuando está la máscara.
+- [ ] No modificar datos contables de Room, exportaciones CSV ni backups JSON, ni presentarlo como cifrado/seguridad.
+- [ ] **Pruebas necesarias:**
+  - Unitarias (`UserPreferencesRepositoryTest`): Conmutación y persistencia de la preferencia.
+  - UI Compose (`HomeScreenTest` / `HistoryScreenTest` / `AnalysisScreenTest`): Verificación visual del reemplazo por `"•••• €"` según la preferencia.
+
+### V6-16 — Aplicación del sistema visual a Movimientos y Detalle de movimiento (TODO, P1)
+- [ ] Aplicar fondo blanco roto, azul petróleo en chips/cabecera y máscara `"•••• €"` en importes con privacidad activa.
+- [ ] **Pruebas necesarias:** Tests de UI Compose para renderizado de lista y detalle con la nueva paleta.
+
+### V6-17 — Aplicación del sistema visual a Análisis (TODO, P1)
+- [ ] Aplicar azul petróleo a anillo y gráficos de barras. Ocultar escalas y valores monetarios con privacidad activa.
+- [ ] **Pruebas necesarias:** Tests de UI Compose para gráficos con y sin modo de privacidad.
+
+### V6-18 — Aplicación del sistema visual a Nuevo Gasto y Nuevo Ingreso (TODO, P1)
+- [ ] Aplicar paleta azul petróleo a selectores, teclado numérico de 48 dp y visibilidad de Guardar con teclado.
+- [ ] **Pruebas necesarias:** Tests de UI Compose de teclados y formularios.
+
+### V6-19 — Aplicación del sistema visual a Cuentas, Adelantos, Transferencias y Ajustes (TODO, P1)
+- [ ] Aplicar paleta azul petróleo y máscara `"•••• €"` en saldos y deudas con privacidad activa.
+- [ ] **Pruebas necesarias:** Tests de UI Compose de cuentas y transferencias.
+
+### V6-20 — Aplicación del sistema visual a Categorías, Ajustes de Cuentas y Datos (TODO, P1)
+- [ ] Aplicar paleta azul petróleo en gestión de categorías, cuentas y copia/restauración JSON.
+- [ ] **Pruebas necesarias:** Tests de UI Compose en hub de ajustes.
+
+### V6-21 — Aplicación del sistema visual a todas las pantallas de Recurrentes V6.1 (TODO, P1)
+- [ ] Aplicar paleta azul petróleo y máscara `"•••• €"` en importes previstos/pendientes de recurrentes.
+- [ ] **Pruebas necesarias:** Tests de UI Compose en lista, formulario y bandeja de pendientes de recurrentes.
+
+---
+
+### Riesgos y Decisiones Todavía Abiertas
+1. **Riesgo de Deducción Proporcional en Gráficos:** Al ocultar etiquetas monetarias en los gráficos de barras de Análisis, las alturas relativas de las barras podrían permitir inferir proporciones. *Decisión:* ¿Se deben aplanar las barras a altura uniforme en modo privacidad o es suficiente con suprimir la escala monetaria?
+2. **Formato del Diálogo de Revisión Individual de Pendientes:** ¿Implementar como Modal Bottom Sheet vs Diálogo AlertDialog centrado?
+
+
 ## Criterio de cierre V6
-Todas las funcionalidades V6 (Sprints S1–S4) están implementadas, documentadas y verificadas con 97 pruebas unitarias/de integración, `assembleDebug` y QA visual/interactiva en emulador Android (412 dp y 360 dp).
+Todas las funcionalidades V6 (Sprints S1–S5) están implementadas, documentadas y verificadas con 111 pruebas unitarias/de integración, `assembleDebug` y QA visual/interactiva en emulador Android (412 dp y 360 dp).

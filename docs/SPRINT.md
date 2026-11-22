@@ -142,4 +142,36 @@
 - [ ] **REC-UI-05 — Configuración visual de Revisión individual (TODO, P1):** Pantalla/diálogo de edición de fecha e importe antes de confirmar.
 - [ ] **REC-UI-06 — Configuración visual de Revisión y confirmación múltiple (TODO, P1):** Selección en lote, pantalla de revisión previa con total y confirmación atómica.
 
+---
+
+## Sprint V6-S5: Sistema Visual Global, Rediseño de Inicio y Modo de Privacidad (ESTADO: TODO)
+**Meta:** Aplicación del nuevo sistema visual MD3 (blanco roto `#F8F9FA`, azul petróleo `#1A3644`, verde/rojo apagados, rejilla 8 dp, target 48 dp) a todas las pantallas de la app, rediseño de Inicio (paridad de cuentas, acciones "Añadir ingreso" / "Añadir gasto", 3 últimos movimientos) y Modo de Privacidad Global (`"•••• €"`).
+
+### Historias pendientes:
+- [ ] **V6-14 — Rediseño visual de Inicio y sección de últimos 3 movimientos (TODO, P1):**
+  - Paleta MD3 azul petróleo / blanco roto neutro. Paridad entre Familia y Personal.
+  - Botón "Añadir ingreso" (`+`) a la izquierda y "Añadir gasto" (`−`) a la derecha.
+  - Sección "Últimos movimientos" con los 3 movimientos más recientes, enlace "Ver todos" y estado vacío ("No hay movimientos registrados").
+  - Layout compacto Galaxy S25 (360-412 dp) con targets táctiles mín. 48 dp.
+  - Pruebas unitarias de `HomeViewModel` y tests de UI Compose.
+- [ ] **V6-15 — Modo de privacidad global para ocultar importes (TODO, P1):**
+  - Botón de ojo (`Visibility` / `VisibilityOff`) en cabecera de Inicio.
+  - Persistencia de `privacyModeEnabled` en Preferences DataStore.
+  - Máscara uniforme `"•••• €"` aplicada en Inicio, Movimientos, detalles, cuentas, Adelantos, Análisis y Recurrentes (sin ocultar conceptos, fechas, cuentas o categorías). Ocultación de escalas/valores monetarios en gráficos.
+  - `contentDescription` dinámico ("Ocultar importes" / "Mostrar importes").
+  - Pruebas unitarias de `UserPreferencesRepository` y tests de UI Compose.
+- [ ] **V6-16 — Aplicación del sistema visual a Movimientos y Detalle de movimiento (TODO, P1):**
+  - Paleta azul petróleo, blanco roto y máscara `"•••• €"` en importes con privacidad activa.
+- [ ] **V6-17 — Aplicación del sistema visual a Análisis: categorías y evolución (TODO, P1):**
+  - Paleta azul petróleo y supresión de valores monetarios en gráfico de barras y anillo con privacidad activa.
+- [ ] **V6-18 — Aplicación del sistema visual a Nuevo Gasto y Nuevo Ingreso (TODO, P1):**
+  - Paleta azul petróleo en selectores, teclado numérico de 48 dp y visibilidad de Guardar con teclado activo.
+- [ ] **V6-19 — Aplicación del sistema visual a Cuentas, Adelantos, Transferencias y Ajustes (TODO, P1):**
+  - Paleta azul petróleo y máscara `"•••• €"` en saldos y deudas.
+- [ ] **V6-20 — Aplicación del sistema visual a Categorías, Ajustes de Cuentas y Datos (TODO, P1):**
+  - Paleta azul petróleo en hub de ajustes, gestión de categorías y copia/restauración JSON.
+- [ ] **V6-21 — Aplicación del sistema visual a todas las pantallas de Recurrentes V6.1 (TODO, P1):**
+  - Paleta azul petróleo y máscara `"•••• €"` en importes previstos/pendientes de recurrentes.
+
+
 

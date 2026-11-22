@@ -11,9 +11,9 @@ import com.familyexpenses.app.data.local.dao.TransactionDao
 import com.familyexpenses.app.data.local.dao.TransferDao
 import com.familyexpenses.app.domain.model.BackupPreferencesSnapshot
 import com.familyexpenses.app.domain.model.PortableBackupSnapshot
-import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.flow.first
 
 @Singleton
 class RoomBackupRepository @Inject constructor(
@@ -35,7 +35,8 @@ class RoomBackupRepository @Inject constructor(
         val transfers = transferDao.getAllTransfers()
         val adjustments = balanceAdjustmentDao.getAllAdjustments()
         val rules = recurrenceRuleDao.observeRules().first()
-        val occurrences = recurrenceOccurrenceDao.getPendingOccurrences() // or all occurrences
+        val occurrences = recurrenceOccurrenceDao.getAllOccurrences()
+        val privacyModeEnabled = preferencesRepository.observePrivacyModeEnabled().first()
 
         val accountIcons = buildMap {
             accounts.forEach { account ->
@@ -60,6 +61,7 @@ class RoomBackupRepository @Inject constructor(
                 lastExpenseCategoryId = preferencesRepository.getLastExpenseCategoryId(),
                 lastIncomeAccountId = preferencesRepository.getLastIncomeAccountId(),
                 lastIncomeCategoryId = preferencesRepository.getLastIncomeCategoryId(),
+                privacyModeEnabled = privacyModeEnabled,
                 accountIcons = accountIcons,
             ),
         )
@@ -88,6 +90,8 @@ class RoomBackupRepository @Inject constructor(
         }
 
         database.invalidationTracker.refreshVersionsAsync()
+
+        preferencesRepository.setPrivacyModeEnabled(snapshot.preferences.privacyModeEnabled)
 
         snapshot.preferences.lastExpensePayingAccountId?.let {
             preferencesRepository.setLastExpensePayingAccountId(it)

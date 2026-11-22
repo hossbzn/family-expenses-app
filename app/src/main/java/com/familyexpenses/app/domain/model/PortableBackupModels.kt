@@ -14,6 +14,7 @@ data class BackupPreferencesSnapshot(
     val lastExpenseCategoryId: String? = null,
     val lastIncomeAccountId: String? = null,
     val lastIncomeCategoryId: String? = null,
+    val privacyModeEnabled: Boolean = false,
     val accountIcons: Map<String, String> = emptyMap(),
 )
 

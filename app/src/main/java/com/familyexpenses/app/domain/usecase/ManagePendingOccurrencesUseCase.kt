@@ -9,7 +9,6 @@ import com.familyexpenses.app.domain.model.AddExpenseRequest
 import com.familyexpenses.app.domain.model.AddIncomeRequest
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 
 class ManagePendingOccurrencesUseCase @Inject constructor(
     private val transactionRunner: TransactionRunner,
@@ -19,11 +18,7 @@ class ManagePendingOccurrencesUseCase @Inject constructor(
 ) {
 
     fun observePendingOccurrences(now: Long = System.currentTimeMillis()): Flow<List<RecurrenceOccurrenceEntity>> {
-        return occurrenceDao.observePendingOccurrences().map { list ->
-            list.filter { occurrence ->
-                occurrence.reviewAt == null || occurrence.reviewAt <= now
-            }
-        }
+        return occurrenceDao.observePendingOccurrences(now)
     }
 
     suspend fun confirmOccurrence(

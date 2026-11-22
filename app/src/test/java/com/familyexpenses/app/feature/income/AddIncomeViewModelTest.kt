@@ -17,6 +17,7 @@ import com.familyexpenses.app.domain.usecase.AddIncomeUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
@@ -118,11 +119,14 @@ class AddIncomeViewModelTest {
 
     private val fakePreferences = object : UserPreferencesRepository {
         var privacyMode = false
+        private var notificationsFlag = true
         var lastIncomeAccount: String? = null
         var lastIncomeCategory: String? = null
 
-        override fun observePrivacyModeEnabled(): kotlinx.coroutines.flow.Flow<Boolean> = kotlinx.coroutines.flow.MutableStateFlow(privacyMode)
+        override fun observePrivacyModeEnabled(): Flow<Boolean> = MutableStateFlow(privacyMode)
         override fun setPrivacyModeEnabled(enabled: Boolean) { privacyMode = enabled }
+        override fun observeNotificationsEnabled(): Flow<Boolean> = MutableStateFlow(notificationsFlag)
+        override fun setNotificationsEnabled(enabled: Boolean) { notificationsFlag = enabled }
         override fun getLastExpensePayingAccountId(): String? = null
         override fun setLastExpensePayingAccountId(accountId: String) {}
         override fun getLastExpenseResponsibleAccountId(): String? = null

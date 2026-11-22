@@ -18,6 +18,7 @@ import com.familyexpenses.app.domain.usecase.ManageCategoriesUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
@@ -120,12 +121,15 @@ class AddExpenseViewModelTest {
 
     private val fakePreferences = object : UserPreferencesRepository {
         var privacyMode = false
+        private var notificationsFlag = true
         var lastPaying: String? = null
         var lastResponsible: String? = null
         var lastCategory: String? = null
 
-        override fun observePrivacyModeEnabled(): kotlinx.coroutines.flow.Flow<Boolean> = kotlinx.coroutines.flow.MutableStateFlow(privacyMode)
+        override fun observePrivacyModeEnabled(): Flow<Boolean> = MutableStateFlow(privacyMode)
         override fun setPrivacyModeEnabled(enabled: Boolean) { privacyMode = enabled }
+        override fun observeNotificationsEnabled(): Flow<Boolean> = MutableStateFlow(notificationsFlag)
+        override fun setNotificationsEnabled(enabled: Boolean) { notificationsFlag = enabled }
         override fun getLastExpensePayingAccountId(): String? = lastPaying
         override fun setLastExpensePayingAccountId(accountId: String) { lastPaying = accountId }
         override fun getLastExpenseResponsibleAccountId(): String? = lastResponsible

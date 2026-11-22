@@ -139,8 +139,11 @@ class AccountDetailViewModelTest {
 
         val fakePreferences = object : UserPreferencesRepository {
             var privacyMode = false
+            var notifications = true
             override fun observePrivacyModeEnabled(): Flow<Boolean> = MutableStateFlow(privacyMode)
             override fun setPrivacyModeEnabled(enabled: Boolean) { privacyMode = enabled }
+            override fun observeNotificationsEnabled(): Flow<Boolean> = MutableStateFlow(notifications)
+            override fun setNotificationsEnabled(enabled: Boolean) { notifications = enabled }
             override fun getLastExpensePayingAccountId(): String? = null
             override fun setLastExpensePayingAccountId(accountId: String) {}
             override fun getLastExpenseResponsibleAccountId(): String? = null

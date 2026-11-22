@@ -323,4 +323,4 @@
 
 
 ## Criterio de cierre V6
-Todas las funcionalidades V6, Recurrentes V6.1, Sistema Visual Global, Modo de Privacidad y Estabilización Senior están implementadas, documentadas y verificadas con 116 pruebas unitarias/de integración en verde (`./gradlew testDebugUnitTest`), Android Lint sin errores (`./gradlew lintDebug`), compilación APK correcta (`./gradlew assembleDebug`) y QA visual/interactiva en emulador Android.
+Todas las funcionalidades V6, Recurrentes V6.1, Sistema Visual Global, Modo de Privacidad y Estabilización Senior se implementan, documentan y verifican con pruebas unitarias/de integración, Android Lint, compilación APK y QA visual/interactiva en emulador Android.

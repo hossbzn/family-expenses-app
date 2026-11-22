@@ -21,12 +21,12 @@ No sustituye a las especificaciones, al backlog ni al sprint. Sirve como histori
 | ID | Severidad | Estado | Área | Hallazgo | Evidencia o criterio de cierre |
 |---|---|---|---|---|---|
 | REV-001 | Bloqueante | RESOLVED | Tests | Todos los dobles de `UserPreferencesRepository` en los tests deben implementar los métodos nuevos y la suite de pruebas debe compilar y ejecutar al 100%. | Resuelto. Todos los dobles de test actualizados (`HomeViewModelTest`, `AddExpenseViewModelTest`, `AddIncomeViewModelTest`, etc.); 118 unit tests pasando en verde (`./gradlew testDebugUnitTest`). |
-| REV-002 | Bloqueante | RESOLVED | Room | Las migraciones 1→5, 2→5, 3→5 y 4→5 deben transformar exactamente los esquemas exportados 1.json, 2.json, 3.json y 4.json a v5 con `MigrationTestHelper`. | Resuelto. `AppDatabaseMigrationTest` ejecuta 4 pruebas reales de migración e inserción previa sobre esquemas v1, v2, v3 y v4. |
-| REV-003 | Alta | RESOLVED | Room | La creación directa del índice único `(ruleId, scheduledAt)` puede fallar si una instalación contiene duplicados. | Resuelto en commit `33b4d41`. `sanitizeDuplicateOccurrences` elimina duplicados reteniendo el último antes de `CREATE UNIQUE INDEX`. |
+| REV-002 | Bloqueante | OPEN | Room | Las migraciones 1→5, 2→5, 3→5 y 4→5 deben transformar exactamente los esquemas exportados 1.json, 2.json, 3.json y 4.json a v5 con `MigrationTestHelper`. | Pruebas de migración de Room utilizando esquemas exportados reales. O bien marcar explícitamente como ACCEPTED_RISK si se aprueba reinicio limpio. |
+| REV-003 | Alta | OPEN | Room | La creación directa del índice único `(ruleId, scheduledAt)` puede fallar si una instalación contiene duplicados. | Saneamiento `sanitizeDuplicateOccurrences` validado en base a REV-002. |
 | REV-004 | Bloqueante | RESOLVED | Backup | El repositorio recoge `recurrenceOccurrences` y `privacyModeEnabled`, pero `BackupRestoreUseCase` no los codifica ni decodifica en el JSON. La restauración los pierde silenciosamente. | Resuelto en commit `7dc96e0`. Prueba round-trip en `BackupRestoreUseCaseTest.kt` validando preservación de ocurrencias y privacidad. |
-| REV-005 | Alta | RESOLVED | Notificaciones | Implementar en Ajustes el interruptor de notificaciones y la solicitud de `POST_NOTIFICATIONS` en Android 13+. Evitar notificaciones repetitivas. | Resuelto. Implementado conmutador en Ajustes (`SettingsScreen`), `SettingsViewModel`, lanzador de permiso `POST_NOTIFICATIONS` y prevención de notificaciones repetidas si la cantidad no varía (`lastNotifiedPendingCount`). |
-| REV-006 | Alta | RESOLVED | Recurrentes | Implementar la acción visible «Posponer». Las ocurrencias pospuestas (`reviewAt > now`) no deben mostrar aviso en Inicio ni en la bandeja antes de `reviewAt`. | Resuelto. `RecurrenceOccurrenceDao.observePendingOccurrences(now)` y `getPendingOccurrences(now)` filtran por `(reviewAt IS NULL OR reviewAt <= :now)`. Acción "Posponer" agregada en UI. |
-| REV-007 | Alta | RESOLVED | Documentación | Corregir contradicciones en AGENTS, BACKLOG, SPRINT y manual. El código usa SharedPreferences (no DataStore). Eliminar afirmaciones sin evidencia. | Resuelto. Documentación sincronizada a SharedPreferences (vía `UserPreferencesRepositoryImpl`), 118 unit tests pasando y estados sin afirmaciones sin evidencia. |
+| REV-005 | Alta | IN_PROGRESS | Notificaciones | Implementar en Ajustes el interruptor de notificaciones y la solicitud de `POST_NOTIFICATIONS` en Android 13+. Evitar notificaciones repetitivas. | Fingerprint corregido. Falta coherencia inicial entre preferencia y permiso Android y desactivación por defecto si no hay permiso. |
+| REV-006 | Alta | IN_PROGRESS | Recurrentes | Implementar la acción visible «Posponer». Las ocurrencias pospuestas (`reviewAt > now`) no deben mostrar aviso en Inicio ni en la bandeja antes de `reviewAt`. | Filtrado centralizado correcto, pero el paso del tiempo no reactiva el Flow sin nueva consulta. Garantizar reaparición al llegar `reviewAt`. |
+| REV-007 | Alta | OPEN | Documentación | Corregir contradicciones en AGENTS, BACKLOG, SPRINT y manual. El código usa SharedPreferences (no DataStore). Eliminar afirmaciones sin evidencia. | Documentación alineada 100% con la realidad del código. Sin afirmar COMPLETADO si hay TODO. Sin cifras de tests ficticias. |
 | REV-008 | Media | RESOLVED | CI | La CI fallará si la suite de tests no compila o si lint encuentra errores. | Resuelto. `./gradlew testDebugUnitTest`, `lintDebug` y `assembleDebug` ejecutan 100% en verde. |
 
 ## Historial de iteraciones
@@ -91,6 +91,31 @@ Resultados reproducidos:
 - Base comparada: `main` en el momento de la revisión
 - Alcance: arranque, WorkManager, Room, recurrentes, backup, notificaciones, CI y documentación.
 - Decisión: **no fusionar todavía**.
+
+### Iteración 2026-11-22 (f) — Corrección de los últimos pendientes de la estabilización V6
+
+- Rama revisada: `fix/estabilizacion-senior-v6`
+- Base comparada: `main`
+- Alcance: Migraciones Room con schemas reales, coherencia de notificaciones, reactivación del flujo de pendientes por tiempo y limpieza documental estricta.
+- Decisión: **PENDIENTE DE REVISIÓN INDEPENDIENTE**
+
+Resultados reproducidos:
+
+| Comprobación | Resultado | Evidencia |
+|---|---|---|
+| `testDebugUnitTest` | | |
+| `lintDebug` | | |
+| `assembleDebug` | | |
+| Migraciones reales | | |
+| QA funcional en emulador | | |
+
+Cambios realizados:
+- **REV-002, REV-003:** 
+- **REV-005:** 
+- **REV-006:** 
+- **REV-007:** 
+
+---
 
 ### Iteración 2026-11-22 (e) — Revisión independiente del commit a127b9b
 

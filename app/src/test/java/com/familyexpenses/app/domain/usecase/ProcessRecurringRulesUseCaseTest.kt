@@ -226,12 +226,12 @@ private class FakeProcessOccurrenceDao : RecurrenceOccurrenceDao {
         return flowOf(occurrences.values.filter { it.ruleId == ruleId })
     }
 
-    override fun observePendingOccurrences(): Flow<List<RecurrenceOccurrenceEntity>> {
-        return flowOf(occurrences.values.filter { it.status == OccurrenceStatus.PENDING })
+    override fun observePendingOccurrences(now: Long): Flow<List<RecurrenceOccurrenceEntity>> {
+        return flowOf(occurrences.values.filter { it.status == OccurrenceStatus.PENDING && (it.reviewAt == null || it.reviewAt!! <= now) })
     }
 
-    override suspend fun getPendingOccurrences(): List<RecurrenceOccurrenceEntity> {
-        return occurrences.values.filter { it.status == OccurrenceStatus.PENDING }
+    override suspend fun getPendingOccurrences(now: Long): List<RecurrenceOccurrenceEntity> {
+        return occurrences.values.filter { it.status == OccurrenceStatus.PENDING && (it.reviewAt == null || it.reviewAt!! <= now) }
     }
 
     override suspend fun getAllOccurrences(): List<RecurrenceOccurrenceEntity> {

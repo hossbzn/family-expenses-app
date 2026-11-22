@@ -24,6 +24,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -171,6 +172,44 @@ class ManagePendingOccurrencesUseCaseTest {
         assertEquals(OccurrenceStatus.CONFIRMED, occurrenceDao.getOccurrenceById("occ-2")?.status)
         assertEquals(2, transactions.size)
     }
+
+    @Test
+    fun testPostponeOccurrenceUpdatesReviewAtWithoutChangingScheduledAtAndFiltersPendingBeforeReviewAt() = runTest {
+        val now = LocalDate.of(2026, 11, 22).atStartOfDay(zoneId).toInstant().toEpochMilli()
+        val scheduledAt = LocalDate.of(2026, 11, 20).atStartOfDay(zoneId).toInstant().toEpochMilli()
+        val newReviewAt = LocalDate.of(2026, 11, 29).atStartOfDay(zoneId).toInstant().toEpochMilli()
+
+        val occ = RecurrenceOccurrenceEntity(
+            id = "occ-postpone-1",
+            ruleId = "rule-1",
+            status = OccurrenceStatus.PENDING,
+            scheduledAt = scheduledAt,
+            amountMinor = 3000L,
+            type = TransactionType.EXPENSE,
+            payingAccountId = "acc-p",
+            responsibleAccountId = "acc-p",
+            categoryId = "cat-1",
+            note = "Posponer me",
+            transactionId = null,
+            createdAt = scheduledAt,
+        )
+        occurrenceDao.upsert(occ)
+
+        useCase.postponeOccurrence("occ-postpone-1", newReviewAt)
+
+        val updated = occurrenceDao.getOccurrenceById("occ-postpone-1")
+        assertNotNull(updated)
+        assertEquals(scheduledAt, updated?.scheduledAt) // scheduledAt economic date is preserved
+        assertEquals(newReviewAt, updated?.reviewAt) // reviewAt is updated
+
+        // Filtered out from pending before newReviewAt
+        val pendingListBeforeReview = occurrenceDao.getPendingOccurrences(now)
+        assertTrue(pendingListBeforeReview.none { it.id == "occ-postpone-1" })
+
+        // Included after reviewAt
+        val pendingListAfterReview = occurrenceDao.getPendingOccurrences(newReviewAt + 1)
+        assertTrue(pendingListAfterReview.any { it.id == "occ-postpone-1" })
+    }
 }
 
 private class FakePendingOccurrenceDao : RecurrenceOccurrenceDao {
@@ -190,12 +229,12 @@ private class FakePendingOccurrenceDao : RecurrenceOccurrenceDao {
         return flowOf(occurrences.values.filter { it.ruleId == ruleId })
     }
 
-    override fun observePendingOccurrences(): Flow<List<RecurrenceOccurrenceEntity>> {
-        return flowOf(occurrences.values.filter { it.status == OccurrenceStatus.PENDING })
+    override fun observePendingOccurrences(now: Long): Flow<List<RecurrenceOccurrenceEntity>> {
+        return flowOf(occurrences.values.filter { it.status == OccurrenceStatus.PENDING && (it.reviewAt == null || it.reviewAt!! <= now) })
     }
 
-    override suspend fun getPendingOccurrences(): List<RecurrenceOccurrenceEntity> {
-        return occurrences.values.filter { it.status == OccurrenceStatus.PENDING }
+    override suspend fun getPendingOccurrences(now: Long): List<RecurrenceOccurrenceEntity> {
+        return occurrences.values.filter { it.status == OccurrenceStatus.PENDING && (it.reviewAt == null || it.reviewAt!! <= now) }
     }
 
     override suspend fun getAllOccurrences(): List<RecurrenceOccurrenceEntity> {

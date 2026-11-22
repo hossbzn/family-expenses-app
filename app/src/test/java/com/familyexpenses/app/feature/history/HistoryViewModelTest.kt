@@ -165,6 +165,8 @@ class HistoryViewModelTest {
             override fun setPrivacyModeEnabled(enabled: Boolean) { privacyMode = enabled }
             override fun observeNotificationsEnabled(): Flow<Boolean> = MutableStateFlow(notifications)
             override fun setNotificationsEnabled(enabled: Boolean) { notifications = enabled }
+            override fun getLastNotifiedPendingCount(): Int = 0
+            override fun setLastNotifiedPendingCount(count: Int) {}
             override fun getLastExpensePayingAccountId(): String? = null
             override fun setLastExpensePayingAccountId(accountId: String) {}
             override fun getLastExpenseResponsibleAccountId(): String? = null
@@ -250,6 +252,8 @@ class HistoryViewModelTest {
             override fun setPrivacyModeEnabled(enabled: Boolean) { privacyMode = enabled }
             override fun observeNotificationsEnabled(): Flow<Boolean> = MutableStateFlow(notifications)
             override fun setNotificationsEnabled(enabled: Boolean) { notifications = enabled }
+            override fun getLastNotifiedPendingCount(): Int = 0
+            override fun setLastNotifiedPendingCount(count: Int) {}
             override fun getLastExpensePayingAccountId(): String? = null
             override fun setLastExpensePayingAccountId(accountId: String) {}
             override fun getLastExpenseResponsibleAccountId(): String? = null

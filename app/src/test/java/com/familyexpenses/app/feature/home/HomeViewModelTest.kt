@@ -147,8 +147,8 @@ class HomeViewModelTest {
             override suspend fun upsertAll(occurrences: List<com.familyexpenses.app.data.local.entity.RecurrenceOccurrenceEntity>) {}
             override suspend fun getOccurrenceById(id: String): com.familyexpenses.app.data.local.entity.RecurrenceOccurrenceEntity? = null
             override fun observeOccurrencesByRule(ruleId: String): Flow<List<com.familyexpenses.app.data.local.entity.RecurrenceOccurrenceEntity>> = flowOf(emptyList())
-            override fun observePendingOccurrences(): Flow<List<com.familyexpenses.app.data.local.entity.RecurrenceOccurrenceEntity>> = flowOf(emptyList())
-            override suspend fun getPendingOccurrences(): List<com.familyexpenses.app.data.local.entity.RecurrenceOccurrenceEntity> = emptyList()
+            override fun observePendingOccurrences(now: Long): Flow<List<com.familyexpenses.app.data.local.entity.RecurrenceOccurrenceEntity>> = flowOf(emptyList())
+            override suspend fun getPendingOccurrences(now: Long): List<com.familyexpenses.app.data.local.entity.RecurrenceOccurrenceEntity> = emptyList()
             override suspend fun getAllOccurrences(): List<com.familyexpenses.app.data.local.entity.RecurrenceOccurrenceEntity> = emptyList()
             override suspend fun updateStatus(id: String, status: com.familyexpenses.app.core.model.OccurrenceStatus, transactionId: String?) {}
             override suspend fun hasOccurrenceForDate(ruleId: String, scheduledAt: Long): Boolean = false
@@ -169,6 +169,10 @@ class HomeViewModelTest {
                 privacyMode = enabled
                 privacyFlow.value = enabled
             }
+            override fun observeNotificationsEnabled(): Flow<Boolean> = MutableStateFlow(true)
+            override fun setNotificationsEnabled(enabled: Boolean) {}
+            override fun getLastNotifiedPendingCount(): Int = 0
+            override fun setLastNotifiedPendingCount(count: Int) {}
             override fun getLastExpensePayingAccountId(): String? = null
             override fun setLastExpensePayingAccountId(accountId: String) {}
             override fun getLastExpenseResponsibleAccountId(): String? = null

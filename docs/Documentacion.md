@@ -1,9 +1,15 @@
 # Manual — Family Expenses V6
 
-**Este documento describe el comportamiento implementado en Family Expenses V6.** Para conocer el funcionamiento del MVP previo consulte [archive/MVP_LEGACY.md](archive/MVP_LEGACY.md). Fuente de verdad: [V6_SPEC.md](V6_SPEC.md).
+**Este documento describe el comportamiento objetivo e implementado en Family Expenses V6.** Para conocer el funcionamiento del MVP previo consulte [archive/MVP_LEGACY.md](archive/MVP_LEGACY.md). Fuente de verdad: [V6_SPEC.md](V6_SPEC.md).
+
+## Sistema visual y diseño
+La aplicación aplica un sistema visual limpio en Material Design 3 con fondo neutro blanco roto (`#F8F9FA`), superficies en blanco puro (`#FFFFFF`) y **azul petróleo** (`#1A3644`) como color principal. Se utiliza verde apagado (`#2E7D32`) y rojo apagado (`#C62828`) de forma secundaria y semántica para ingresos y gastos. Todos los componentes interactivos respetan una rejilla base de 8 dp y un tamaño táctil mínimo de 48 dp $\times$ 48 dp. La interfaz está optimizada para pantallas compactas como Galaxy S25 base (360-412 dp), permitiendo scroll vertical y ofreciendo compatibilidad con texto ampliado y alto contraste.
 
 ## Inicio
-Al abrir verás las dos cuentas: **Familia** en negro y **Personal** en gris claro. Cada una muestra dinero real disponible, no gasto mensual imputado. Pulsando una cuenta abres su detalle. Hay botones grandes **Nuevo gasto** y **Nuevo ingreso**. Debajo, **Adelantos** indica quién debe a quién o «Sin adelantos pendientes». Siempre visible. Menú inferior Inicio / Movimientos / Análisis. Ajustes arriba.
+Al abrir verás las dos cuentas: **Familia** y **Personal** con el mismo peso y jerarquía visual. Cada una muestra dinero real disponible, no gasto mensual imputado. Pulsando una cuenta abres su detalle. Debajo encuentras los botones de acciones rápidas: **Añadir ingreso** (con icono `+`) a la izquierda y **Añadir gasto** (con icono `−`) a la derecha (colocado a la derecha por mayor frecuencia de uso). Debajo, **Adelantos** indica quién debe a quién o «Sin adelantos pendientes» (siempre visible). A continuación, la sección **Últimos movimientos** muestra exactamente los tres movimientos más recientes registrados (gastos, ingresos, transferencias, devoluciones, ajustes y recurrentes) con concepto, fecha, cuenta e importe, junto con el enlace «Ver todos» para abrir la lista completa. En la cabecera superior dispones del botón de **Modo de Privacidad** (icono de ojo) y el botón de **Ajustes** (⚙️). Menú inferior: Inicio / Movimientos / Análisis.
+
+## Modo de Privacidad Global
+Pulsando el botón del ojo en la cabecera de Inicio activas o desactivas el modo de privacidad global. Al activarlo, todos los importes numéricos visibles en la app (Inicio, Movimientos, detalles, cuentas, Adelantos, Análisis, Recurrentes y diálogos) se reemplazan por una máscara uniforme `•••• €`. En la pantalla de Análisis, se ocultan las cifras, escalas y etiquetas monetarias de los gráficos de barras y anillos. Los conceptos, fechas, cuentas, categorías y frecuencias permanecen siempre visibles. Tu preferencia se guarda localmente en el dispositivo y se mantiene tras reiniciar la app. No altera los datos reales de la contabilidad, las exportaciones CSV ni las copias de seguridad JSON, y no se presenta como una función de cifrado o seguridad con PIN.
 
 ## Registrar un gasto
 1. Pulsa Nuevo gasto, introduce el importe con teclado numérico (coma, C y retroceso).

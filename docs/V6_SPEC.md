@@ -5,7 +5,16 @@ Alcance de este documento: requisitos para la próxima implementación, NO funci
 
 ## 1. Producto y principios
 App Android offline-first de gastos familiares, inicialmente de un solo dispositivo. Dos cuentas activas (Familia y Personal); modelo ampliable en el futuro. Registro rápido de gastos, contabilidad de caja real, gastos atribuidos a cuenta responsable y adelantos bidireccionales. Moneda EUR e importes en céntimos (enteros).
-Diseño Material Design 3 monocromático (blanco, negro, grises), controles accesibles y navegación inferior Inicio / Movimientos / Análisis. Ajustes desde Inicio. Sin PIN adicional.
+
+### Sistema visual global
+- **Fondo y superficies:** Fondo neutro blanco roto (`#F8F9FA`) y superficies en blanco puro (`#FFFFFF`).
+- **Color principal:** Azul petróleo (`#1A3644`) para botones principales, indicadores de pestaña, selecciones y elementos destacados.
+- **Colores semánticos:** Verde apagado (`#2E7D32`) para ingresos/positivos y rojo apagado (`#C62828`) para gastos/negativos, utilizados únicamente cuando aportan significado. No depender exclusivamente del color para transmitir información (combinar con signos `+` / `−` e iconos).
+- **Paridad de cuentas:** Familia y Personal se representan con la misma jerarquía y peso visual.
+- **Diseño e iconografía:** Iconografía y tipografía MD3 consistente, cuadrícula base de 8 dp, objetivos táctiles mínimos de 48 dp $\times$ 48 dp en todos los componentes interactivos.
+- **Adaptabilidad:** Diseño compacto optimizado para Galaxy S25 base (360 dp - 412 dp de ancho), permitiendo scroll vertical antes que reducir excesivamente el tamaño de fuente. Compatible con tamaño de fuente aumentado y contraste accesible.
+- **Estados explícitos:** Definición de estados vacío, cargando, error, deshabilitado y confirmación en todos los componentes.
+- Navegación inferior: Inicio / Movimientos / Análisis. Ajustes y Modo de Privacidad en la cabecera de Inicio. Sin PIN adicional.
 
 ## 2. Modelo económico — INVARIANTES
 - Cada gasto tiene *cuenta responsable* y *cuenta pagadora* por separado. El gasto se contabiliza UNA vez para análisis en la cuenta responsable; el dinero sale ÚNICAMENTE de la pagadora.
@@ -21,11 +30,19 @@ Ejemplo: Personal paga 80 € de Familia: saldo Personal -80 €, saldo Familia 
 No interpretar transferencias como devolución automáticamente.
 
 ## 3. Inicio
-- Tarjeta Familia negra y Personal gris claro; ambas muestran saldos de caja reales individualmente, sin saldo global.
-- Botones grandes «Nuevo gasto» (principal negro) y «Nuevo ingreso» (secundario).
+- Cabecera con saludo/subtítulo ("Buenos días / Resumen familiar"), botón de ojo para el Modo de Privacidad y botón de Ajustes (⚙️).
+- Tarjetas de saldo real de Familia y Personal con el mismo peso y jerarquía visual. Ambas muestran saldos de caja reales individualmente, sin saldo agregado global.
+- Botones grandes de acciones rápidas: «Añadir ingreso» a la izquierda con icono `+`, y «Añadir gasto» a la derecha con icono `−` (Gasto colocado a la derecha por ser la acción más frecuente).
 - Adelantos siempre visibles: «Familia te debe X», «Personal debe a Familia X» o «Sin adelantos pendientes», clic para detalle.
-- Sin listado de recientes, gráficos ni totales del mes.
-- Ajustes en cabecera; barra inferior con solo Inicio, Movimientos, Análisis.
+- Sección «Últimos movimientos»:
+  - Muestra exactamente los **tres últimos movimientos** registrados en orden descendente por fecha (`occurredAt`) y orden de creación (`createdAt`).
+  - Cada fila muestra concepto/nota, fecha (ej. "Hoy", "Ayer", "20 nov"), cuenta (ej. "Familia", "Personal") e importe formatado.
+  - Incluye gastos, ingresos, transferencias, devoluciones, ajustes de saldo y ejecuciones de recurrentes.
+  - Botón «Ver todos» a la derecha del título que navega a la pantalla de Movimientos.
+  - Muestra un estado vacío claro ("No hay movimientos registrados") cuando no existan operaciones.
+  - Sin resumen mensual ni gráficos acumulados en Inicio.
+- Diseño compacto y desplazable optimizado para un dispositivo base Galaxy S25 (360-412 dp).
+- Cabecera con Ajustes y Modo de Privacidad; barra inferior con Inicio, Movimientos y Análisis.
 
 ## 4. Nuevo gasto / ingreso
 - Importe destacado; teclado numérico propio con coma decimal, 2 decimales, C y retroceso; importe inicia en 0.
@@ -71,10 +88,20 @@ No interpretar transferencias como devolución automáticamente.
 - Datos: exportar CSV; backup portable completo con cuentas, categorías, operaciones, preferencias, adelantos y devoluciones; validar antes de restaurar, pedir confirmación y reemplazar de forma completa.
 - Datos locales, offline, sin login, sin nube, sin sincronización ni PIN en V6. Advertir de riesgo al perder almacenamiento local, recomendar copia externa. Identificadores estables y diseño preparado para sincronización futura.
 
-## 10. Accesibilidad y validación
-- Priorizar 360 y 412 dp de ancho (Android), objetivos táctiles aproximados >=48 dp, contraste suficiente, texto ampliado, áreas seguras, botones Guardar accesibles, sin scroll horizontal.
-- Verificar teclado, barras de navegación, pantallas compactas, navegación hacia atrás, persistencia offline.
-- Tests de caja vs responsabilidad, adelantos bidireccionales, devoluciones parciales, modificaciones/borrados, respaldos y restauración.
+## 10. Modo de privacidad global (Ocultar importes)
+- **Acceso:** Botón de ojo (`Visibility` / `VisibilityOff`) en la cabecera de Inicio junto al icono de Ajustes (⚙️) que controla una preferencia global persistente.
+- **Alcance global:** Permite mostrar u ocultar de forma global todos los importes numéricos visibles en todas las pantallas de la aplicación: Inicio, Movimientos, detalles, cuentas, Adelantos, Análisis, Recurrentes y cualquier diálogo con cantidades.
+- **Máscara uniforme:** Al activar la privacidad, aplica una máscara uniforme de longitud fija como `"•••• €"`.
+- **En Análisis y Gráficos:** Los gráficos de evolución y anillos de categorías deben ocultar valores, escalas numéricas y etiquetas monetarias en ejes cuando el modo esté activo, evitando que permitan deducir cantidades.
+- **Exclusiones de la máscara:** NO oculta conceptos, notas, fechas, nombres de cuenta, categorías ni frecuencias de ejecución.
+- **Persistencia local:** La preferencia se guarda localmente en `UserPreferencesRepository` (Preferences DataStore) y se mantiene tras cerrar y reabrir la app.
+- **Transparencia y límites:** NO modifica los datos contables reales, el formato de exportación CSV ni los backups JSON. Tampoco se promociona ni presenta como una función de seguridad, cifrado o protección con PIN.
+
+## 11. Accesibilidad y validación
+- Priorizar 360 y 412 dp de ancho (Android, optimizado para Galaxy S25 base), objetivos táctiles mínimos de 48 dp $\times$ 48 dp, contraste suficiente en azul petróleo y fondo blanco roto, texto ampliado, áreas seguras y sin scroll horizontal.
+- Accesibilidad en Modo de Privacidad: `contentDescription` dinámico ("Ocultar importes" cuando los valores están visibles; "Mostrar importes" cuando la máscara está activa). No depender exclusivamente del color para transmitir información semántica (combinar color con signos `+` / `−` e iconos).
+- Verificar teclado, barras de navegación, pantallas compactas, navegación hacia atrás y persistencia offline.
+- Tests de caja vs responsabilidad, adelantos bidireccionales, devoluciones parciales, modificaciones/borrados, respaldos, modo de privacidad global y restauración.
 - La métrica aspiracional «registro de gasto <3 segundos» es objetivo UX, a medir en prueba real, no una garantía.
 
 ## 11. Alcance existente y migración

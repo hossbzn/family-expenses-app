@@ -22,10 +22,10 @@ interface RecurrenceOccurrenceDao {
     @Query("SELECT * FROM recurrence_occurrences WHERE ruleId = :ruleId ORDER BY scheduledAt DESC")
     fun observeOccurrencesByRule(ruleId: String): Flow<List<RecurrenceOccurrenceEntity>>
 
-    @Query("SELECT * FROM recurrence_occurrences WHERE status = 'PENDING' ORDER BY scheduledAt ASC")
+    @Query("SELECT * FROM recurrence_occurrences WHERE status = 'PENDING' ORDER BY COALESCE(reviewAt, scheduledAt) ASC")
     fun observePendingOccurrences(): Flow<List<RecurrenceOccurrenceEntity>>
 
-    @Query("SELECT * FROM recurrence_occurrences WHERE status = 'PENDING' ORDER BY scheduledAt ASC")
+    @Query("SELECT * FROM recurrence_occurrences WHERE status = 'PENDING' ORDER BY COALESCE(reviewAt, scheduledAt) ASC")
     suspend fun getPendingOccurrences(): List<RecurrenceOccurrenceEntity>
 
     @Query("SELECT * FROM recurrence_occurrences ORDER BY scheduledAt ASC")

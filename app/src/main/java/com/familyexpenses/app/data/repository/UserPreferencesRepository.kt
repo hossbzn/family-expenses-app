@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.asStateFlow
 interface UserPreferencesRepository {
     fun observePrivacyModeEnabled(): Flow<Boolean>
     fun setPrivacyModeEnabled(enabled: Boolean)
+    fun observeNotificationsEnabled(): Flow<Boolean>
+    fun setNotificationsEnabled(enabled: Boolean)
     fun getLastExpensePayingAccountId(): String?
     fun setLastExpensePayingAccountId(accountId: String)
     fun getLastExpenseResponsibleAccountId(): String?
@@ -36,11 +38,22 @@ class UserPreferencesRepositoryImpl @Inject constructor(
         prefs.getBoolean(KEY_PRIVACY_MODE_ENABLED, false),
     )
 
+    private val notificationsState = MutableStateFlow(
+        prefs.getBoolean(KEY_NOTIFICATIONS_ENABLED, true),
+    )
+
     override fun observePrivacyModeEnabled(): Flow<Boolean> = privacyModeState.asStateFlow()
 
     override fun setPrivacyModeEnabled(enabled: Boolean) {
         prefs.edit { putBoolean(KEY_PRIVACY_MODE_ENABLED, enabled) }
         privacyModeState.value = enabled
+    }
+
+    override fun observeNotificationsEnabled(): Flow<Boolean> = notificationsState.asStateFlow()
+
+    override fun setNotificationsEnabled(enabled: Boolean) {
+        prefs.edit { putBoolean(KEY_NOTIFICATIONS_ENABLED, enabled) }
+        notificationsState.value = enabled
     }
 
     override fun getLastExpensePayingAccountId(): String? = prefs.getString(KEY_LAST_EXPENSE_PAYING_ACCOUNT_ID, null)
@@ -82,6 +95,7 @@ class UserPreferencesRepositoryImpl @Inject constructor(
     companion object {
         private const val PREFS_NAME = "family_expenses_user_prefs"
         private const val KEY_PRIVACY_MODE_ENABLED = "privacy_mode_enabled"
+        private const val KEY_NOTIFICATIONS_ENABLED = "notifications_enabled"
         private const val KEY_LAST_EXPENSE_PAYING_ACCOUNT_ID = "last_expense_paying_account_id"
         private const val KEY_LAST_EXPENSE_RESPONSIBLE_ACCOUNT_ID = "last_expense_responsible_account_id"
         private const val KEY_LAST_EXPENSE_CATEGORY_ID = "last_expense_category_id"

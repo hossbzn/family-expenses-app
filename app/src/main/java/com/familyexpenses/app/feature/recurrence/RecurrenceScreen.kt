@@ -494,7 +494,12 @@ private fun PendingOccurrencesContent(
                         }
 
                         Text(text = accountSubtitle, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-                        Text(text = "Fecha programada: ${occurrence.scheduledAt.toDateText()}", style = MaterialTheme.typography.bodySmall, color = Color.DarkGray)
+                        val dateLabel = if (occurrence.reviewAt != null) {
+                            "Fecha de revisión: ${occurrence.reviewAt.toDateText()} (Programada: ${occurrence.scheduledAt.toDateText()})"
+                        } else {
+                            "Fecha programada: ${occurrence.scheduledAt.toDateText()}"
+                        }
+                        Text(text = dateLabel, style = MaterialTheme.typography.bodySmall, color = Color.DarkGray)
 
                         HorizontalDivider(color = Color(0xFFEEEEEE))
 

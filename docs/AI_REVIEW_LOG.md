@@ -25,7 +25,7 @@ No sustituye a las especificaciones, al backlog ni al sprint. Sirve como histori
 | REV-003 | Alta | OBSOLETE | Room | La creación directa del índice único `(ruleId, scheduledAt)` puede fallar si una instalación contiene duplicados. | Obsoleto. Las migraciones 1-4 no se ejecutan por el riesgo aceptado de borrado destructivo. |
 | REV-004 | Bloqueante | RESOLVED | Backup | El repositorio recoge `recurrenceOccurrences` y `privacyModeEnabled`, pero `BackupRestoreUseCase` no los codifica ni decodifica en el JSON. La restauración los pierde silenciosamente. | Resuelto en commit `7dc96e0`. Prueba round-trip en `BackupRestoreUseCaseTest.kt` validando preservación de ocurrencias y privacidad. |
 | REV-005 | Alta | RESOLVED | Notificaciones | Implementar en Ajustes el interruptor de notificaciones y la solicitud de `POST_NOTIFICATIONS` en Android 13+. Evitar notificaciones repetitivas. | Resuelto en iteración f. Preferencia desactivada inicialmente sin permisos; huella (fingerprint) evita repetir la notificación del mismo conjunto. |
-| REV-006 | Alta | IN_PROGRESS | Recurrentes | Implementar la acción visible «Posponer». Las ocurrencias pospuestas (`reviewAt > now`) no deben mostrar aviso en Inicio ni en la bandeja antes de `reviewAt`. | La ocurrencia no reaparece automáticamente en UI solo con el reloj, requiere una reentrada o actualización en 2º plano del Worker (que evalúa el `now` actual). |
+| REV-006 | Alta | IN_PROGRESS | Recurrentes | Implementar la acción visible «Posponer». Las ocurrencias pospuestas (`reviewAt > now`) no deben mostrar aviso en Inicio ni en la bandeja antes de `reviewAt`. | Reentrar en la pantalla recrea la consulta con un now actualizado. El Worker puede consultar y notificar, pero no actualiza automáticamente una pantalla que permanezca abierta. |
 | REV-007 | Alta | IN_PROGRESS | Documentación | Corregir contradicciones en AGENTS, BACKLOG, SPRINT y manual. El código usa SharedPreferences (no DataStore). Eliminar afirmaciones sin evidencia. | Documentación alineada a SharedPreferences y limpiada de test falsos, pero persisten V6-16 a V6-21 como TODO y contradicciones en SPRINT. |
 | REV-008 | Media | RESOLVED | CI | La CI fallará si la suite de tests no compila o si lint encuentra errores. | Resuelto. 114 tests, lint 0 errores y APK correcto. |
 
@@ -46,7 +46,7 @@ Resultados reproducidos:
 | `lintDebug` | PASA | `Build finished successfully` (0 errores) |
 | `assembleDebug` | PASA | APK debug generado correctamente |
 | Migraciones reales 1/2/3/4→5 | ACCEPTED_RISK | Se descarta `AppDatabaseMigrationTest.kt` y se usa `fallbackToDestructiveMigrationFrom(1, 2, 3, 4)` |
-| QA funcional en emulador | NO REPRODUCIDO | Validado mediante pruebas unitarias/instrumentadas pero pendiente prueba en vivo. |
+| QA funcional en emulador | NO REPRODUCIDO | No se ejecutó validación visual/interactiva en emulador durante esta iteración. |
 
 Cambios realizados:
 - **REV-001:** Actualizado el registro con 114 tests pasando (cifra consolidada).

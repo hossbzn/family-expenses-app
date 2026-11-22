@@ -4,16 +4,21 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.familyexpenses.app.data.local.entity.AccountEntity
+import com.familyexpenses.app.data.local.entity.BalanceAdjustmentEntity
+import com.familyexpenses.app.data.local.entity.TransactionEntity
+import com.familyexpenses.app.data.local.entity.TransferEntity
 import com.familyexpenses.app.data.repository.AccountRepository
 import com.familyexpenses.app.data.repository.BalanceAdjustmentRepository
 import com.familyexpenses.app.data.repository.ExpenseRepository
 import com.familyexpenses.app.data.repository.TransferRepository
+import com.familyexpenses.app.data.repository.UserPreferencesRepository
 import com.familyexpenses.app.data.seed.DatabaseSeeder
 import com.familyexpenses.app.domain.usecase.ComputeAccountBalanceUseCase
 import com.familyexpenses.app.domain.usecase.ComputeNetDebtUseCase
 import com.familyexpenses.app.domain.usecase.CreateBalanceAdjustmentUseCase
 import com.familyexpenses.app.feature.expense.NumericKeypadHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,7 +28,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @HiltViewModel
 class AccountDetailViewModel @Inject constructor(
@@ -32,6 +36,7 @@ class AccountDetailViewModel @Inject constructor(
     expenseRepository: ExpenseRepository,
     private val transferRepository: TransferRepository,
     balanceAdjustmentRepository: BalanceAdjustmentRepository,
+    userPreferencesRepository: UserPreferencesRepository,
     private val computeAccountBalanceUseCase: ComputeAccountBalanceUseCase,
     private val computeNetDebtUseCase: ComputeNetDebtUseCase,
     private val createBalanceAdjustmentUseCase: CreateBalanceAdjustmentUseCase,
@@ -49,8 +54,20 @@ class AccountDetailViewModel @Inject constructor(
         expenseRepository.observeTransactions(),
         transferRepository.observeTransfers(),
         balanceAdjustmentRepository.observeAdjustments(),
+        userPreferencesRepository.observePrivacyModeEnabled(),
         dialogState,
-    ) { accounts, transactions, transfers, adjustments, dialogs ->
+    ) { flowArray ->
+        @Suppress("UNCHECKED_CAST")
+        val accounts = flowArray[0] as List<AccountEntity>
+        @Suppress("UNCHECKED_CAST")
+        val transactions = flowArray[1] as List<TransactionEntity>
+        @Suppress("UNCHECKED_CAST")
+        val transfers = flowArray[2] as List<TransferEntity>
+        @Suppress("UNCHECKED_CAST")
+        val adjustments = flowArray[3] as List<BalanceAdjustmentEntity>
+        val privacyEnabled = flowArray[4] as Boolean
+        val dialogs = flowArray[5] as AccountDetailDialogState
+
         val account = accounts.firstOrNull { it.id == accountId }
         val cashBalanceMinor = account?.let {
             computeAccountBalanceUseCase.compute(
@@ -80,6 +97,7 @@ class AccountDetailViewModel @Inject constructor(
             initialBalanceInput = dialogs.initialBalanceInput,
             initialBalanceErrorMessage = dialogs.initialBalanceErrorMessage,
             isSaving = dialogs.isSaving,
+            privacyModeEnabled = privacyEnabled,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -285,6 +303,7 @@ data class AccountDetailUiState(
     val initialBalanceInput: String = "",
     val initialBalanceErrorMessage: String? = null,
     val isSaving: Boolean = false,
+    val privacyModeEnabled: Boolean = false,
 )
 
 sealed interface AccountDetailEvent {

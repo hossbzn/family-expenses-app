@@ -60,6 +60,12 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.familyexpenses.app.core.model.AccountType
+import com.familyexpenses.app.core.ui.MoneyText
+import com.familyexpenses.app.ui.theme.OffWhiteBackground
+import com.familyexpenses.app.ui.theme.OutlineBorder
+import com.familyexpenses.app.ui.theme.PetroleumBlueContainer
+import com.familyexpenses.app.ui.theme.PetroleumBluePrimary
+import com.familyexpenses.app.ui.theme.PureWhiteSurface
 import kotlinx.coroutines.flow.collectLatest
 import java.text.NumberFormat
 import java.util.Currency
@@ -200,17 +206,17 @@ fun AccountDetailScreen(
                     Text(
                         text = "Saldo disponible (caja real)",
                         style = MaterialTheme.typography.labelLarge,
-                        color = if (isFamily) Color(0xFFCCCCCC) else Color(0xFF666666),
+                        color = Color.Gray,
                     )
                     Spacer(modifier = Modifier.height(12.dp))
-                    Text(
-                        text = formatCurrency(uiState.cashBalanceMinor),
+                    MoneyText(
+                        amountMinor = uiState.cashBalanceMinor,
+                        isPrivacyModeEnabled = uiState.privacyModeEnabled,
                         style = MaterialTheme.typography.headlineLarge.copy(
                             fontWeight = FontWeight.Bold,
                             fontSize = 34.sp,
                         ),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                        color = PetroleumBluePrimary,
                     )
                 }
             }
@@ -227,7 +233,7 @@ fun AccountDetailScreen(
                         .heightIn(min = 52.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Black,
+                        containerColor = PetroleumBluePrimary,
                         contentColor = Color.White,
                     ),
                 ) {
@@ -249,19 +255,19 @@ fun AccountDetailScreen(
                         .weight(1f)
                         .heightIn(min = 52.dp),
                     shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, Color(0xFFD0D0D0)),
+                    border = BorderStroke(1.dp, OutlineBorder),
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ReceiptLong,
                         contentDescription = null,
-                        tint = Color.Black,
+                        tint = PetroleumBluePrimary,
                         modifier = Modifier.size(20.dp),
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "Movimientos",
                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                        color = Color.Black,
+                        color = PetroleumBluePrimary,
                     )
                 }
             }
@@ -271,8 +277,8 @@ fun AccountDetailScreen(
                 onClick = onAdvancesClick,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                color = Color(0xFFFAFAFA),
-                border = BorderStroke(1.dp, Color(0xFFE5E5E5)),
+                color = PureWhiteSurface,
+                border = BorderStroke(1.dp, OutlineBorder),
             ) {
                 Row(
                     modifier = Modifier
@@ -283,7 +289,7 @@ fun AccountDetailScreen(
                     Icon(
                         imageVector = Icons.Default.SwapHoriz,
                         contentDescription = null,
-                        tint = Color.DarkGray,
+                        tint = PetroleumBluePrimary,
                         modifier = Modifier.size(24.dp),
                     )
                     Spacer(modifier = Modifier.width(12.dp))
@@ -294,18 +300,34 @@ fun AccountDetailScreen(
                             color = Color.Gray,
                         )
                         Spacer(modifier = Modifier.height(2.dp))
-                        val debtText = when {
-                            uiState.netDebtMinor > 0L -> "Familia debe ${formatCurrency(uiState.netDebtMinor)} a Personal"
-                            uiState.netDebtMinor < 0L -> "Personal debe ${formatCurrency(abs(uiState.netDebtMinor))} a Familia"
-                            else -> "Sin adelantos pendientes"
+                        if (uiState.netDebtMinor == 0L) {
+                            Text(
+                                text = "Sin adelantos pendientes",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.DarkGray,
+                            )
+                        } else {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                val prefix = if (uiState.netDebtMinor > 0L) "Familia debe " else "Personal debe "
+                                val suffix = if (uiState.netDebtMinor > 0L) " a Personal" else " a Familia"
+                                Text(
+                                    text = prefix,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = PetroleumBluePrimary,
+                                )
+                                MoneyText(
+                                    amountMinor = abs(uiState.netDebtMinor),
+                                    isPrivacyModeEnabled = uiState.privacyModeEnabled,
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = PetroleumBluePrimary,
+                                )
+                                Text(
+                                    text = suffix,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = PetroleumBluePrimary,
+                                )
+                            }
                         }
-                        Text(
-                            text = debtText,
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontWeight = if (uiState.netDebtMinor != 0L) FontWeight.Bold else FontWeight.Medium,
-                            ),
-                            color = if (uiState.netDebtMinor != 0L) Color.Black else Color.DarkGray,
-                        )
                     }
                     Icon(
                         imageVector = Icons.Default.ChevronRight,

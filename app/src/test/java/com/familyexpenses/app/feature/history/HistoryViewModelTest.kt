@@ -17,6 +17,7 @@ import com.familyexpenses.app.data.local.entity.TransferEntity
 import com.familyexpenses.app.data.repository.AccountRepository
 import com.familyexpenses.app.data.repository.CategoryRepository
 import com.familyexpenses.app.data.repository.HistoryRepository
+import com.familyexpenses.app.data.repository.UserPreferencesRepository
 import com.familyexpenses.app.domain.usecase.FilterMovementsUseCase
 import com.familyexpenses.app.domain.usecase.GetHistoryUseCase
 import com.familyexpenses.app.domain.usecase.MovementAccountFilter
@@ -157,11 +158,30 @@ class HistoryViewModelTest {
             categoryDao = fakeCategoryDao,
         )
 
+        val fakePreferences = object : UserPreferencesRepository {
+            var privacyMode = false
+            override fun observePrivacyModeEnabled(): Flow<Boolean> = MutableStateFlow(privacyMode)
+            override fun setPrivacyModeEnabled(enabled: Boolean) { privacyMode = enabled }
+            override fun getLastExpensePayingAccountId(): String? = null
+            override fun setLastExpensePayingAccountId(accountId: String) {}
+            override fun getLastExpenseResponsibleAccountId(): String? = null
+            override fun setLastExpenseResponsibleAccountId(accountId: String) {}
+            override fun getLastExpenseCategoryId(): String? = null
+            override fun setLastExpenseCategoryId(categoryId: String) {}
+            override fun getLastIncomeAccountId(): String? = null
+            override fun setLastIncomeAccountId(accountId: String) {}
+            override fun getLastIncomeCategoryId(): String? = null
+            override fun setLastIncomeCategoryId(categoryId: String) {}
+            override fun getAccountIcon(accountId: String): String? = null
+            override fun setAccountIcon(accountId: String, icon: String) {}
+        }
+
         viewModel = HistoryViewModel(
             savedStateHandle = SavedStateHandle(),
             getHistoryUseCase = GetHistoryUseCase(historyRepository),
             accountRepository = AccountRepository(fakeAccountDao),
             categoryRepository = CategoryRepository(fakeCategoryDao),
+            userPreferencesRepository = fakePreferences,
             filterMovementsUseCase = FilterMovementsUseCase(),
         )
     }
@@ -220,6 +240,23 @@ class HistoryViewModelTest {
             accountDao = fakeAccountDao,
             categoryDao = fakeCategoryDao,
         )
+        val fakePreferences = object : UserPreferencesRepository {
+            var privacyMode = false
+            override fun observePrivacyModeEnabled(): Flow<Boolean> = MutableStateFlow(privacyMode)
+            override fun setPrivacyModeEnabled(enabled: Boolean) { privacyMode = enabled }
+            override fun getLastExpensePayingAccountId(): String? = null
+            override fun setLastExpensePayingAccountId(accountId: String) {}
+            override fun getLastExpenseResponsibleAccountId(): String? = null
+            override fun setLastExpenseResponsibleAccountId(accountId: String) {}
+            override fun getLastExpenseCategoryId(): String? = null
+            override fun setLastExpenseCategoryId(categoryId: String) {}
+            override fun getLastIncomeAccountId(): String? = null
+            override fun setLastIncomeAccountId(accountId: String) {}
+            override fun getLastIncomeCategoryId(): String? = null
+            override fun setLastIncomeCategoryId(categoryId: String) {}
+            override fun getAccountIcon(accountId: String): String? = null
+            override fun setAccountIcon(accountId: String, icon: String) {}
+        }
         val drillDownVm = HistoryViewModel(
             savedStateHandle = SavedStateHandle(
                 mapOf(
@@ -234,6 +271,7 @@ class HistoryViewModelTest {
             getHistoryUseCase = GetHistoryUseCase(historyRepository),
             accountRepository = AccountRepository(fakeAccountDao),
             categoryRepository = CategoryRepository(fakeCategoryDao),
+            userPreferencesRepository = fakePreferences,
             filterMovementsUseCase = FilterMovementsUseCase(),
         )
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { drillDownVm.uiState.collect() }

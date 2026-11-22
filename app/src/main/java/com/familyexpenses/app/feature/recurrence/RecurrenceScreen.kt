@@ -79,10 +79,16 @@ import com.familyexpenses.app.core.model.RecurrenceExecutionMode
 import com.familyexpenses.app.core.model.RecurrenceFrequency
 import com.familyexpenses.app.core.model.RecurrenceRuleStatus
 import com.familyexpenses.app.core.model.TransactionType
+import com.familyexpenses.app.core.ui.MoneyText
 import com.familyexpenses.app.data.local.entity.AccountEntity
 import com.familyexpenses.app.data.local.entity.CategoryEntity
 import com.familyexpenses.app.data.local.entity.RecurrenceOccurrenceEntity
 import com.familyexpenses.app.data.local.entity.RecurrenceRuleEntity
+import com.familyexpenses.app.ui.theme.OffWhiteBackground
+import com.familyexpenses.app.ui.theme.OutlineBorder
+import com.familyexpenses.app.ui.theme.PetroleumBlueContainer
+import com.familyexpenses.app.ui.theme.PetroleumBluePrimary
+import com.familyexpenses.app.ui.theme.PureWhiteSurface
 import java.math.RoundingMode
 import java.text.NumberFormat
 import java.time.Instant
@@ -237,6 +243,7 @@ fun RecurrenceScreen(
                     occurrences = uiState.pendingOccurrences,
                     accounts = uiState.accountOptions,
                     categories = uiState.categoryOptions,
+                    privacyModeEnabled = uiState.privacyModeEnabled,
                     onConfirm = { id -> onConfirmOccurrence(id, null, null) },
                     onEditBeforeConfirm = { occurrenceToEdit = it },
                     onConfirmAll = onConfirmAllPending,
@@ -349,6 +356,7 @@ fun RecurrenceScreen(
                                 rule = rule,
                                 accounts = uiState.accountOptions,
                                 categories = uiState.categoryOptions,
+                                privacyModeEnabled = uiState.privacyModeEnabled,
                                 onClick = { selectedRuleDetail = rule },
                                 onEdit = {
                                     onEditRule(rule)
@@ -394,6 +402,7 @@ private fun PendingOccurrencesContent(
     occurrences: List<RecurrenceOccurrenceEntity>,
     accounts: List<AccountEntity>,
     categories: List<CategoryEntity>,
+    privacyModeEnabled: Boolean,
     onConfirm: (String) -> Unit,
     onEditBeforeConfirm: (RecurrenceOccurrenceEntity) -> Unit,
     onConfirmAll: () -> Unit,
@@ -409,7 +418,8 @@ private fun PendingOccurrencesContent(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF7F7F7)),
+                    colors = CardDefaults.cardColors(containerColor = PureWhiteSurface),
+                    border = BorderStroke(1.dp, OutlineBorder),
                 ) {
                     Text(
                         text = "No hay ejecuciones recurrentes pendientes de confirmar.",
@@ -429,11 +439,12 @@ private fun PendingOccurrencesContent(
                     Text(
                         text = "Ejecuciones por revisar",
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = PetroleumBluePrimary,
                     )
                     Button(
                         onClick = onConfirmAll,
                         shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
+                        colors = ButtonDefaults.buttonColors(containerColor = PetroleumBluePrimary),
                     ) {
                         Text("Confirmar todas")
                     }
@@ -448,8 +459,8 @@ private fun PendingOccurrencesContent(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF9F9F9)),
-                    border = BorderStroke(1.dp, Color(0xFFE5E5E5)),
+                    colors = CardDefaults.cardColors(containerColor = PureWhiteSurface),
+                    border = BorderStroke(1.dp, OutlineBorder),
                 ) {
                     Column(
                         modifier = Modifier.padding(16.dp),
@@ -462,10 +473,13 @@ private fun PendingOccurrencesContent(
                             Text(
                                 text = occurrence.note ?: catName,
                                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = PetroleumBluePrimary,
                             )
-                            Text(
-                                text = occurrence.amountMinor.toCurrencyText(),
+                            MoneyText(
+                                amountMinor = occurrence.amountMinor,
+                                isPrivacyModeEnabled = privacyModeEnabled,
                                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = PetroleumBluePrimary,
                             )
                         }
 
@@ -518,6 +532,7 @@ private fun RuleCard(
     rule: RecurrenceRuleEntity,
     accounts: List<AccountEntity>,
     categories: List<CategoryEntity>,
+    privacyModeEnabled: Boolean,
     onClick: () -> Unit,
     onEdit: () -> Unit,
     onPause: () -> Unit,
@@ -542,8 +557,8 @@ private fun RuleCard(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF9F9F9)),
-        border = BorderStroke(1.dp, Color(0xFFE5E5E5)),
+        colors = CardDefaults.cardColors(containerColor = PureWhiteSurface),
+        border = BorderStroke(1.dp, OutlineBorder),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -556,10 +571,13 @@ private fun RuleCard(
                 Text(
                     text = rule.note ?: catName,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = PetroleumBluePrimary,
                 )
-                Text(
-                    text = rule.amountMinor.toCurrencyText(),
+                MoneyText(
+                    amountMinor = rule.amountMinor,
+                    isPrivacyModeEnabled = privacyModeEnabled,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = PetroleumBluePrimary,
                 )
             }
 

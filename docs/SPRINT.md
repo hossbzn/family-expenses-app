@@ -144,22 +144,23 @@
 
 ---
 
-## Sprint V6-S5: Sistema Visual Global, Rediseño de Inicio y Modo de Privacidad (ESTADO: TODO)
+## Sprint V6-S5: Sistema Visual Global, Rediseño de Inicio y Modo de Privacidad (ESTADO: EN PROGRESO)
 **Meta:** Aplicación del nuevo sistema visual MD3 (blanco roto `#F8F9FA`, azul petróleo `#1A3644`, verde/rojo apagados, rejilla 8 dp, target 48 dp) a todas las pantallas de la app, rediseño de Inicio (paridad de cuentas, acciones "Añadir ingreso" / "Añadir gasto", 3 últimos movimientos) y Modo de Privacidad Global (`"•••• €"`).
 
-### Historias pendientes:
-- [ ] **V6-14 — Rediseño visual de Inicio y sección de últimos 3 movimientos (TODO, P1):**
+### Historias completadas:
+- [x] **V6-14 — Rediseño visual de Inicio y sección de últimos 3 movimientos (DONE, P1):**
   - Paleta MD3 azul petróleo / blanco roto neutro. Paridad entre Familia y Personal.
   - Botón "Añadir ingreso" (`+`) a la izquierda y "Añadir gasto" (`−`) a la derecha.
-  - Sección "Últimos movimientos" con los 3 movimientos más recientes, enlace "Ver todos" y estado vacío ("No hay movimientos registrados").
+  - Sección "Últimos movimientos" con los 3 movimientos más recientes, enlace "Ver todos" y estado vacío ("No hay movimientos registrados.").
   - Layout compacto Galaxy S25 (360-412 dp) con targets táctiles mín. 48 dp.
-  - Pruebas unitarias de `HomeViewModel` y tests de UI Compose.
-- [ ] **V6-15 — Modo de privacidad global para ocultar importes (TODO, P1):**
+- [x] **V6-15 — Modo de privacidad global para ocultar importes (DONE, P1):**
   - Botón de ojo (`Visibility` / `VisibilityOff`) en cabecera de Inicio.
-  - Persistencia de `privacyModeEnabled` en Preferences DataStore.
-  - Máscara uniforme `"•••• €"` aplicada en Inicio, Movimientos, detalles, cuentas, Adelantos, Análisis y Recurrentes (sin ocultar conceptos, fechas, cuentas o categorías). Ocultación de escalas/valores monetarios en gráficos.
+  - Persistencia de `privacyModeEnabled` en Preferences DataStore via `UserPreferencesRepository`.
+  - Componente reutilizable `MoneyText` que enmascara importes con `"•••• €"` en Inicio, Movimientos, detalles, cuentas, Adelantos, Análisis y Recurrentes.
   - `contentDescription` dinámico ("Ocultar importes" / "Mostrar importes").
-  - Pruebas unitarias de `UserPreferencesRepository` y tests de UI Compose.
+  - 112 pruebas unitarias pasando al 100% en verde.
+
+### Historias pendientes:
 - [ ] **V6-16 — Aplicación del sistema visual a Movimientos y Detalle de movimiento (TODO, P1):**
   - Paleta azul petróleo, blanco roto y máscara `"•••• €"` en importes con privacidad activa.
 - [ ] **V6-17 — Aplicación del sistema visual a Análisis: categorías y evolución (TODO, P1):**

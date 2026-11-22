@@ -17,6 +17,7 @@ import com.familyexpenses.app.data.repository.AccountRepository
 import com.familyexpenses.app.data.repository.BalanceAdjustmentRepository
 import com.familyexpenses.app.data.repository.ExpenseRepository
 import com.familyexpenses.app.data.repository.TransferRepository
+import com.familyexpenses.app.data.repository.UserPreferencesRepository
 import com.familyexpenses.app.domain.usecase.ComputeAccountBalanceUseCase
 import com.familyexpenses.app.domain.usecase.ComputeNetDebtUseCase
 import com.familyexpenses.app.domain.usecase.CreateBalanceAdjustmentUseCase
@@ -136,12 +137,31 @@ class AccountDetailViewModelTest {
         val transferRepository = TransferRepository(fakeTransferDao)
         val adjustmentRepository = BalanceAdjustmentRepository(fakeAdjustmentDao)
 
+        val fakePreferences = object : UserPreferencesRepository {
+            var privacyMode = false
+            override fun observePrivacyModeEnabled(): Flow<Boolean> = MutableStateFlow(privacyMode)
+            override fun setPrivacyModeEnabled(enabled: Boolean) { privacyMode = enabled }
+            override fun getLastExpensePayingAccountId(): String? = null
+            override fun setLastExpensePayingAccountId(accountId: String) {}
+            override fun getLastExpenseResponsibleAccountId(): String? = null
+            override fun setLastExpenseResponsibleAccountId(accountId: String) {}
+            override fun getLastExpenseCategoryId(): String? = null
+            override fun setLastExpenseCategoryId(categoryId: String) {}
+            override fun getLastIncomeAccountId(): String? = null
+            override fun setLastIncomeAccountId(accountId: String) {}
+            override fun getLastIncomeCategoryId(): String? = null
+            override fun setLastIncomeCategoryId(categoryId: String) {}
+            override fun getAccountIcon(accountId: String): String? = null
+            override fun setAccountIcon(accountId: String, icon: String) {}
+        }
+
         viewModel = AccountDetailViewModel(
             savedStateHandle = SavedStateHandle(mapOf(AccountDetailViewModel.ACCOUNT_ID_ARG to "account-personal")),
             accountRepository = accountRepository,
             expenseRepository = expenseRepository,
             transferRepository = transferRepository,
             balanceAdjustmentRepository = adjustmentRepository,
+            userPreferencesRepository = fakePreferences,
             computeAccountBalanceUseCase = ComputeAccountBalanceUseCase(),
             computeNetDebtUseCase = ComputeNetDebtUseCase(),
             createBalanceAdjustmentUseCase = CreateBalanceAdjustmentUseCase(accountRepository, adjustmentRepository),

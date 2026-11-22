@@ -117,9 +117,12 @@ class AddIncomeViewModelTest {
     }
 
     private val fakePreferences = object : UserPreferencesRepository {
+        var privacyMode = false
         var lastIncomeAccount: String? = null
         var lastIncomeCategory: String? = null
 
+        override fun observePrivacyModeEnabled(): kotlinx.coroutines.flow.Flow<Boolean> = kotlinx.coroutines.flow.MutableStateFlow(privacyMode)
+        override fun setPrivacyModeEnabled(enabled: Boolean) { privacyMode = enabled }
         override fun getLastExpensePayingAccountId(): String? = null
         override fun setLastExpensePayingAccountId(accountId: String) {}
         override fun getLastExpenseResponsibleAccountId(): String? = null

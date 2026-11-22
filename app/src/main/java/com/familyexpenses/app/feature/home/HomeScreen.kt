@@ -17,19 +17,22 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
-import androidx.compose.material.icons.automirrored.filled.TrendingDown
-import androidx.compose.material.icons.automirrored.filled.TrendingUp
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.HomeWork
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SwapHoriz
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -43,6 +46,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -57,8 +61,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import java.text.NumberFormat
-import java.util.Currency
+import com.familyexpenses.app.core.ui.MoneyText
+import com.familyexpenses.app.domain.model.HistoryItem
+import com.familyexpenses.app.domain.model.MovementKind
+import com.familyexpenses.app.ui.theme.OffWhiteBackground
+import com.familyexpenses.app.ui.theme.OutlineBorder
+import com.familyexpenses.app.ui.theme.PetroleumBlueContainer
+import com.familyexpenses.app.ui.theme.PetroleumBluePrimary
+import com.familyexpenses.app.ui.theme.PureWhiteSurface
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.abs
 
@@ -97,6 +111,7 @@ fun HomeRoute(
     HomeScreen(
         uiState = uiState.value,
         snackbarHostState = snackbarHostState,
+        onTogglePrivacyMode = viewModel::togglePrivacyMode,
         onFamilyAccountClick = onFamilyAccountClick,
         onPersonalAccountClick = onPersonalAccountClick,
         onAddExpenseClick = onAddExpenseClick,
@@ -114,6 +129,7 @@ fun HomeRoute(
 fun HomeScreen(
     uiState: HomeUiState,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    onTogglePrivacyMode: () -> Unit = {},
     onFamilyAccountClick: () -> Unit = {},
     onPersonalAccountClick: () -> Unit = {},
     onAddExpenseClick: () -> Unit,
@@ -127,31 +143,47 @@ fun HomeScreen(
     val scrollState = rememberScrollState()
 
     Scaffold(
+        containerColor = OffWhiteBackground,
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = "Family Expenses",
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                    )
+                    Column {
+                        Text(
+                            text = "Buenos días",
+                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                        )
+                        Text(
+                            text = "Resumen familiar",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray,
+                        )
+                    }
                 },
                 actions = {
+                    IconButton(onClick = onTogglePrivacyMode) {
+                        Icon(
+                            imageVector = if (uiState.privacyModeEnabled) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                            contentDescription = if (uiState.privacyModeEnabled) "Mostrar importes" else "Ocultar importes",
+                            tint = PetroleumBluePrimary,
+                        )
+                    }
                     IconButton(onClick = onSettingsClick) {
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = "Ajustes",
+                            tint = PetroleumBluePrimary,
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    containerColor = OffWhiteBackground,
+                    titleContentColor = PetroleumBluePrimary,
                 ),
             )
         },
         bottomBar = {
             NavigationBar(
-                containerColor = Color.White,
+                containerColor = PureWhiteSurface,
                 tonalElevation = 4.dp,
             ) {
                 NavigationBarItem(
@@ -160,9 +192,9 @@ fun HomeScreen(
                     icon = { Icon(Icons.Default.Home, contentDescription = "Inicio") },
                     label = { Text("Inicio") },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color.White,
-                        selectedTextColor = Color.Black,
-                        indicatorColor = Color.Black,
+                        selectedIconColor = PureWhiteSurface,
+                        selectedTextColor = PetroleumBluePrimary,
+                        indicatorColor = PetroleumBluePrimary,
                         unselectedIconColor = Color.Gray,
                         unselectedTextColor = Color.Gray,
                     ),
@@ -199,88 +231,119 @@ fun HomeScreen(
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            // 1. Tarjetas de saldo real: Familia (Negra) y Personal (Gris claro) con igual jerarquía
-            FamilyAccountCard(
-                balanceMinor = uiState.familyCashBalanceMinor,
-                onClick = onFamilyAccountClick,
-            )
-            PersonalAccountCard(
-                balanceMinor = uiState.personalCashBalanceMinor,
-                onClick = onPersonalAccountClick,
-            )
-
-            // 2. Botones grandes: «Nuevo gasto» (principal negro) y «Nuevo ingreso» (secundario)
+            // 1. Tarjetas de saldo real: Familia y Personal con el mismo peso e igual jerarquía visual
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                // Botón principal: Nuevo gasto
-                Button(
-                    onClick = onAddExpenseClick,
-                    modifier = Modifier
-                        .weight(1f)
-                        .heightIn(min = 54.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Black,
-                        contentColor = Color.White,
-                    ),
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.TrendingDown,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp),
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Nuevo gasto",
-                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                        )
-                    }
-                }
+                AccountSummaryCard(
+                    accountName = "Familia",
+                    balanceMinor = uiState.familyCashBalanceMinor,
+                    icon = Icons.Default.HomeWork,
+                    privacyModeEnabled = uiState.privacyModeEnabled,
+                    onClick = onFamilyAccountClick,
+                    modifier = Modifier.weight(1f),
+                )
+                AccountSummaryCard(
+                    accountName = "Personal",
+                    balanceMinor = uiState.personalCashBalanceMinor,
+                    icon = Icons.Default.Person,
+                    privacyModeEnabled = uiState.privacyModeEnabled,
+                    onClick = onPersonalAccountClick,
+                    modifier = Modifier.weight(1f),
+                )
+            }
 
-                // Botón secundario: Nuevo ingreso
+            // 2. Botones de acciones rápidas: "Añadir ingreso" (+) a la izquierda, "Añadir gasto" (−) a la derecha
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                // Añadir ingreso (+)
                 Surface(
                     onClick = onAddIncomeClick,
                     modifier = Modifier
                         .weight(1f)
-                        .heightIn(min = 54.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    color = Color(0xFFF5F5F5),
-                    border = BorderStroke(1.dp, Color(0xFFE0E0E0)),
+                        .heightIn(min = 52.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    color = PureWhiteSurface,
+                    border = BorderStroke(1.dp, OutlineBorder),
                 ) {
                     Row(
                         modifier = Modifier.fillMaxSize(),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center,
                     ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.TrendingUp,
-                            contentDescription = null,
-                            tint = Color.Black,
-                            modifier = Modifier.size(20.dp),
-                        )
+                        Surface(
+                            shape = RoundedCornerShape(20.dp),
+                            color = PetroleumBlueContainer,
+                            modifier = Modifier.size(32.dp),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = null,
+                                tint = PetroleumBluePrimary,
+                                modifier = Modifier
+                                    .padding(6.dp)
+                                    .size(18.dp),
+                            )
+                        }
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Nuevo ingreso",
-                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                            color = Color.Black,
+                            text = "Añadir ingreso",
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                            color = PetroleumBluePrimary,
+                        )
+                    }
+                }
+
+                // Añadir gasto (−)
+                Surface(
+                    onClick = onAddExpenseClick,
+                    modifier = Modifier
+                        .weight(1f)
+                        .heightIn(min = 52.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    color = PureWhiteSurface,
+                    border = BorderStroke(1.dp, OutlineBorder),
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                    ) {
+                        Surface(
+                            shape = RoundedCornerShape(20.dp),
+                            color = Color(0xFFFFEBEE),
+                            modifier = Modifier.size(32.dp),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Remove,
+                                contentDescription = null,
+                                tint = Color(0xFFC62828),
+                                modifier = Modifier
+                                    .padding(6.dp)
+                                    .size(18.dp),
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Añadir gasto",
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                            color = PetroleumBluePrimary,
                         )
                     }
                 }
             }
 
-            // 3. Bloque de Adelantos siempre visible (incluso a cero)
+            // 3. Bloque de Adelantos siempre visible
             AdvancesBlock(
                 netDebtMinor = uiState.netDebtMinor,
+                privacyModeEnabled = uiState.privacyModeEnabled,
                 onClick = onPendingSettlementClick,
             )
 
-            // 4. Aviso discreto de recurrentes pendientes
+            // 4. Banner discreto de recurrentes pendientes
             if (uiState.pendingRecurrencesCount > 0) {
                 PendingRecurrencesBanner(
                     count = uiState.pendingRecurrencesCount,
@@ -288,8 +351,248 @@ fun HomeScreen(
                 )
             }
 
+            // 5. Sección de Últimos Movimientos (3 ítems más recientes)
+            RecentMovementsSection(
+                recentMovements = uiState.recentMovements,
+                privacyModeEnabled = uiState.privacyModeEnabled,
+                onViewAllClick = onHistoryClick,
+            )
+
             Spacer(modifier = Modifier.height(8.dp))
         }
+    }
+}
+
+/**
+ * Tarjeta de saldo real con la misma jerarquía para Familia y Personal.
+ */
+@Composable
+private fun AccountSummaryCard(
+    accountName: String,
+    balanceMinor: Long,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    privacyModeEnabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        onClick = onClick,
+        modifier = modifier.heightIn(min = 110.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = PureWhiteSurface,
+            contentColor = PetroleumBluePrimary,
+        ),
+        border = BorderStroke(1.dp, OutlineBorder),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = PetroleumBluePrimary,
+                    modifier = Modifier.size(22.dp),
+                )
+                Text(
+                    text = accountName,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = PetroleumBluePrimary,
+                )
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            MoneyText(
+                amountMinor = balanceMinor,
+                isPrivacyModeEnabled = privacyModeEnabled,
+                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                color = PetroleumBluePrimary,
+            )
+        }
+    }
+}
+
+/**
+ * Bloque de Adelantos siempre visible con soporte de privacidad.
+ */
+@Composable
+private fun AdvancesBlock(
+    netDebtMinor: Long,
+    privacyModeEnabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        color = PureWhiteSurface,
+        border = BorderStroke(1.dp, OutlineBorder),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = Icons.Default.SwapHoriz,
+                contentDescription = null,
+                tint = PetroleumBluePrimary,
+                modifier = Modifier.size(24.dp),
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Adelantos entre cuentas",
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                    color = PetroleumBluePrimary,
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                if (netDebtMinor == 0L) {
+                    Text(
+                        text = "Sin adelantos pendientes",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray,
+                    )
+                } else {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        val prefix = if (netDebtMinor > 0L) "Familia te debe " else "Personal debe a Familia "
+                        Text(
+                            text = prefix,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = PetroleumBluePrimary,
+                        )
+                        MoneyText(
+                            amountMinor = abs(netDebtMinor),
+                            isPrivacyModeEnabled = privacyModeEnabled,
+                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+                            color = PetroleumBluePrimary,
+                        )
+                    }
+                }
+            }
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = "Ver adelantos",
+                tint = Color.Gray,
+                modifier = Modifier.size(20.dp),
+            )
+        }
+    }
+}
+
+/**
+ * Sección de los 3 últimos movimientos en Inicio.
+ */
+@Composable
+private fun RecentMovementsSection(
+    recentMovements: List<HistoryItem>,
+    privacyModeEnabled: Boolean,
+    onViewAllClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "Últimos movimientos",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = PetroleumBluePrimary,
+            )
+            TextButton(onClick = onViewAllClick) {
+                Text(
+                    text = "Ver todos",
+                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+                    color = PetroleumBluePrimary,
+                )
+            }
+        }
+
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            color = PureWhiteSurface,
+            border = BorderStroke(1.dp, OutlineBorder),
+        ) {
+            if (recentMovements.isEmpty()) {
+                Text(
+                    text = "No hay movimientos registrados.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray,
+                    modifier = Modifier.padding(16.dp),
+                )
+            } else {
+                Column {
+                    recentMovements.forEachIndexed { index, item ->
+                        RecentMovementRow(
+                            item = item,
+                            privacyModeEnabled = privacyModeEnabled,
+                        )
+                        if (index < recentMovements.size - 1) {
+                            HorizontalDivider(color = OutlineBorder)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Fila individual de movimiento reciente en Inicio.
+ */
+@Composable
+private fun RecentMovementRow(
+    item: HistoryItem,
+    privacyModeEnabled: Boolean,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = item.note ?: item.categoryName ?: when (item.kind) {
+                    MovementKind.NORMAL_TRANSFER -> "Transferencia"
+                    MovementKind.REIMBURSEMENT -> "Devolución"
+                    else -> "Movimiento"
+                },
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                color = PetroleumBluePrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            val dateLabel = item.occurredAt.toRelativeDateText()
+            val accountLabel = if (item.kind == MovementKind.EXPENSE) item.responsibleAccountName else item.payingAccountName
+            Text(
+                text = "$dateLabel · $accountLabel",
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.Gray,
+            )
+        }
+
+        MoneyText(
+            amountMinor = item.amountMinor,
+            isPrivacyModeEnabled = privacyModeEnabled,
+            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+            color = if (item.kind == MovementKind.INCOME) Color(0xFF2E7D32) else PetroleumBluePrimary,
+        )
     }
 }
 
@@ -303,8 +606,8 @@ private fun PendingRecurrencesBanner(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        color = Color(0xFFF5F5F5),
-        border = BorderStroke(1.dp, Color(0xFFE0E0E0)),
+        color = PureWhiteSurface,
+        border = BorderStroke(1.dp, OutlineBorder),
     ) {
         Row(
             modifier = Modifier
@@ -320,13 +623,13 @@ private fun PendingRecurrencesBanner(
                 Icon(
                     imageVector = Icons.Default.CalendarMonth,
                     contentDescription = null,
-                    tint = Color.Black,
+                    tint = PetroleumBluePrimary,
                     modifier = Modifier.size(20.dp),
                 )
                 Text(
                     text = if (count == 1) "1 recurrente pendiente" else "$count recurrentes pendientes",
                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = Color.Black,
+                    color = PetroleumBluePrimary,
                 )
             }
             Icon(
@@ -339,183 +642,14 @@ private fun PendingRecurrencesBanner(
     }
 }
 
-/**
- * Tarjeta de saldo real para Cuenta Familia: fondo negro, texto blanco.
- */
-@Composable
-private fun FamilyAccountCard(
-    balanceMinor: Long,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Card(
-        onClick = onClick,
-        modifier = modifier
-            .fillMaxWidth()
-            .heightIn(min = 124.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.Black,
-            contentColor = Color.White,
-        ),
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            verticalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = "Familia",
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = Color(0xFFCCCCCC),
-                )
-                Text(
-                    text = "Caja real",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = Color(0xFF999999),
-                )
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = formatCurrency(balanceMinor),
-                style = MaterialTheme.typography.headlineLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 32.sp,
-                ),
-                color = Color.White,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
-    }
-}
+private fun Long.toRelativeDateText(): String {
+    val zoneId = ZoneId.systemDefault()
+    val today = LocalDate.now(zoneId)
+    val movementDate = Instant.ofEpochMilli(this).atZone(zoneId).toLocalDate()
 
-/**
- * Tarjeta de saldo real para Cuenta Personal: fondo gris claro, texto negro.
- */
-@Composable
-private fun PersonalAccountCard(
-    balanceMinor: Long,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Card(
-        onClick = onClick,
-        modifier = modifier
-            .fillMaxWidth()
-            .heightIn(min = 124.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFF5F5F5),
-            contentColor = Color.Black,
-        ),
-        border = BorderStroke(1.dp, Color(0xFFE0E0E0)),
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            verticalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = "Personal",
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = Color(0xFF555555),
-                )
-                Text(
-                    text = "Caja real",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = Color(0xFF777777),
-                )
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = formatCurrency(balanceMinor),
-                style = MaterialTheme.typography.headlineLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 32.sp,
-                ),
-                color = Color.Black,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
+    return when {
+        movementDate == today -> "Hoy"
+        movementDate == today.minusDays(1) -> "Ayer"
+        else -> movementDate.format(DateTimeFormatter.ofPattern("d MMM", Locale("es", "ES")))
     }
-}
-
-/**
- * Bloque de Adelantos siempre visible (incluso a cero).
- */
-@Composable
-private fun AdvancesBlock(
-    netDebtMinor: Long,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Surface(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        color = Color(0xFFFAFAFA),
-        border = BorderStroke(1.dp, Color(0xFFE5E5E5)),
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Icon(
-                imageVector = Icons.Default.SwapHoriz,
-                contentDescription = null,
-                tint = Color.DarkGray,
-                modifier = Modifier.size(24.dp),
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "Adelantos entre cuentas",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color.Gray,
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                val debtText = when {
-                    netDebtMinor > 0L -> "Familia te debe ${formatCurrency(netDebtMinor)}"
-                    netDebtMinor < 0L -> "Personal debe a Familia ${formatCurrency(abs(netDebtMinor))}"
-                    else -> "Sin adelantos pendientes"
-                }
-                Text(
-                    text = debtText,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontWeight = if (netDebtMinor != 0L) FontWeight.Bold else FontWeight.Medium,
-                    ),
-                    color = if (netDebtMinor != 0L) Color.Black else Color.DarkGray,
-                )
-            }
-            Icon(
-                imageVector = Icons.Default.ChevronRight,
-                contentDescription = "Ver adelantos",
-                tint = Color.Gray,
-                modifier = Modifier.size(20.dp),
-            )
-        }
-    }
-}
-
-private fun formatCurrency(minorAmount: Long): String {
-    val amount = minorAmount / 100.0
-    val format = NumberFormat.getCurrencyInstance(Locale("es", "ES"))
-    format.currency = Currency.getInstance("EUR")
-    return format.format(amount)
 }

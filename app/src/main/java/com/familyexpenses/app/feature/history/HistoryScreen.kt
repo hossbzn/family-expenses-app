@@ -66,6 +66,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.familyexpenses.app.core.ui.MoneyText
 import com.familyexpenses.app.data.local.entity.AccountEntity
 import com.familyexpenses.app.data.local.entity.CategoryEntity
 import com.familyexpenses.app.domain.model.MovementKind
@@ -73,6 +74,11 @@ import com.familyexpenses.app.domain.usecase.MovementAccountFilter
 import com.familyexpenses.app.domain.usecase.MovementPeriodFilter
 import com.familyexpenses.app.domain.usecase.MovementTypeFilter
 import com.familyexpenses.app.feature.expense.resolveCategoryIcon
+import com.familyexpenses.app.ui.theme.OffWhiteBackground
+import com.familyexpenses.app.ui.theme.OutlineBorder
+import com.familyexpenses.app.ui.theme.PetroleumBlueContainer
+import com.familyexpenses.app.ui.theme.PetroleumBluePrimary
+import com.familyexpenses.app.ui.theme.PureWhiteSurface
 
 @Composable
 fun HistoryRoute(
@@ -317,10 +323,11 @@ fun HistoryScreen(
                         ) { row ->
                             CompactMovementRow(
                                 row = row,
+                                privacyModeEnabled = uiState.privacyModeEnabled,
                                 onClick = { onMovementClick(row.kind, row.id) },
                             )
                             HorizontalDivider(
-                                color = Color(0xFFF3F3F3),
+                                color = OutlineBorder,
                                 modifier = Modifier.padding(start = 60.dp, end = 16.dp),
                             )
                         }
@@ -422,8 +429,8 @@ private fun AccountSegmentChip(
         onClick = onClick,
         modifier = modifier.heightIn(min = 48.dp),
         shape = RoundedCornerShape(10.dp),
-        color = if (isSelected) Color.Black else Color(0xFFF5F5F5),
-        border = BorderStroke(1.dp, if (isSelected) Color.Black else Color(0xFFE0E0E0)),
+        color = if (isSelected) PetroleumBluePrimary else PureWhiteSurface,
+        border = BorderStroke(1.dp, if (isSelected) PetroleumBluePrimary else OutlineBorder),
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(
@@ -431,7 +438,7 @@ private fun AccountSegmentChip(
                 style = MaterialTheme.typography.labelLarge.copy(
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                 ),
-                color = if (isSelected) Color.White else Color.Black,
+                color = if (isSelected) Color.White else PetroleumBluePrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -549,7 +556,7 @@ private fun PeriodChip(
         onClick = onClick,
         label = { Text(label) },
         colors = FilterChipDefaults.filterChipColors(
-            selectedContainerColor = Color.Black,
+            selectedContainerColor = PetroleumBluePrimary,
             selectedLabelColor = Color.White,
         ),
     )
@@ -581,7 +588,7 @@ private fun SecondaryFiltersRow(
                     Text(selectedCategoryName ?: "Categoría")
                 },
                 colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = Color.Black,
+                    selectedContainerColor = PetroleumBluePrimary,
                     selectedLabelColor = Color.White,
                     selectedLeadingIconColor = Color.White,
                 ),
@@ -601,7 +608,7 @@ private fun SecondaryFiltersRow(
                 onClick = { onTypeSelected(typeFilter) },
                 label = { Text(label) },
                 colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = Color.Black,
+                    selectedContainerColor = PetroleumBluePrimary,
                     selectedLabelColor = Color.White,
                 ),
             )
@@ -617,6 +624,7 @@ private fun SecondaryFiltersRow(
 @Composable
 private fun CompactMovementRow(
     row: MovementRowUiModel,
+    privacyModeEnabled: Boolean,
     onClick: () -> Unit,
 ) {
     Surface(
@@ -635,7 +643,7 @@ private fun CompactMovementRow(
             Surface(
                 modifier = Modifier.size(36.dp),
                 shape = RoundedCornerShape(10.dp),
-                color = Color(0xFFF3F3F3),
+                color = PetroleumBlueContainer,
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     val icon = when (row.kind) {
@@ -645,7 +653,7 @@ private fun CompactMovementRow(
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        tint = Color.Black,
+                        tint = PetroleumBluePrimary,
                         modifier = Modifier.size(18.dp),
                     )
                 }
@@ -665,18 +673,19 @@ private fun CompactMovementRow(
                     Text(
                         text = row.line1Title,
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = Color.Black,
+                        color = PetroleumBluePrimary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier
                             .weight(1f)
                             .padding(end = 8.dp),
                     )
-                    Text(
-                        text = row.amountText,
+                    MoneyText(
+                        amountMinor = row.amountMinor,
+                        isPrivacyModeEnabled = privacyModeEnabled,
+                        showPlusSign = row.kind == MovementKind.INCOME,
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                        color = Color.Black,
-                        maxLines = 1,
+                        color = if (row.kind == MovementKind.INCOME) Color(0xFF2E7D32) else PetroleumBluePrimary,
                     )
                 }
 

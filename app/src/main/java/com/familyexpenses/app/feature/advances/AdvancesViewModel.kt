@@ -7,16 +7,11 @@ import com.familyexpenses.app.data.repository.AccountRepository
 import com.familyexpenses.app.data.repository.ExpenseRepository
 import com.familyexpenses.app.data.repository.HistoryRepository
 import com.familyexpenses.app.data.repository.TransferRepository
+import com.familyexpenses.app.data.repository.UserPreferencesRepository
 import com.familyexpenses.app.domain.model.HistoryItem
 import com.familyexpenses.app.domain.model.MovementKind
 import com.familyexpenses.app.domain.usecase.ComputeNetDebtUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import java.text.NumberFormat
 import java.time.Instant
 import java.time.ZoneId
@@ -24,6 +19,12 @@ import java.time.format.DateTimeFormatter
 import java.util.Currency
 import java.util.Locale
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 
 enum class AdvancesHistoryFilter {
     ALL,
@@ -37,6 +38,7 @@ class AdvancesViewModel @Inject constructor(
     expenseRepository: ExpenseRepository,
     transferRepository: TransferRepository,
     historyRepository: HistoryRepository,
+    userPreferencesRepository: UserPreferencesRepository,
     private val computeNetDebtUseCase: ComputeNetDebtUseCase,
 ) : ViewModel() {
 
@@ -47,8 +49,20 @@ class AdvancesViewModel @Inject constructor(
         expenseRepository.observeTransactions(),
         transferRepository.observeTransfers(),
         historyRepository.observeHistory(),
+        userPreferencesRepository.observePrivacyModeEnabled(),
         selectedFilter,
-    ) { accounts, transactions, transfers, historyItems, filter ->
+    ) { flowArray ->
+        @Suppress("UNCHECKED_CAST")
+        val accounts = flowArray[0] as List<com.familyexpenses.app.data.local.entity.AccountEntity>
+        @Suppress("UNCHECKED_CAST")
+        val transactions = flowArray[1] as List<com.familyexpenses.app.data.local.entity.TransactionEntity>
+        @Suppress("UNCHECKED_CAST")
+        val transfers = flowArray[2] as List<com.familyexpenses.app.data.local.entity.TransferEntity>
+        @Suppress("UNCHECKED_CAST")
+        val historyItems = flowArray[3] as List<HistoryItem>
+        val privacyEnabled = flowArray[4] as Boolean
+        val filter = flowArray[5] as AdvancesHistoryFilter
+
         val netDebtMinor = computeNetDebtUseCase.compute(
             accounts = accounts,
             transactions = transactions,
@@ -84,6 +98,7 @@ class AdvancesViewModel @Inject constructor(
             advancesCount = advancesCount,
             reimbursementsCount = reimbursementsCount,
             items = filteredItems.map { it.toAdvanceRowUiModel() },
+            privacyModeEnabled = privacyEnabled,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -121,6 +136,7 @@ class AdvancesViewModel @Inject constructor(
             isReimbursement = isReimbursement,
             title = title,
             subtitle = subtitle,
+            amountMinor = amountMinor,
             amountText = formatCurrency(amountMinor),
         )
     }
@@ -140,6 +156,7 @@ data class AdvancesUiState(
     val advancesCount: Int = 0,
     val reimbursementsCount: Int = 0,
     val items: List<AdvanceHistoryRowUiModel> = emptyList(),
+    val privacyModeEnabled: Boolean = false,
 )
 
 data class AdvanceHistoryRowUiModel(
@@ -148,5 +165,6 @@ data class AdvanceHistoryRowUiModel(
     val isReimbursement: Boolean,
     val title: String,
     val subtitle: String,
+    val amountMinor: Long,
     val amountText: String,
 )

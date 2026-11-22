@@ -3,6 +3,8 @@ package com.familyexpenses.app.di
 import android.content.Context
 import androidx.room.Room
 import com.familyexpenses.app.data.local.AppDatabase
+import com.familyexpenses.app.data.local.RoomTransactionRunner
+import com.familyexpenses.app.data.local.TransactionRunner
 import com.familyexpenses.app.data.local.dao.AccountDao
 import com.familyexpenses.app.data.local.dao.BalanceAdjustmentDao
 import com.familyexpenses.app.data.local.dao.CategoryDao
@@ -10,6 +12,7 @@ import com.familyexpenses.app.data.local.dao.RecurrenceOccurrenceDao
 import com.familyexpenses.app.data.local.dao.RecurrenceRuleDao
 import com.familyexpenses.app.data.local.dao.TransactionDao
 import com.familyexpenses.app.data.local.dao.TransferDao
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -52,4 +55,13 @@ object DatabaseModule {
 
     @Provides
     fun provideRecurrenceOccurrenceDao(database: AppDatabase): RecurrenceOccurrenceDao = database.recurrenceOccurrenceDao()
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class DatabaseBindsModule {
+
+    @Binds
+    @Singleton
+    abstract fun bindTransactionRunner(impl: RoomTransactionRunner): TransactionRunner
 }

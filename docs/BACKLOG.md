@@ -104,21 +104,21 @@
 - [x] Ajuste automático al último día real del mes para días 29/30/31 y 29 de febrero en años no bisiestos.
 - [x] Pruebas unitarias de cálculo de fechas y ajuste de fin de mes (`RecurrenceCalculatorTest`).
 
-### REC-04 — Modos y generación de ocurrencias (IN_PROGRESS, P1)
-- [ ] Modo por regla automático o pendiente de confirmar.
-- [ ] Automático registra por motor económico V6; pendiente no modifica caja/deuda/análisis.
-- [ ] Recuperar fechas activas vencidas al reabrir, omitiendo períodos pausados/archivados.
+### REC-04 — Modos y generación de ocurrencias (DONE, P1)
+- [x] Implementado `ProcessRecurringRulesUseCase` distinguiendo modo `AUTOMATIC` (registra directo con motor V6) y modo `PENDING` (genera ocurrencia sin alterar caja/deuda).
+- [x] Reconciliación idempotente de fechas vencidas sin duplicados en transacciones Room atómicas (`TransactionRunner`).
+- [x] Pruebas unitarias de generación automática y pendiente (`ProcessRecurringRulesUseCaseTest`).
 
-### REC-05 — Bandeja y gestión individual (TODO, P1)
-- [ ] Mostrar pendientes, revisar importe/fecha (programada por defecto), confirmar.
-- [ ] Posponer revisión sin alterar fecha económica o futuras fechas; omitir ejecución sin generar gasto.
-- [ ] No cambiar pendientes al editar su regla.
+### REC-05 — Bandeja y gestión individual (DONE, P1)
+- [x] Implementado `ManagePendingOccurrencesUseCase`: confirmación individual con fecha/importe editable y aplicación estricta de contabilidad V6.
+- [x] Acciones de omitir (`SKIPPED`) y posponer sin alterar fecha económica ni reglas futuras.
+- [x] Pruebas unitarias de gestión individual (`ManagePendingOccurrencesUseCaseTest`).
 
-### REC-06 — Confirmación múltiple (TODO, P1)
-- [ ] Selección y revisión de fechas e importes por ocurrencia.
-- [ ] Confirmación atómica todo-o-nada e idempotente; tratar errores sin duplicar.
+### REC-06 — Confirmación múltiple (DONE, P1)
+- [x] Confirmación múltiple en `ManagePendingOccurrencesUseCase` en transacción todo-o-nada e idempotente.
+- [x] Pruebas unitarias de confirmación múltiple (`ManagePendingOccurrencesUseCaseTest`).
 
-### REC-07 — Inicio y avisos (TODO, P2)
+### REC-07 — Inicio y avisos (IN_PROGRESS, P2)
 - [ ] Aviso discreto y acceso a pendientes desde Inicio, siempre que existan.
 - [ ] Notificaciones Android opcionales desde Ajustes, agrupadas, respetando permiso y sin repetición molesta.
 - [ ] Notificaciones no condicionan generación local.

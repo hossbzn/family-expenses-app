@@ -13,7 +13,15 @@ Evolucionar y estabilizar la aplicación Android Kotlin/Jetpack Compose hacia **
 7. `docs/archive/MVP_LEGACY.md`: referencia histórica únicamente. **No aplicar reglas heredadas incompatibles**.
 
 Si documentos V6 divergen, detenerse y proponer corrección. No declarar una historia terminada solo porque compile. Marcar DONE únicamente tras cumplir la implementación, pruebas automatizadas, `testDebugUnitTest`, `lintDebug`, `assembleDebug` y verificación funcional.
+## Registro obligatorio de feedback
 
+Después de leer este archivo, leer siempre `docs/AI_REVIEW_LOG.md`. Ese documento conserva los hallazgos y resultados de validación entre iteraciones.
+
+- No borrar ni reescribir entradas históricas.
+- Antes de trabajar, identificar los hallazgos `OPEN` relacionados con la tarea.
+- Mantener sus identificadores `REV-xxx` en commits, informes o pull requests cuando corresponda.
+- No marcar un hallazgo `RESOLVED` sin commit y evidencia reproducible de pruebas.
+- Al terminar una iteración de corrección o revisión, añadir su resultado al historial aunque la solución haya fallado.
 ## Reglas contables INNEGOCIABLES
 - Dos cuentas visibles: Familia y Personal; modelo ampliable.
 - Gasto: `payingAccountId` (dinero que sale) y `responsibleAccountId` (imputación analítica), **ambos independientes**.

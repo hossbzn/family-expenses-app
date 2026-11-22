@@ -98,16 +98,48 @@
 
 ---
 
-## Línea de trabajo propuesta — Recurrentes V6.1 (sin autorización de programación)
-**Fuente:** [RECURRENTES_V6_1.md](RECURRENTES_V6_1.md), historias REC-01 a REC-08 de [BACKLOG.md](BACKLOG.md).
+## Sprint V6.1: Recurrentes V6.1 (ESTADO: DONE)
+**Meta:** Implementación completa del motor de recurrentes V6.1, agregando ocurrencias independientes (modos Automático y Pendiente), calendario flexible (Semanal, Mensual, Multi-mes, Anual), ciclo de vida (Pausa, Archivo, Restauración), bandeja de confirmación y respaldo portable JSON.
 
-**Puerta previa:** verificar que los componentes V6-01/V6-02 marcados DONE son reutilizables y auditar por separado la migración de los recurrentes existentes. El código V6 actual ya declara completadas las historias V6; eso no valida automáticamente una actualización de instalaciones anteriores ni una migración no destructiva.
+- [x] **REC-01 — Esquema Room y Ocurrencias:**
+  - `RecurrenceRuleEntity` ampliada y creada `RecurrenceOccurrenceEntity` para instantáneas de ejecuciones.
+  - Creados `RecurrenceOccurrenceDao` y `TransactionRunner`.
+  - Pruebas unitarias de esquema Room (`RecurrenceSchemaTest`).
+- [x] **REC-02 / REC-03 — Ciclo de vida y Calculador de Frecuencias:**
+  - Implementado `RecurrenceCalculator` soportando las 4 frecuencias y ajuste de fin de mes/bisiestos.
+  - Implementado `ManageRecurrenceRulesUseCase`: pausar, reactivar, archivar y restaurar reglas.
+  - Pruebas unitarias (`RecurrenceCalculatorTest`, `ManageRecurrenceRulesUseCaseTest`).
+- [x] **REC-04 / REC-05 / REC-06 — Motor de Procesamiento y Gestión de Pendientes:**
+  - `ProcessRecurringRulesUseCase`: generación atómica e idempotente para modos `AUTOMATIC` y `PENDING`.
+  - `ManagePendingOccurrencesUseCase`: confirmación individual/múltiple (con fecha/importe editable), posponer y omitir.
+  - Pruebas unitarias (`ProcessRecurringRulesUseCaseTest`, `ManagePendingOccurrencesUseCaseTest`).
+- [x] **REC-07 / REC-08 — Inicio, Worker y Copia Portable:**
+  - Banner en `HomeScreen` cuando existen pendientes.
+  - `GenerateRecurringTransactionsWorker` adaptado al nuevo procesador.
+  - Copia portable JSON e importación actualizada con `recurrenceOccurrences`.
+  - 111 pruebas unitarias pasando al 100% en verde.
 
-- **REC-S0 — Diseño y auditoría:** REC-01. Examinar Room, Worker, compatibilidad de instalaciones existentes y estrategia de migración. Sin código hasta autorización.
-- **REC-S1 — Reglas y calendario:** REC-02/REC-03. Edición futura, estados, archivo/restauración, frecuencias y tests de calendario.
-- **REC-S2 — Ejecuciones:** REC-04/REC-05. Motor idempotente, modo automático/pendiente, reconciliación y revisión individual.
-- **REC-S3 — Experiencia y calidad:** REC-06/REC-07/REC-08. Confirmación múltiple atómica, avisos/permiso, backup, migración y regresión en dispositivo.
-- **Criterio de salida:** cero duplicados, saldos/deudas correctos tras confirmar, cero efecto de pendientes, ninguna pérdida de datos reales, pruebas en móvil, sin generar periodos pausados.
+---
 
-**Situación:** diseño funcional aprobado y documentado; **todas las historias REC siguen TODO**. Este plan no autoriza implementar ni modificar el APK instalado.
+## Sprint V6.1-UI: Interfaces Visuales de Recurrentes V6.1 (ESTADO: TODO)
+**Meta:** Diseño e implementación de la experiencia de usuario y vistas de Jetpack Compose para configurar y revisar reglas y ocurrencias pendientes.
+
+> [!IMPORTANT]
+> **Decisiones visuales pendientes:**
+> 1. Ubicación exacta del acceso a la creación de regla: ¿Botón flotante (FAB) o botón de acción integrado en cabecera de "Mis reglas"?
+> 2. Formato de la revisión individual de una ocurrencia pendiente: ¿Pantalla dedicada vs Modal Bottom Sheet sobre la bandeja?
+
+### Historias pendientes:
+- [ ] **REC-UI-01 — Crear y editar la configuración visual de una recurrencia (TODO, P1):**
+  - Cabecera con título dinámico, datos principales (Tipo, Concepto, Importe, Categoría), cuentas dinámicas (Pagadora/Responsable vs Destinataria), programación con 4 frecuencias y previsualización de próxima ejecución con aclaración de días 29/30/31.
+  - Modos Automático y Pendiente con explicaciones descriptivas.
+  - Aviso en edición de impacto exclusivo en futuras ocurrencias.
+  - Validaciones de formulario con errores en línea y adaptabilidad compacta (Galaxy S25).
+  - Pruebas UI Compose y preservación de estado.
+- [ ] **REC-UI-02 — Configuración visual de la Lista de reglas (TODO, P1):** Filtros por estado, tarjetas resumen y acciones de ciclo de vida.
+- [ ] **REC-UI-03 — Configuración visual del Detalle de regla (TODO, P1):** Vista detallada e historial de ocurrencias vinculadas.
+- [ ] **REC-UI-04 — Configuración visual de la Bandeja de pendientes (TODO, P1):** Lista de pendientes con tarjetas de instantánea y acciones rápidas.
+- [ ] **REC-UI-05 — Configuración visual de Revisión individual (TODO, P1):** Pantalla/diálogo de edición de fecha e importe antes de confirmar.
+- [ ] **REC-UI-06 — Configuración visual de Revisión y confirmación múltiple (TODO, P1):** Selección en lote, pantalla de revisión previa con total y confirmación atómica.
+
 

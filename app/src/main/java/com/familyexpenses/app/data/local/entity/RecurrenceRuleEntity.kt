@@ -4,7 +4,9 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.familyexpenses.app.core.model.RecurrenceExecutionMode
 import com.familyexpenses.app.core.model.RecurrenceFrequency
+import com.familyexpenses.app.core.model.RecurrenceRuleStatus
 import com.familyexpenses.app.core.model.TransactionType
 
 @Entity(
@@ -34,6 +36,7 @@ import com.familyexpenses.app.core.model.TransactionType
         Index("responsibleAccountId"),
         Index("categoryId"),
         Index("nextOccurrenceAt"),
+        Index("status"),
     ],
 )
 data class RecurrenceRuleEntity(
@@ -44,11 +47,15 @@ data class RecurrenceRuleEntity(
     val categoryId: String,
     val amountMinor: Long,
     val note: String? = null,
-    val frequency: RecurrenceFrequency = RecurrenceFrequency.MONTHLY,
-    val dayOfMonth: Int = 1,
+    val frequency: RecurrenceFrequency,
+    val intervalCount: Int? = null,
+    val dayOfWeek: Int? = null,
+    val dayOfMonth: Int? = null,
+    val monthOfYear: Int? = null,
+    val mode: RecurrenceExecutionMode = RecurrenceExecutionMode.AUTOMATIC,
+    val status: RecurrenceRuleStatus = RecurrenceRuleStatus.ACTIVE,
     val startAt: Long,
     val endAt: Long? = null,
     val nextOccurrenceAt: Long,
-    val isActive: Boolean = true,
     val createdAt: Long,
 )

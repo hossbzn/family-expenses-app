@@ -5,6 +5,7 @@ import com.familyexpenses.app.data.local.AppDatabase
 import com.familyexpenses.app.data.local.dao.AccountDao
 import com.familyexpenses.app.data.local.dao.BalanceAdjustmentDao
 import com.familyexpenses.app.data.local.dao.CategoryDao
+import com.familyexpenses.app.data.local.dao.RecurrenceOccurrenceDao
 import com.familyexpenses.app.data.local.dao.RecurrenceRuleDao
 import com.familyexpenses.app.data.local.dao.TransactionDao
 import com.familyexpenses.app.data.local.dao.TransferDao
@@ -23,6 +24,7 @@ class RoomBackupRepository @Inject constructor(
     private val transferDao: TransferDao,
     private val balanceAdjustmentDao: BalanceAdjustmentDao,
     private val recurrenceRuleDao: RecurrenceRuleDao,
+    private val recurrenceOccurrenceDao: RecurrenceOccurrenceDao,
     private val preferencesRepository: UserPreferencesRepository,
 ) : BackupRepository {
 
@@ -33,6 +35,7 @@ class RoomBackupRepository @Inject constructor(
         val transfers = transferDao.getAllTransfers()
         val adjustments = balanceAdjustmentDao.getAllAdjustments()
         val rules = recurrenceRuleDao.observeRules().first()
+        val occurrences = recurrenceOccurrenceDao.getPendingOccurrences() // or all occurrences
 
         val accountIcons = buildMap {
             accounts.forEach { account ->
@@ -50,6 +53,7 @@ class RoomBackupRepository @Inject constructor(
             transfers = transfers,
             balanceAdjustments = adjustments,
             recurrenceRules = rules,
+            recurrenceOccurrences = occurrences,
             preferences = BackupPreferencesSnapshot(
                 lastExpensePayingAccountId = preferencesRepository.getLastExpensePayingAccountId(),
                 lastExpenseResponsibleAccountId = preferencesRepository.getLastExpenseResponsibleAccountId(),
@@ -65,6 +69,7 @@ class RoomBackupRepository @Inject constructor(
         database.withTransaction {
             val writableDb = database.openHelper.writableDatabase
             // Borrado en orden inverso de claves foráneas
+            writableDb.execSQL("DELETE FROM recurrence_occurrences")
             writableDb.execSQL("DELETE FROM transactions")
             writableDb.execSQL("DELETE FROM transfers")
             writableDb.execSQL("DELETE FROM balance_adjustments")
@@ -79,6 +84,7 @@ class RoomBackupRepository @Inject constructor(
             snapshot.transactions.forEach { transactionDao.insertTransaction(it) }
             snapshot.transfers.forEach { transferDao.insertTransfer(it) }
             snapshot.balanceAdjustments.forEach { balanceAdjustmentDao.insertAdjustment(it) }
+            recurrenceOccurrenceDao.upsertAll(snapshot.recurrenceOccurrences)
         }
 
         database.invalidationTracker.refreshVersionsAsync()

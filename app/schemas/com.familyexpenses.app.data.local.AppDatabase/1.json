@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "4aea59698ce0b042d6415d198fe0a40d",
+    "identityHash": "ba296696124b269922b1b5cb87a7d172",
     "entities": [
       {
         "tableName": "accounts",
@@ -476,7 +476,7 @@
       },
       {
         "tableName": "recurrence_rules",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `type` TEXT NOT NULL, `payingAccountId` TEXT NOT NULL, `responsibleAccountId` TEXT NOT NULL, `categoryId` TEXT NOT NULL, `amountMinor` INTEGER NOT NULL, `note` TEXT, `frequency` TEXT NOT NULL, `dayOfMonth` INTEGER NOT NULL, `startAt` INTEGER NOT NULL, `endAt` INTEGER, `nextOccurrenceAt` INTEGER NOT NULL, `isActive` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`payingAccountId`) REFERENCES `accounts`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT , FOREIGN KEY(`responsibleAccountId`) REFERENCES `accounts`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT , FOREIGN KEY(`categoryId`) REFERENCES `categories`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `type` TEXT NOT NULL, `payingAccountId` TEXT NOT NULL, `responsibleAccountId` TEXT NOT NULL, `categoryId` TEXT NOT NULL, `amountMinor` INTEGER NOT NULL, `note` TEXT, `frequency` TEXT NOT NULL, `intervalCount` INTEGER, `dayOfWeek` INTEGER, `dayOfMonth` INTEGER, `monthOfYear` INTEGER, `mode` TEXT NOT NULL, `status` TEXT NOT NULL, `startAt` INTEGER NOT NULL, `endAt` INTEGER, `nextOccurrenceAt` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`payingAccountId`) REFERENCES `accounts`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT , FOREIGN KEY(`responsibleAccountId`) REFERENCES `accounts`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT , FOREIGN KEY(`categoryId`) REFERENCES `categories`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT )",
         "fields": [
           {
             "fieldPath": "id",
@@ -527,9 +527,39 @@
             "notNull": true
           },
           {
+            "fieldPath": "intervalCount",
+            "columnName": "intervalCount",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "dayOfWeek",
+            "columnName": "dayOfWeek",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
             "fieldPath": "dayOfMonth",
             "columnName": "dayOfMonth",
             "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "monthOfYear",
+            "columnName": "monthOfYear",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "mode",
+            "columnName": "mode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -547,12 +577,6 @@
           {
             "fieldPath": "nextOccurrenceAt",
             "columnName": "nextOccurrenceAt",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "isActive",
-            "columnName": "isActive",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -605,6 +629,15 @@
             ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_recurrence_rules_nextOccurrenceAt` ON `${TABLE_NAME}` (`nextOccurrenceAt`)"
+          },
+          {
+            "name": "index_recurrence_rules_status",
+            "unique": false,
+            "columnNames": [
+              "status"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_recurrence_rules_status` ON `${TABLE_NAME}` (`status`)"
           }
         ],
         "foreignKeys": [
@@ -642,12 +675,158 @@
             ]
           }
         ]
+      },
+      {
+        "tableName": "recurrence_occurrences",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `ruleId` TEXT NOT NULL, `status` TEXT NOT NULL, `scheduledAt` INTEGER NOT NULL, `amountMinor` INTEGER NOT NULL, `type` TEXT NOT NULL, `payingAccountId` TEXT NOT NULL, `responsibleAccountId` TEXT NOT NULL, `categoryId` TEXT NOT NULL, `note` TEXT, `transactionId` TEXT, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`ruleId`) REFERENCES `recurrence_rules`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT , FOREIGN KEY(`transactionId`) REFERENCES `transactions`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ruleId",
+            "columnName": "ruleId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "scheduledAt",
+            "columnName": "scheduledAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "amountMinor",
+            "columnName": "amountMinor",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "payingAccountId",
+            "columnName": "payingAccountId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "responsibleAccountId",
+            "columnName": "responsibleAccountId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "categoryId",
+            "columnName": "categoryId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "transactionId",
+            "columnName": "transactionId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_recurrence_occurrences_ruleId",
+            "unique": false,
+            "columnNames": [
+              "ruleId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_recurrence_occurrences_ruleId` ON `${TABLE_NAME}` (`ruleId`)"
+          },
+          {
+            "name": "index_recurrence_occurrences_transactionId",
+            "unique": false,
+            "columnNames": [
+              "transactionId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_recurrence_occurrences_transactionId` ON `${TABLE_NAME}` (`transactionId`)"
+          },
+          {
+            "name": "index_recurrence_occurrences_status",
+            "unique": false,
+            "columnNames": [
+              "status"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_recurrence_occurrences_status` ON `${TABLE_NAME}` (`status`)"
+          },
+          {
+            "name": "index_recurrence_occurrences_scheduledAt",
+            "unique": false,
+            "columnNames": [
+              "scheduledAt"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_recurrence_occurrences_scheduledAt` ON `${TABLE_NAME}` (`scheduledAt`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "recurrence_rules",
+            "onDelete": "RESTRICT",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "ruleId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "transactions",
+            "onDelete": "SET NULL",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "transactionId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4aea59698ce0b042d6415d198fe0a40d')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ba296696124b269922b1b5cb87a7d172')"
     ]
   }
 }

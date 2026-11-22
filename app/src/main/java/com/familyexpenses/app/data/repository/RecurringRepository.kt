@@ -1,5 +1,7 @@
 package com.familyexpenses.app.data.repository
 
+import com.familyexpenses.app.core.model.RecurrenceFrequency
+import com.familyexpenses.app.core.model.RecurrenceRuleStatus
 import com.familyexpenses.app.data.local.dao.RecurrenceRuleDao
 import com.familyexpenses.app.data.local.entity.RecurrenceRuleEntity
 import com.familyexpenses.app.domain.model.RecurringRuleDraft
@@ -28,10 +30,11 @@ class RecurringRepository @Inject constructor(
                 categoryId = draft.categoryId,
                 amountMinor = draft.amountMinor,
                 note = draft.note?.takeIf { it.isNotBlank() },
+                frequency = RecurrenceFrequency.MONTHLY,
                 startAt = draft.startAt,
                 endAt = draft.endAt,
                 nextOccurrenceAt = firstOccurrenceAt,
-                isActive = true,
+                status = RecurrenceRuleStatus.ACTIVE,
                 createdAt = System.currentTimeMillis(),
             ),
         )
@@ -43,6 +46,7 @@ class RecurringRepository @Inject constructor(
     }
 
     suspend fun setActive(ruleId: String, isActive: Boolean) {
-        recurrenceRuleDao.updateActiveState(ruleId, isActive)
+        val status = if (isActive) RecurrenceRuleStatus.ACTIVE else RecurrenceRuleStatus.PAUSED
+        recurrenceRuleDao.updateStatus(ruleId, status)
     }
 }

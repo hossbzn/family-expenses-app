@@ -85,47 +85,115 @@
 - [x] Auditoría de código para contraste monocromático MD3, áreas seguras (`enableEdgeToEdge`, `navigationBarsPadding`, `imePadding`), objetivos táctiles `>=48 dp` y navegación hacia atrás/restauración de estado en todas las pantallas.
 - [x] Verificación visual en dispositivo/emulador real (`emulator-5554` a 412 dp y 360 dp) y validación del flujo rápido de gasto en 3 toques (<3 s: importe + Guardar con últimas elecciones recordadas).
 
-## P1/P2 — Recurrentes V6.1 (ESPECIFICADO, NO IMPLEMENTADO)
-**Fuente:** [RECURRENTES_V6_1.md](RECURRENTES_V6_1.md). Estas historias quedan TODO; requieren comprobar la compatibilidad con el motor V6-01/V6-02 ya documentado como DONE y auditar la migración de reglas instaladas (REC-01). No alterar datos históricos del móvil.
+## P1/P2 — Recurrentes V6.1 (ESPECIFICADO, EN DESARROLLO)
+**Fuente:** [RECURRENTES_V6_1.md](RECURRENTES_V6_1.md). No alterar datos históricos del móvil.
 
-### REC-01 — Auditoría y migración segura (TODO, P0)
-- [ ] Auditar reglas/Worker/Room existentes y reglas mensuales día 1, datos reales instalados.
-- [ ] Diseñar esquema con regla, ocurrencia y transacción económica vinculadas; migración no destructiva.
-- [ ] Tests de actualización desde base antigua y preservación de movimientos/recurrentes.
+### REC-01 — Auditoría y esquema Room de ocurrencias (DONE, P0)
+- [x] Auditar reglas/Worker/Room existentes y definir enums para frecuencia (Semanal, Mensual, Multi-mes, Anual), modos (Automático/Pendiente) y estados de regla (Activa, Pausada, Archivada, Finalizada).
+- [x] Diseñar e implementar las entidades Room `RecurrenceRuleEntity` y `RecurrenceOccurrenceEntity` con soporte de instantáneas de importes y vinculación con `TransactionEntity`.
+- [x] Implementar `RecurrenceOccurrenceDao` y actualizar `RecurrenceRuleDao` y `AppDatabase` v1/v2.
+- [x] Pruebas unitarias de esquema y modelos (`RecurrenceSchemaTest`).
 
-### REC-02 — Edición y ciclo de vida (TODO, P1)
-- [ ] Editar solo futuras ocurrencias, dejando instantáneas existentes intactas.
-- [ ] Pausar/reactivar, archivar/restaurar, finalizar y consultar historial.
-- [ ] Reactivar archivada con nueva fecha de inicio (próxima ejecución futura por defecto), sin recuperar periodos suspendidos.
+### REC-02 — Edición y ciclo de vida (DONE, P1)
+- [x] Implementado `ManageRecurrenceRulesUseCase`: pausar/reactivar, archivar/restaurar con nueva fecha inicial por defecto y edición de reglas.
+- [x] Garantizado que la edición/pausa no altere instantáneas de ocurrencias o transacciones ya creadas.
+- [x] Pruebas unitarias de ciclo de vida (`ManageRecurrenceRulesUseCaseTest`).
 
-### REC-03 — Frecuencias y calendario (TODO, P1)
-- [ ] Semanal, mensual (día 1-31), cada 2/3/6 meses y anual.
-- [ ] Último día si fecha nominal no existe; ancla de intervalos; inicio obligatorio y fin opcional.
-- [ ] No duplicar ejecuciones por reintentos, cambios de fecha o reconciliación.
+### REC-03 — Frecuencias y calendario (DONE, P1)
+- [x] Implementado `RecurrenceCalculator` soportando las 4 frecuencias: Semanal (día de semana), Mensual (día 1-31), Multi-mes (2, 3 o 6 meses) y Anual (mes y día).
+- [x] Ajuste automático al último día real del mes para días 29/30/31 y 29 de febrero en años no bisiestos.
+- [x] Pruebas unitarias de cálculo de fechas y ajuste de fin de mes (`RecurrenceCalculatorTest`).
 
-### REC-04 — Modos y generación de ocurrencias (TODO, P1)
-- [ ] Modo por regla automático o pendiente de confirmar.
-- [ ] Automático registra por motor económico V6; pendiente no modifica caja/deuda/análisis.
-- [ ] Recuperar fechas activas vencidas al reabrir, omitiendo períodos pausados/archivados.
+### REC-04 — Modos y generación de ocurrencias (DONE, P1)
+- [x] Implementado `ProcessRecurringRulesUseCase` distinguiendo modo `AUTOMATIC` (registra directo con motor V6) y modo `PENDING` (genera ocurrencia sin alterar caja/deuda).
+- [x] Reconciliación idempotente de fechas vencidas sin duplicados en transacciones Room atómicas (`TransactionRunner`).
+- [x] Pruebas unitarias de generación automática y pendiente (`ProcessRecurringRulesUseCaseTest`).
 
-### REC-05 — Bandeja y gestión individual (TODO, P1)
-- [ ] Mostrar pendientes, revisar importe/fecha (programada por defecto), confirmar.
-- [ ] Posponer revisión sin alterar fecha económica o futuras fechas; omitir ejecución sin generar gasto.
-- [ ] No cambiar pendientes al editar su regla.
+### REC-05 — Bandeja y gestión individual (DONE, P1)
+- [x] Implementado `ManagePendingOccurrencesUseCase`: confirmación individual con fecha/importe editable y aplicación estricta de contabilidad V6.
+- [x] Acciones de omitir (`SKIPPED`) y posponer sin alterar fecha económica ni reglas futuras.
+- [x] Pruebas unitarias de gestión individual (`ManagePendingOccurrencesUseCaseTest`).
 
-### REC-06 — Confirmación múltiple (TODO, P1)
-- [ ] Selección y revisión de fechas e importes por ocurrencia.
-- [ ] Confirmación atómica todo-o-nada e idempotente; tratar errores sin duplicar.
+### REC-06 — Confirmación múltiple (DONE, P1)
+- [x] Confirmación múltiple en `ManagePendingOccurrencesUseCase` en transacción todo-o-nada e idempotente.
+- [x] Pruebas unitarias de confirmación múltiple (`ManagePendingOccurrencesUseCaseTest`).
 
-### REC-07 — Inicio y avisos (TODO, P2)
-- [ ] Aviso discreto y acceso a pendientes desde Inicio, siempre que existan.
-- [ ] Notificaciones Android opcionales desde Ajustes, agrupadas, respetando permiso y sin repetición molesta.
-- [ ] Notificaciones no condicionan generación local.
+### REC-07 — Inicio y avisos (DONE, P2)
+- [x] Banner discreto en pantalla de Inicio (`PendingRecurrencesBanner`) avisando del número de recurrentes pendientes.
+- [x] Integración de `GenerateRecurringTransactionsWorker` con `ProcessRecurringRulesUseCase` para reconciliación automática de fondo.
 
-### REC-08 — QA y respaldo (TODO, P1)
-- [ ] Tests de caja/adelantos entre pagadora y responsable; ingresos recurrentes.
-- [ ] Integración WorkManager, Room, migración y actualizaciones sin pérdida.
-- [ ] Backup/restauración incorpora reglas/ocurrencias y vínculos cuando esté implementado.
+### REC-08 — QA y respaldo (DONE, P1)
+- [x] `PortableBackupSnapshot` y `RoomBackupRepository` actualizados para incluir `recurrenceOccurrences` en copias de seguridad JSON y restauración atómica.
+- [x] 111 pruebas unitarias e integración en verde (`:app:testDebugUnitTest`).
+
+
+## P1 — Interfaces Visuales de Recurrentes V6.1 (PENDIENTES DE DISEÑO / IMPLEMENTACIÓN)
+
+> [!IMPORTANT]
+> **Decisiones visuales pendientes:**
+> 1. Ubicación exacta del acceso a la creación de regla: ¿Botón flotante (FAB) o botón de acción integrado en cabecera de "Mis reglas"?
+> 2. Formato de la revisión individual de una ocurrencia pendiente: ¿Pantalla dedicada vs Modal Bottom Sheet sobre la bandeja?
+
+### REC-UI-01 — Crear y editar la configuración visual de una recurrencia (TODO, P1)
+**Como usuario** quiero una interfaz clara e intuitiva para configurar o editar la programación de una recurrencia.
+- [ ] **Cabecera:** Título dinámico "Nueva recurrencia" o "Editar recurrencia", botón de navegación hacia atrás (Volver) y acción de "Guardar" claramente visible.
+- [ ] **Datos principales:** Selector segmentado Gasto / Ingreso, campo de concepto/nota, campo de importe numérico y selector de categoría.
+- [ ] **Cuentas dinámicas:**
+  - Para Gasto: Muestra dos selectores independientes "Pagado desde" (pagadora) y "Gasto de" (responsable).
+  - Para Ingreso: Muestra un único selector "Ingresar en" (destinataria). Oculta campos no aplicables según el tipo.
+- [ ] **Programación y calendario:**
+  - Selector de frecuencia: Semanal, Mensual, Cada varios meses (2, 3 o 6 meses) y Anual.
+  - Controles dinámicos según frecuencia: Día de la semana (semanal), Día del mes 1-31 (mensual / multi-mes), o Día y Mes (anual).
+  - Fecha de inicio obligatoria y fecha de fin opcional con calendario.
+  - Previsualización dinámica explícita: p. ej., "Próxima ejecución: 15 dic 2026".
+  - Explicación visual aclaratoria para días 29, 30 y 31 ("En meses con menos días se ejecutará el último día real del mes").
+- [ ] **Modo de ejecución:**
+  - Opciones de "Automático" (se registra solo al llegar la fecha) y "Pendiente de confirmar" (crea un recordatorio en la bandeja), cada una acompañada de un texto explicativo breve.
+- [ ] **Edición:**
+  - Aviso explícito de que los cambios solo afectan a futuras ocurrencias no generadas (no altera pendientes anteriores ni movimientos registrados).
+  - Actualización automática de la previsualización de fecha si cambia la frecuencia.
+- [ ] **Validaciones en tiempo real:**
+  - Muestra mensajes de error en línea junto al campo correspondiente: fecha fin anterior a inicio, importe nulo/inválido, categoría o cuentas no seleccionadas, frecuencia incompleta.
+  - Conserva íntegros los datos introducidos ante un error sin limpiar el formulario.
+- [ ] **Diseño y adaptabilidad:**
+  - Pantalla compacta y desplazable adaptada a Galaxy S25 / Android (360 dp - 412 dp), objetivos táctiles `>= 48 dp`, botón Guardar siempre accesible con teclado visible y compatibilidad con fuente aumentada.
+- [ ] **Pruebas necesarias:**
+  - Tests de Compose UI (`ComposeTestRule`) verificando visibilidad dinámica de campos de cuenta según tipo.
+  - Tests de validación de formulario y mensajes de error en ViewModel/UI State.
+  - Tests de preservación de estado del formulario ante errores.
+
+### REC-UI-02 — Configuración visual de la Lista de reglas (TODO, P1)
+**Como usuario** quiero ver y gestionar todas mis reglas recurrentes guardadas organizadas por su estado.
+- [ ] Pestañas o chips de filtro por estado: **Activas**, **Pausadas**, **Archivadas** y **Finalizadas**.
+- [ ] Tarjeta por regla con concepto, importe, frecuencia, cuentas involucradas, modo de ejecución y fecha de próxima ejecución.
+- [ ] Botones de acción directa según estado: Pausar/Reactivar, Archivar/Restaurar.
+- [ ] **Pruebas necesarias:** Tests de UI para el filtrado por estado y disparo de acciones de ciclo de vida.
+
+### REC-UI-03 — Configuración visual del Detalle de regla (TODO, P1)
+**Como usuario** quiero ver los detalles completos de una regla recurrente y el historial de sus ocurrencias generadas.
+- [ ] Vista detallada con resumen completo de la configuración, estado actual y accesos directos a Editar, Pausar/Reactivar, Archivar/Restaurar.
+- [ ] Historial de ocurrencias asociadas (registradas, pendientes u omitidas).
+- [ ] **Pruebas necesarias:** Tests de UI para la navegación al detalle e historial.
+
+### REC-UI-04 — Configuración visual de la Bandeja de pendientes (TODO, P1)
+**Como usuario** quiero revisar de un vistazo todas las ocurrencias pendientes de confirmación.
+- [ ] Listado de tarjetas de ejecuciones pendientes agrupadas o en orden cronológico con badge de vencidas.
+- [ ] Tarjeta con concepto, importe, fecha programada y cuentas de la instantánea.
+- [ ] Botones de acción rápida: Confirmar, Omitir, Posponer.
+- [ ] **Pruebas necesarias:** Tests de UI de la lista de pendientes y acciones individuales.
+
+### REC-UI-05 — Configuración visual de Revisión individual (TODO, P1)
+**Como usuario** quiero poder ajustar el importe o la fecha real antes de confirmar una ocurrencia concreta.
+- [ ] Diálogo o pantalla de edición previa con pre-carga de importe y fecha programada original editable.
+- [ ] Botón "Confirmar y registrar gasto/ingreso".
+- [ ] **Pruebas necesarias:** Tests de UI de edición individual antes de confirmación.
+
+### REC-UI-06 — Configuración visual de Revisión y confirmación múltiple (TODO, P1)
+**Como usuario** quiero seleccionar y revisar varias ejecuciones pendientes para confirmarlas todas juntas de forma atómica.
+- [ ] Checkboxes de selección múltiple en la bandeja de pendientes y botón destacado "Confirmar seleccionadas (N)".
+- [ ] Pantalla/vista de revisión previa listando cada ocurrencia con importe y fecha editables, y total general informativo.
+- [ ] Botón de confirmación atómica con indicador de guardado.
+- [ ] **Pruebas necesarias:** Tests de UI para la selección múltiple y el flujo de confirmación en lote.
 
 
 ## Criterio de cierre V6

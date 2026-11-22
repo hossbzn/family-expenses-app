@@ -123,8 +123,20 @@ class HomeViewModelTest {
         expenseRepository = ExpenseRepository(fakeTransactionDao)
         val getDashboardSummaryUseCase = GetDashboardSummaryUseCase(dashboardRepository)
 
+        val fakeOccurrenceDao = object : com.familyexpenses.app.data.local.dao.RecurrenceOccurrenceDao {
+            override suspend fun upsert(occurrence: com.familyexpenses.app.data.local.entity.RecurrenceOccurrenceEntity) {}
+            override suspend fun upsertAll(occurrences: List<com.familyexpenses.app.data.local.entity.RecurrenceOccurrenceEntity>) {}
+            override suspend fun getOccurrenceById(id: String): com.familyexpenses.app.data.local.entity.RecurrenceOccurrenceEntity? = null
+            override fun observeOccurrencesByRule(ruleId: String): Flow<List<com.familyexpenses.app.data.local.entity.RecurrenceOccurrenceEntity>> = flowOf(emptyList())
+            override fun observePendingOccurrences(): Flow<List<com.familyexpenses.app.data.local.entity.RecurrenceOccurrenceEntity>> = flowOf(emptyList())
+            override suspend fun getPendingOccurrences(): List<com.familyexpenses.app.data.local.entity.RecurrenceOccurrenceEntity> = emptyList()
+            override suspend fun updateStatus(id: String, status: com.familyexpenses.app.core.model.OccurrenceStatus, transactionId: String?) {}
+            override suspend fun hasOccurrenceForDate(ruleId: String, scheduledAt: Long): Boolean = false
+        }
+
         viewModel = HomeViewModel(
             getDashboardSummaryUseCase = getDashboardSummaryUseCase,
+            recurrenceOccurrenceDao = fakeOccurrenceDao,
             expenseRepository = expenseRepository,
         )
     }

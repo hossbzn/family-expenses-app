@@ -89,7 +89,7 @@ class BackupRestoreUseCaseTest {
                     startAt = 1000L,
                     endAt = null,
                     nextOccurrenceAt = 2000L,
-                    isActive = true,
+                    status = com.familyexpenses.app.core.model.RecurrenceRuleStatus.ACTIVE,
                     createdAt = 1000L,
                 ),
             ),

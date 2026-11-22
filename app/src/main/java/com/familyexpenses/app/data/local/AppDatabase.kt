@@ -29,7 +29,7 @@ import com.familyexpenses.app.data.local.entity.TransferEntity
         RecurrenceRuleEntity::class,
         RecurrenceOccurrenceEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 @TypeConverters(RoomConverters::class)

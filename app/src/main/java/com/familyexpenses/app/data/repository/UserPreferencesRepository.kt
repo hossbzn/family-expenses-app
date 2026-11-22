@@ -14,6 +14,8 @@ interface UserPreferencesRepository {
     fun setPrivacyModeEnabled(enabled: Boolean)
     fun observeNotificationsEnabled(): Flow<Boolean>
     fun setNotificationsEnabled(enabled: Boolean)
+    fun getLastNotifiedPendingCount(): Int
+    fun setLastNotifiedPendingCount(count: Int)
     fun getLastExpensePayingAccountId(): String?
     fun setLastExpensePayingAccountId(accountId: String)
     fun getLastExpenseResponsibleAccountId(): String?
@@ -56,6 +58,12 @@ class UserPreferencesRepositoryImpl @Inject constructor(
         notificationsState.value = enabled
     }
 
+    override fun getLastNotifiedPendingCount(): Int = prefs.getInt(KEY_LAST_NOTIFIED_PENDING_COUNT, 0)
+
+    override fun setLastNotifiedPendingCount(count: Int) {
+        prefs.edit { putInt(KEY_LAST_NOTIFIED_PENDING_COUNT, count) }
+    }
+
     override fun getLastExpensePayingAccountId(): String? = prefs.getString(KEY_LAST_EXPENSE_PAYING_ACCOUNT_ID, null)
 
     override fun setLastExpensePayingAccountId(accountId: String) {
@@ -96,6 +104,7 @@ class UserPreferencesRepositoryImpl @Inject constructor(
         private const val PREFS_NAME = "family_expenses_user_prefs"
         private const val KEY_PRIVACY_MODE_ENABLED = "privacy_mode_enabled"
         private const val KEY_NOTIFICATIONS_ENABLED = "notifications_enabled"
+        private const val KEY_LAST_NOTIFIED_PENDING_COUNT = "last_notified_pending_count"
         private const val KEY_LAST_EXPENSE_PAYING_ACCOUNT_ID = "last_expense_paying_account_id"
         private const val KEY_LAST_EXPENSE_RESPONSIBLE_ACCOUNT_ID = "last_expense_responsible_account_id"
         private const val KEY_LAST_EXPENSE_CATEGORY_ID = "last_expense_category_id"

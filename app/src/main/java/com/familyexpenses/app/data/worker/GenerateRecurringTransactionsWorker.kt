@@ -28,8 +28,12 @@ class GenerateRecurringTransactionsWorker @AssistedInject constructor(
         val notificationsEnabled = userPreferencesRepository.observeNotificationsEnabled().first()
         if (notificationsEnabled) {
             val pendingCount = recurrenceOccurrenceDao.getPendingOccurrences().size
-            if (pendingCount > 0) {
+            val lastNotifiedCount = userPreferencesRepository.getLastNotifiedPendingCount()
+            if (pendingCount > 0 && pendingCount != lastNotifiedCount) {
                 notificationHelper.showPendingRecurrencesNotification(pendingCount)
+                userPreferencesRepository.setLastNotifiedPendingCount(pendingCount)
+            } else if (pendingCount == 0 && lastNotifiedCount != 0) {
+                userPreferencesRepository.setLastNotifiedPendingCount(0)
             }
         }
 

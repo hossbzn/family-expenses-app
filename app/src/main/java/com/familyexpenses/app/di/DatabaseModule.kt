@@ -22,6 +22,25 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+private fun sanitizeDuplicateOccurrences(db: SupportSQLiteDatabase) {
+    val cursor = db.query("PRAGMA table_info(recurrence_occurrences)")
+    val tableExists = cursor.count > 0
+    cursor.close()
+
+    if (tableExists) {
+        db.execSQL(
+            """
+            DELETE FROM `recurrence_occurrences`
+            WHERE rowid NOT IN (
+                SELECT max(rowid)
+                FROM `recurrence_occurrences`
+                GROUP BY `ruleId`, `scheduledAt`
+            )
+            """.trimIndent(),
+        )
+    }
+}
+
 val MIGRATION_1_5 = object : Migration(1, 5) {
     override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL(
@@ -31,7 +50,6 @@ val MIGRATION_1_5 = object : Migration(1, 5) {
                 `ruleId` TEXT NOT NULL,
                 `status` TEXT NOT NULL,
                 `scheduledAt` INTEGER NOT NULL,
-                `reviewAt` INTEGER,
                 `amountMinor` INTEGER NOT NULL,
                 `type` TEXT NOT NULL,
                 `payingAccountId` TEXT NOT NULL,
@@ -40,6 +58,7 @@ val MIGRATION_1_5 = object : Migration(1, 5) {
                 `note` TEXT,
                 `transactionId` TEXT,
                 `createdAt` INTEGER NOT NULL,
+                `reviewAt` INTEGER,
                 PRIMARY KEY(`id`),
                 FOREIGN KEY(`ruleId`) REFERENCES `recurrence_rules`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT,
                 FOREIGN KEY(`transactionId`) REFERENCES `transactions`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL
@@ -50,13 +69,14 @@ val MIGRATION_1_5 = object : Migration(1, 5) {
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_recurrence_occurrences_transactionId` ON `recurrence_occurrences` (`transactionId`)")
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_recurrence_occurrences_status` ON `recurrence_occurrences` (`status`)")
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_recurrence_occurrences_scheduledAt` ON `recurrence_occurrences` (`scheduledAt`)")
+
+        sanitizeDuplicateOccurrences(db)
         db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_recurrence_occurrences_ruleId_scheduledAt` ON `recurrence_occurrences` (`ruleId`, `scheduledAt`)")
     }
 }
 
 val MIGRATION_2_5 = object : Migration(2, 5) {
     override fun migrate(db: SupportSQLiteDatabase) {
-        // Verificar si la tabla de ocurrencias ya existía en la variante v2
         val cursor = db.query("PRAGMA table_info(recurrence_occurrences)")
         val tableExists = cursor.count > 0
         cursor.close()
@@ -64,7 +84,6 @@ val MIGRATION_2_5 = object : Migration(2, 5) {
         if (!tableExists) {
             MIGRATION_1_5.migrate(db)
         } else {
-            // Si la tabla existía pero le faltaba reviewAt, añadir la columna
             val reviewAtCursor = db.query("PRAGMA table_info(recurrence_occurrences)")
             var hasReviewAt = false
             while (reviewAtCursor.moveToNext()) {
@@ -80,6 +99,7 @@ val MIGRATION_2_5 = object : Migration(2, 5) {
                 db.execSQL("ALTER TABLE `recurrence_occurrences` ADD COLUMN `reviewAt` INTEGER")
             }
 
+            sanitizeDuplicateOccurrences(db)
             db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_recurrence_occurrences_ruleId_scheduledAt` ON `recurrence_occurrences` (`ruleId`, `scheduledAt`)")
         }
     }

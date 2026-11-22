@@ -1,99 +1,131 @@
 package com.familyexpenses.app.data.local
 
 import android.content.Context
-import androidx.room.Room
+import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.core.app.ApplicationProvider
-import com.familyexpenses.app.core.model.AccountType
-import com.familyexpenses.app.core.model.CategoryType
-import com.familyexpenses.app.core.model.OccurrenceStatus
-import com.familyexpenses.app.core.model.RecurrenceExecutionMode
-import com.familyexpenses.app.core.model.RecurrenceFrequency
-import com.familyexpenses.app.core.model.RecurrenceRuleStatus
-import com.familyexpenses.app.core.model.TransactionType
-import com.familyexpenses.app.data.local.entity.AccountEntity
-import com.familyexpenses.app.data.local.entity.CategoryEntity
-import com.familyexpenses.app.data.local.entity.RecurrenceOccurrenceEntity
-import com.familyexpenses.app.data.local.entity.RecurrenceRuleEntity
-import kotlinx.coroutines.runBlocking
-import org.junit.After
+import com.familyexpenses.app.di.MIGRATION_1_5
+import com.familyexpenses.app.di.MIGRATION_2_5
+import com.familyexpenses.app.di.MIGRATION_3_5
+import com.familyexpenses.app.di.MIGRATION_4_5
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Before
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@Config(manifest = Config.NONE)
+@Config(sdk = [34])
 class AppDatabaseMigrationTest {
 
-    private lateinit var db: AppDatabase
-
-    @Before
-    fun setUp() {
+    private fun createHelper(version: Int, onCreate: (SupportSQLiteDatabase) -> Unit): SupportSQLiteDatabase {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        db = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java)
-            .allowMainThreadQueries()
-            .build()
-    }
+        val config = androidx.sqlite.db.SupportSQLiteOpenHelper.Configuration.builder(context)
+            .name(null) // In-memory database
+            .callback(object : androidx.sqlite.db.SupportSQLiteOpenHelper.Callback(version) {
+                override fun onCreate(db: SupportSQLiteDatabase) {
+                    onCreate(db)
+                }
 
-    @After
-    fun tearDown() {
-        db.close()
+                override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {}
+            })
+            .build()
+        val helper = FrameworkSQLiteOpenHelperFactory().create(config)
+        return helper.writableDatabase
     }
 
     @Test
-    fun testRecurrenceOccurrenceUniqueConstraintAndReviewAt() = runBlocking {
-        db.accountDao().upsert(AccountEntity("acc-personal", "Personal", AccountType.PERSONAL, "EUR", 0L, false, 1000L))
-        db.accountDao().upsert(AccountEntity("acc-family", "Familia", AccountType.FAMILY, "EUR", 0L, false, 1000L))
-        db.categoryDao().upsert(CategoryEntity("cat-supermarket", "Supermercado", "ic_cart", CategoryType.EXPENSE, 1, true, 1, false, 1000L))
+    fun testMigration1To5() {
+        val db = createHelper(1) { database ->
+            database.execSQL("CREATE TABLE IF NOT EXISTS `accounts` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `currencyCode` TEXT NOT NULL, `initialBalanceMinor` INTEGER NOT NULL, `isArchived` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+            database.execSQL("CREATE TABLE IF NOT EXISTS `categories` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `icon` TEXT NOT NULL, `type` TEXT NOT NULL, `orderIndex` INTEGER NOT NULL, `isFavorite` INTEGER NOT NULL, `favoritePosition` INTEGER, `isArchived` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+            database.execSQL("CREATE TABLE IF NOT EXISTS `transactions` (`id` TEXT NOT NULL, `type` TEXT NOT NULL, `amountMinor` INTEGER NOT NULL, `payingAccountId` TEXT NOT NULL, `responsibleAccountId` TEXT NOT NULL, `categoryId` TEXT NOT NULL, `occurredAt` INTEGER NOT NULL, `note` TEXT, `source` TEXT NOT NULL, `recurrenceRuleId` TEXT, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+            database.execSQL("CREATE TABLE IF NOT EXISTS `transfers` (`id` TEXT NOT NULL, `type` TEXT NOT NULL, `sourceAccountId` TEXT NOT NULL, `destinationAccountId` TEXT NOT NULL, `amountMinor` INTEGER NOT NULL, `occurredAt` INTEGER NOT NULL, `note` TEXT, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+            database.execSQL("CREATE TABLE IF NOT EXISTS `balance_adjustments` (`id` TEXT NOT NULL, `accountId` TEXT NOT NULL, `amountDeltaMinor` INTEGER NOT NULL, `reason` TEXT NOT NULL, `occurredAt` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+            database.execSQL("CREATE TABLE IF NOT EXISTS `recurrence_rules` (`id` TEXT NOT NULL, `type` TEXT NOT NULL, `payingAccountId` TEXT NOT NULL, `responsibleAccountId` TEXT NOT NULL, `categoryId` TEXT NOT NULL, `amountMinor` INTEGER NOT NULL, `note` TEXT, `frequency` TEXT NOT NULL, `intervalCount` INTEGER, `dayOfWeek` INTEGER, `dayOfMonth` INTEGER, `monthOfYear` INTEGER, `mode` TEXT NOT NULL, `status` TEXT NOT NULL, `startAt` INTEGER NOT NULL, `endAt` INTEGER, `nextOccurrenceAt` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
 
-        val rule = RecurrenceRuleEntity(
-            id = "rule-unique-1",
-            type = TransactionType.EXPENSE,
-            payingAccountId = "acc-personal",
-            responsibleAccountId = "acc-family",
-            categoryId = "cat-supermarket",
-            amountMinor = 5000L,
-            note = "Compra semanal",
-            frequency = RecurrenceFrequency.WEEKLY,
-            intervalCount = 1,
-            dayOfWeek = 1,
-            mode = RecurrenceExecutionMode.PENDING,
-            status = RecurrenceRuleStatus.ACTIVE,
-            startAt = 1000000000L,
-            endAt = null,
-            nextOccurrenceAt = 1000000000L,
-            createdAt = 1000000000L,
-        )
+            database.execSQL("INSERT INTO accounts (id, name, type, currencyCode, initialBalanceMinor, isArchived, createdAt) VALUES ('acc-1', 'Personal', 'PERSONAL', 'EUR', 1000, 0, 1000000)")
+        }
 
-        db.recurrenceRuleDao().upsert(rule)
+        MIGRATION_1_5.migrate(db)
 
-        val occurrence1 = RecurrenceOccurrenceEntity(
-            id = "occ-1",
-            ruleId = "rule-unique-1",
-            status = OccurrenceStatus.PENDING,
-            scheduledAt = 1000000000L,
-            reviewAt = 1000086400L,
-            amountMinor = 5000L,
-            type = TransactionType.EXPENSE,
-            payingAccountId = "acc-personal",
-            responsibleAccountId = "acc-family",
-            categoryId = "cat-supermarket",
-            note = "Compra semanal",
-            transactionId = null,
-            createdAt = 1000000000L,
-        )
+        val cursor = db.query("SELECT * FROM accounts WHERE id = 'acc-1'")
+        assertTrue(cursor.moveToFirst())
+        assertEquals("Personal", cursor.getString(cursor.getColumnIndexOrThrow("name")))
+        cursor.close()
 
-        db.recurrenceOccurrenceDao().upsert(occurrence1)
+        val occCursor = db.query("PRAGMA table_info(recurrence_occurrences)")
+        assertTrue(occCursor.count > 0)
+        occCursor.close()
+    }
 
-        val fetched = db.recurrenceOccurrenceDao().getOccurrenceById("occ-1")
-        assertNotNull(fetched)
-        assertEquals(1000086400L, fetched?.reviewAt)
-        assertEquals(1000000000L, fetched?.scheduledAt)
+    @Test
+    fun testMigration2To5WithDuplicatesSanitization() {
+        val db = createHelper(2) { database ->
+            database.execSQL("CREATE TABLE IF NOT EXISTS `accounts` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `currencyCode` TEXT NOT NULL, `initialBalanceMinor` INTEGER NOT NULL, `isArchived` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+            database.execSQL("CREATE TABLE IF NOT EXISTS `categories` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `icon` TEXT NOT NULL, `type` TEXT NOT NULL, `orderIndex` INTEGER NOT NULL, `isFavorite` INTEGER NOT NULL, `favoritePosition` INTEGER, `isArchived` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+            database.execSQL("CREATE TABLE IF NOT EXISTS `transactions` (`id` TEXT NOT NULL, `type` TEXT NOT NULL, `amountMinor` INTEGER NOT NULL, `payingAccountId` TEXT NOT NULL, `responsibleAccountId` TEXT NOT NULL, `categoryId` TEXT NOT NULL, `occurredAt` INTEGER NOT NULL, `note` TEXT, `source` TEXT NOT NULL, `recurrenceRuleId` TEXT, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+            database.execSQL("CREATE TABLE IF NOT EXISTS `transfers` (`id` TEXT NOT NULL, `type` TEXT NOT NULL, `sourceAccountId` TEXT NOT NULL, `destinationAccountId` TEXT NOT NULL, `amountMinor` INTEGER NOT NULL, `occurredAt` INTEGER NOT NULL, `note` TEXT, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+            database.execSQL("CREATE TABLE IF NOT EXISTS `balance_adjustments` (`id` TEXT NOT NULL, `accountId` TEXT NOT NULL, `amountDeltaMinor` INTEGER NOT NULL, `reason` TEXT NOT NULL, `occurredAt` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+            database.execSQL("CREATE TABLE IF NOT EXISTS `recurrence_rules` (`id` TEXT NOT NULL, `type` TEXT NOT NULL, `payingAccountId` TEXT NOT NULL, `responsibleAccountId` TEXT NOT NULL, `categoryId` TEXT NOT NULL, `amountMinor` INTEGER NOT NULL, `note` TEXT, `frequency` TEXT NOT NULL, `intervalCount` INTEGER, `dayOfWeek` INTEGER, `dayOfMonth` INTEGER, `monthOfYear` INTEGER, `mode` TEXT NOT NULL, `status` TEXT NOT NULL, `startAt` INTEGER NOT NULL, `endAt` INTEGER, `nextOccurrenceAt` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
 
-        val hasOccurrence = db.recurrenceOccurrenceDao().hasOccurrenceForDate("rule-unique-1", 1000000000L)
-        assertEquals(true, hasOccurrence)
+            database.execSQL("CREATE TABLE IF NOT EXISTS `recurrence_occurrences` (`id` TEXT NOT NULL, `ruleId` TEXT NOT NULL, `status` TEXT NOT NULL, `scheduledAt` INTEGER NOT NULL, `amountMinor` INTEGER NOT NULL, `type` TEXT NOT NULL, `payingAccountId` TEXT NOT NULL, `responsibleAccountId` TEXT NOT NULL, `categoryId` TEXT NOT NULL, `note` TEXT, `transactionId` TEXT, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+
+            database.execSQL("INSERT INTO accounts (id, name, type, currencyCode, initialBalanceMinor, isArchived, createdAt) VALUES ('acc-1', 'Personal', 'PERSONAL', 'EUR', 1000, 0, 1000000)")
+            database.execSQL("INSERT INTO recurrence_rules (id, type, payingAccountId, responsibleAccountId, categoryId, amountMinor, frequency, mode, status, startAt, nextOccurrenceAt, createdAt) VALUES ('rule-1', 'EXPENSE', 'acc-1', 'acc-1', 'cat-1', 5000, 'WEEKLY', 'PENDING', 'ACTIVE', 100000, 100000, 100000)")
+            database.execSQL("INSERT INTO recurrence_occurrences (id, ruleId, status, scheduledAt, amountMinor, type, payingAccountId, responsibleAccountId, categoryId, createdAt) VALUES ('occ-1', 'rule-1', 'PENDING', 100000, 5000, 'EXPENSE', 'acc-1', 'acc-1', 'cat-1', 100000)")
+            database.execSQL("INSERT INTO recurrence_occurrences (id, ruleId, status, scheduledAt, amountMinor, type, payingAccountId, responsibleAccountId, categoryId, createdAt) VALUES ('occ-2', 'rule-1', 'PENDING', 100000, 5000, 'EXPENSE', 'acc-1', 'acc-1', 'cat-1', 100001)")
+        }
+
+        MIGRATION_2_5.migrate(db)
+
+        val occCursor = db.query("SELECT * FROM recurrence_occurrences WHERE ruleId = 'rule-1'")
+        assertEquals(1, occCursor.count)
+        occCursor.close()
+
+        val tableInfoCursor = db.query("PRAGMA table_info(recurrence_occurrences)")
+        var hasReviewAt = false
+        while (tableInfoCursor.moveToNext()) {
+            val nameIndex = tableInfoCursor.getColumnIndex("name")
+            if (nameIndex != -1 && tableInfoCursor.getString(nameIndex) == "reviewAt") {
+                hasReviewAt = true
+                break
+            }
+        }
+        tableInfoCursor.close()
+        assertTrue(hasReviewAt)
+    }
+
+    @Test
+    fun testMigration3To5() {
+        val db = createHelper(3) { database ->
+            database.execSQL("CREATE TABLE IF NOT EXISTS `users` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `isActive` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+            database.execSQL("CREATE TABLE IF NOT EXISTS `accounts` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `currencyCode` TEXT NOT NULL, `initialBalanceMinor` INTEGER NOT NULL, `isArchived` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+            database.execSQL("CREATE TABLE IF NOT EXISTS `categories` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `icon` TEXT NOT NULL, `type` TEXT NOT NULL, `orderIndex` INTEGER NOT NULL, `isFavorite` INTEGER NOT NULL, `favoritePosition` INTEGER, `isArchived` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+            database.execSQL("CREATE TABLE IF NOT EXISTS `transactions` (`id` TEXT NOT NULL, `type` TEXT NOT NULL, `amountMinor` INTEGER NOT NULL, `payingAccountId` TEXT NOT NULL, `responsibleAccountId` TEXT NOT NULL, `categoryId` TEXT NOT NULL, `occurredAt` INTEGER NOT NULL, `note` TEXT, `source` TEXT NOT NULL, `recurrenceRuleId` TEXT, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+            database.execSQL("CREATE TABLE IF NOT EXISTS `transfers` (`id` TEXT NOT NULL, `type` TEXT NOT NULL, `sourceAccountId` TEXT NOT NULL, `destinationAccountId` TEXT NOT NULL, `amountMinor` INTEGER NOT NULL, `occurredAt` INTEGER NOT NULL, `note` TEXT, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+            database.execSQL("CREATE TABLE IF NOT EXISTS `balance_adjustments` (`id` TEXT NOT NULL, `accountId` TEXT NOT NULL, `amountDeltaMinor` INTEGER NOT NULL, `reason` TEXT NOT NULL, `occurredAt` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+            database.execSQL("CREATE TABLE IF NOT EXISTS `recurrence_rules` (`id` TEXT NOT NULL, `type` TEXT NOT NULL, `payingAccountId` TEXT NOT NULL, `responsibleAccountId` TEXT NOT NULL, `categoryId` TEXT NOT NULL, `amountMinor` INTEGER NOT NULL, `note` TEXT, `frequency` TEXT NOT NULL, `intervalCount` INTEGER, `dayOfWeek` INTEGER, `dayOfMonth` INTEGER, `monthOfYear` INTEGER, `mode` TEXT NOT NULL, `status` TEXT NOT NULL, `startAt` INTEGER NOT NULL, `endAt` INTEGER, `nextOccurrenceAt` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+        }
+
+        MIGRATION_3_5.migrate(db)
+        assertTrue(db.isOpen)
+    }
+
+    @Test
+    fun testMigration4To5() {
+        val db = createHelper(4) { database ->
+            database.execSQL("CREATE TABLE IF NOT EXISTS `users` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `isActive` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+            database.execSQL("CREATE TABLE IF NOT EXISTS `accounts` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `currencyCode` TEXT NOT NULL, `initialBalanceMinor` INTEGER NOT NULL, `isArchived` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+            database.execSQL("CREATE TABLE IF NOT EXISTS `categories` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `icon` TEXT NOT NULL, `type` TEXT NOT NULL, `orderIndex` INTEGER NOT NULL, `isFavorite` INTEGER NOT NULL, `favoritePosition` INTEGER, `isArchived` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+            database.execSQL("CREATE TABLE IF NOT EXISTS `transactions` (`id` TEXT NOT NULL, `type` TEXT NOT NULL, `amountMinor` INTEGER NOT NULL, `payingAccountId` TEXT NOT NULL, `responsibleAccountId` TEXT NOT NULL, `categoryId` TEXT NOT NULL, `occurredAt` INTEGER NOT NULL, `note` TEXT, `source` TEXT NOT NULL, `recurrenceRuleId` TEXT, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+            database.execSQL("CREATE TABLE IF NOT EXISTS `transfers` (`id` TEXT NOT NULL, `type` TEXT NOT NULL, `sourceAccountId` TEXT NOT NULL, `destinationAccountId` TEXT NOT NULL, `amountMinor` INTEGER NOT NULL, `occurredAt` INTEGER NOT NULL, `note` TEXT, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+            database.execSQL("CREATE TABLE IF NOT EXISTS `balance_adjustments` (`id` TEXT NOT NULL, `accountId` TEXT NOT NULL, `amountDeltaMinor` INTEGER NOT NULL, `reason` TEXT NOT NULL, `occurredAt` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+            database.execSQL("CREATE TABLE IF NOT EXISTS `recurrence_rules` (`id` TEXT NOT NULL, `type` TEXT NOT NULL, `payingAccountId` TEXT NOT NULL, `responsibleAccountId` TEXT NOT NULL, `categoryId` TEXT NOT NULL, `amountMinor` INTEGER NOT NULL, `note` TEXT, `frequency` TEXT NOT NULL, `intervalCount` INTEGER, `dayOfWeek` INTEGER, `dayOfMonth` INTEGER, `monthOfYear` INTEGER, `mode` TEXT NOT NULL, `status` TEXT NOT NULL, `startAt` INTEGER NOT NULL, `endAt` INTEGER, `nextOccurrenceAt` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+        }
+
+        MIGRATION_4_5.migrate(db)
+        assertTrue(db.isOpen)
     }
 }

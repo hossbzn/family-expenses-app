@@ -1,5 +1,10 @@
 package com.familyexpenses.app.feature.settings
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,6 +26,7 @@ import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material3.AlertDialog
@@ -32,6 +38,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -45,8 +53,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.familyexpenses.app.ui.theme.OffWhiteBackground
+import com.familyexpenses.app.ui.theme.OutlineBorder
+import com.familyexpenses.app.ui.theme.PetroleumBlueContainer
+import com.familyexpenses.app.ui.theme.PetroleumBluePrimary
+import com.familyexpenses.app.ui.theme.PureWhiteSurface
 
 @Composable
 fun SettingsRoute(
@@ -55,13 +72,18 @@ fun SettingsRoute(
     onAccountsClick: () -> Unit,
     onRecurrenceClick: () -> Unit,
     onDataSecurityClick: () -> Unit,
+    viewModel: SettingsViewModel = hiltViewModel(),
 ) {
+    val notificationsEnabled by viewModel.notificationsEnabled.collectAsStateWithLifecycle()
+
     SettingsScreen(
         onBack = onBack,
         onCategoriesClick = onCategoriesClick,
         onAccountsClick = onAccountsClick,
         onRecurrenceClick = onRecurrenceClick,
         onDataSecurityClick = onDataSecurityClick,
+        notificationsEnabled = notificationsEnabled,
+        onNotificationsToggle = viewModel::setNotificationsEnabled,
     )
 }
 
@@ -73,10 +95,20 @@ fun SettingsScreen(
     onAccountsClick: () -> Unit,
     onRecurrenceClick: () -> Unit,
     onDataSecurityClick: () -> Unit,
+    notificationsEnabled: Boolean = true,
+    onNotificationsToggle: (Boolean) -> Unit = {},
 ) {
     var showAboutDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { isGranted ->
+        onNotificationsToggle(isGranted)
+    }
 
     Scaffold(
+        containerColor = OffWhiteBackground,
         topBar = {
             TopAppBar(
                 title = {
@@ -94,8 +126,8 @@ fun SettingsScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    containerColor = OffWhiteBackground,
+                    titleContentColor = PetroleumBluePrimary,
                 ),
             )
         },
@@ -132,6 +164,29 @@ fun SettingsScreen(
                 )
             }
             item {
+                SettingsSwitchRowCard(
+                    icon = Icons.Default.Notifications,
+                    title = "Notificaciones de pendientes",
+                    subtitle = "Avisar en la barra de estado cuando haya recurrentes por revisar",
+                    checked = notificationsEnabled,
+                    onCheckedChange = { targetState ->
+                        if (targetState && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            val hasPermission = ContextCompat.checkSelfPermission(
+                                context,
+                                Manifest.permission.POST_NOTIFICATIONS,
+                            ) == PackageManager.PERMISSION_GRANTED
+                            if (!hasPermission) {
+                                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            } else {
+                                onNotificationsToggle(true)
+                            }
+                        } else {
+                            onNotificationsToggle(targetState)
+                        }
+                    },
+                )
+            }
+            item {
                 SettingsRowCard(
                     icon = Icons.Default.Storage,
                     title = "Datos y seguridad",
@@ -157,7 +212,7 @@ fun SettingsScreen(
             text = {
                 Text(
                     "Versión 6.0 (offline-first). Todos los movimientos, saldos reales de caja, " +
-                        "adelantos bidireccionales y copias de seguridad se almacenan únicamente en este dispositivo, " +
+                        "adelantos bidireccionales y copias de seguridad se almacenan únicamente en este dispositivo en SharedPreferences/SQLite local, " +
                         "sin nube, sin cuentas externas ni sincronización automática.",
                 )
             },
@@ -183,8 +238,8 @@ private fun SettingsRowCard(
             .fillMaxWidth()
             .heightIn(min = 68.dp),
         shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF7F7F7)),
-        border = BorderStroke(1.dp, Color(0xFFE5E5E5)),
+        colors = CardDefaults.cardColors(containerColor = PureWhiteSurface),
+        border = BorderStroke(1.dp, OutlineBorder),
     ) {
         Row(
             modifier = Modifier
@@ -195,13 +250,13 @@ private fun SettingsRowCard(
             Surface(
                 modifier = Modifier.size(40.dp),
                 shape = RoundedCornerShape(10.dp),
-                color = Color.Black,
+                color = PetroleumBlueContainer,
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        tint = Color.White,
+                        tint = PetroleumBluePrimary,
                         modifier = Modifier.size(20.dp),
                     )
                 }
@@ -216,7 +271,7 @@ private fun SettingsRowCard(
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = Color.Black,
+                    color = PetroleumBluePrimary,
                 )
                 Text(
                     text = subtitle,
@@ -229,6 +284,73 @@ private fun SettingsRowCard(
                 imageVector = Icons.Default.ChevronRight,
                 contentDescription = null,
                 tint = Color.DarkGray,
+            )
+        }
+    }
+}
+
+@Composable
+private fun SettingsSwitchRowCard(
+    icon: ImageVector,
+    title: String,
+    subtitle: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 68.dp),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = PureWhiteSurface),
+        border = BorderStroke(1.dp, OutlineBorder),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Surface(
+                modifier = Modifier.size(40.dp),
+                shape = RoundedCornerShape(10.dp),
+                color = PetroleumBlueContainer,
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = PetroleumBluePrimary,
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(14.dp))
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = PetroleumBluePrimary,
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray,
+                )
+            }
+
+            Switch(
+                checked = checked,
+                onCheckedChange = onCheckedChange,
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = Color.White,
+                    checkedTrackColor = PetroleumBluePrimary,
+                ),
             )
         }
     }

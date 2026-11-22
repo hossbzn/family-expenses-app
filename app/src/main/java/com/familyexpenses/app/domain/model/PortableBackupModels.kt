@@ -3,6 +3,7 @@ package com.familyexpenses.app.domain.model
 import com.familyexpenses.app.data.local.entity.AccountEntity
 import com.familyexpenses.app.data.local.entity.BalanceAdjustmentEntity
 import com.familyexpenses.app.data.local.entity.CategoryEntity
+import com.familyexpenses.app.data.local.entity.RecurrenceOccurrenceEntity
 import com.familyexpenses.app.data.local.entity.RecurrenceRuleEntity
 import com.familyexpenses.app.data.local.entity.TransactionEntity
 import com.familyexpenses.app.data.local.entity.TransferEntity
@@ -26,6 +27,7 @@ data class PortableBackupSnapshot(
     val transfers: List<TransferEntity>,
     val balanceAdjustments: List<BalanceAdjustmentEntity>,
     val recurrenceRules: List<RecurrenceRuleEntity>,
+    val recurrenceOccurrences: List<RecurrenceOccurrenceEntity> = emptyList(),
     val preferences: BackupPreferencesSnapshot = BackupPreferencesSnapshot(),
 ) {
     companion object {

@@ -20,6 +20,7 @@ import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.automirrored.filled.TrendingDown
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
@@ -71,6 +72,7 @@ fun HomeRoute(
     onHistoryClick: () -> Unit,
     onAnalysisClick: () -> Unit,
     onSettingsClick: () -> Unit,
+    onRecurringClick: () -> Unit = {},
     savedTransactionId: String? = null,
     onClearSavedTransactionId: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
@@ -103,6 +105,7 @@ fun HomeRoute(
         onHistoryClick = onHistoryClick,
         onAnalysisClick = onAnalysisClick,
         onSettingsClick = onSettingsClick,
+        onRecurringClick = onRecurringClick,
     )
 }
 
@@ -119,6 +122,7 @@ fun HomeScreen(
     onHistoryClick: () -> Unit,
     onAnalysisClick: () -> Unit,
     onSettingsClick: () -> Unit,
+    onRecurringClick: () -> Unit = {},
 ) {
     val scrollState = rememberScrollState()
 
@@ -276,7 +280,61 @@ fun HomeScreen(
                 onClick = onPendingSettlementClick,
             )
 
+            // 4. Aviso discreto de recurrentes pendientes
+            if (uiState.pendingRecurrencesCount > 0) {
+                PendingRecurrencesBanner(
+                    count = uiState.pendingRecurrencesCount,
+                    onClick = onRecurringClick,
+                )
+            }
+
             Spacer(modifier = Modifier.height(8.dp))
+        }
+    }
+}
+
+@Composable
+private fun PendingRecurrencesBanner(
+    count: Int,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        color = Color(0xFFF5F5F5),
+        border = BorderStroke(1.dp, Color(0xFFE0E0E0)),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CalendarMonth,
+                    contentDescription = null,
+                    tint = Color.Black,
+                    modifier = Modifier.size(20.dp),
+                )
+                Text(
+                    text = if (count == 1) "1 recurrente pendiente" else "$count recurrentes pendientes",
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = Color.Black,
+                )
+            }
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = Color.Gray,
+                modifier = Modifier.size(20.dp),
+            )
         }
     }
 }

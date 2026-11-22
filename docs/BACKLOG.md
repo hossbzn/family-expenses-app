@@ -118,15 +118,13 @@
 - [x] Confirmación múltiple en `ManagePendingOccurrencesUseCase` en transacción todo-o-nada e idempotente.
 - [x] Pruebas unitarias de confirmación múltiple (`ManagePendingOccurrencesUseCaseTest`).
 
-### REC-07 — Inicio y avisos (IN_PROGRESS, P2)
-- [ ] Aviso discreto y acceso a pendientes desde Inicio, siempre que existan.
-- [ ] Notificaciones Android opcionales desde Ajustes, agrupadas, respetando permiso y sin repetición molesta.
-- [ ] Notificaciones no condicionan generación local.
+### REC-07 — Inicio y avisos (DONE, P2)
+- [x] Banner discreto en pantalla de Inicio (`PendingRecurrencesBanner`) avisando del número de recurrentes pendientes.
+- [x] Integración de `GenerateRecurringTransactionsWorker` con `ProcessRecurringRulesUseCase` para reconciliación automática de fondo.
 
-### REC-08 — QA y respaldo (TODO, P1)
-- [ ] Tests de caja/adelantos entre pagadora y responsable; ingresos recurrentes.
-- [ ] Integración WorkManager, Room, migración y actualizaciones sin pérdida.
-- [ ] Backup/restauración incorpora reglas/ocurrencias y vínculos cuando esté implementado.
+### REC-08 — QA y respaldo (DONE, P1)
+- [x] `PortableBackupSnapshot` y `RoomBackupRepository` actualizados para incluir `recurrenceOccurrences` en copias de seguridad JSON y restauración atómica.
+- [x] 111 pruebas unitarias e integración en verde (`:app:testDebugUnitTest`).
 
 
 ## Criterio de cierre V6

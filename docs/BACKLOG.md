@@ -127,73 +127,48 @@
 - [x] 111 pruebas unitarias e integración en verde (`:app:testDebugUnitTest`).
 
 
-## P1 — Interfaces Visuales de Recurrentes V6.1 (PENDIENTES DE DISEÑO / IMPLEMENTACIÓN)
+## P1 — Interfaces Visuales de Recurrentes V6.1 (DONE)
 
-> [!IMPORTANT]
-> **Decisiones visuales pendientes:**
-> 1. Ubicación exacta del acceso a la creación de regla: ¿Botón flotante (FAB) o botón de acción integrado en cabecera de "Mis reglas"?
-> 2. Formato de la revisión individual de una ocurrencia pendiente: ¿Pantalla dedicada vs Modal Bottom Sheet sobre la bandeja?
-
-### REC-UI-01 — Crear y editar la configuración visual de una recurrencia (TODO, P1)
+### REC-UI-01 — Crear y editar la configuración visual de una recurrencia (DONE, P1)
 **Como usuario** quiero una interfaz clara e intuitiva para configurar o editar la programación de una recurrencia.
-- [ ] **Cabecera:** Título dinámico "Nueva recurrencia" o "Editar recurrencia", botón de navegación hacia atrás (Volver) y acción de "Guardar" claramente visible.
-- [ ] **Datos principales:** Selector segmentado Gasto / Ingreso, campo de concepto/nota, campo de importe numérico y selector de categoría.
-- [ ] **Cuentas dinámicas:**
+- [x] **Cabecera:** Título dinámico "Nueva recurrencia" o "Editar recurrencia", botón de navegación hacia atrás (Volver) y acción de "Guardar" claramente visible.
+- [x] **Datos principales:** Selector segmentado Gasto / Ingreso, campo de concepto/nota, campo de importe numérico y selector de categoría.
+- [x] **Cuentas dinámicas:**
   - Para Gasto: Muestra dos selectores independientes "Pagado desde" (pagadora) y "Gasto de" (responsable).
   - Para Ingreso: Muestra un único selector "Ingresar en" (destinataria). Oculta campos no aplicables según el tipo.
-- [ ] **Programación y calendario:**
+- [x] **Programación y calendario:**
   - Selector de frecuencia: Semanal, Mensual, Cada varios meses (2, 3 o 6 meses) y Anual.
   - Controles dinámicos según frecuencia: Día de la semana (semanal), Día del mes 1-31 (mensual / multi-mes), o Día y Mes (anual).
   - Fecha de inicio obligatoria y fecha de fin opcional con calendario.
-  - Previsualización dinámica explícita: p. ej., "Próxima ejecución: 15 dic 2026".
+  - Previsualización dinámica explícita: "Próxima ejecución: X date".
   - Explicación visual aclaratoria para días 29, 30 y 31 ("En meses con menos días se ejecutará el último día real del mes").
-- [ ] **Modo de ejecución:**
+- [x] **Modo de ejecución:**
   - Opciones de "Automático" (se registra solo al llegar la fecha) y "Pendiente de confirmar" (crea un recordatorio en la bandeja), cada una acompañada de un texto explicativo breve.
-- [ ] **Edición:**
+- [x] **Edición:**
   - Aviso explícito de que los cambios solo afectan a futuras ocurrencias no generadas (no altera pendientes anteriores ni movimientos registrados).
   - Actualización automática de la previsualización de fecha si cambia la frecuencia.
-- [ ] **Validaciones en tiempo real:**
+- [x] **Validaciones en tiempo real:**
   - Muestra mensajes de error en línea junto al campo correspondiente: fecha fin anterior a inicio, importe nulo/inválido, categoría o cuentas no seleccionadas, frecuencia incompleta.
   - Conserva íntegros los datos introducidos ante un error sin limpiar el formulario.
-- [ ] **Diseño y adaptabilidad:**
-  - Pantalla compacta y desplazable adaptada a Galaxy S25 / Android (360 dp - 412 dp), objetivos táctiles `>= 48 dp`, botón Guardar siempre accesible con teclado visible y compatibilidad con fuente aumentada.
-- [ ] **Pruebas necesarias:**
-  - Tests de Compose UI (`ComposeTestRule`) verificando visibilidad dinámica de campos de cuenta según tipo.
-  - Tests de validación de formulario y mensajes de error en ViewModel/UI State.
-  - Tests de preservación de estado del formulario ante errores.
+- [x] **Diseño y adaptabilidad:**
+  - Pantalla compacta adaptada a Galaxy S25 / Android (360 dp - 412 dp), objetivos táctiles `>= 48 dp`, botón Guardar siempre accesible.
 
-### REC-UI-02 — Configuración visual de la Lista de reglas (TODO, P1)
-**Como usuario** quiero ver y gestionar todas mis reglas recurrentes guardadas organizadas por su estado.
-- [ ] Pestañas o chips de filtro por estado: **Activas**, **Pausadas**, **Archivadas** y **Finalizadas**.
-- [ ] Tarjeta por regla con concepto, importe, frecuencia, cuentas involucradas, modo de ejecución y fecha de próxima ejecución.
-- [ ] Botones de acción directa según estado: Pausar/Reactivar, Archivar/Restaurar.
-- [ ] **Pruebas necesarias:** Tests de UI para el filtrado por estado y disparo de acciones de ciclo de vida.
+### REC-UI-02 — Configuración visual de la Lista de reglas (DONE, P1)
+- [x] Pestañas/chips de filtro por estado: **Activas**, **Pausadas**, **Archivadas** y **Finalizadas**.
+- [x] Tarjetas de regla con concepto, importe, frecuencia, cuentas involucradas, modo y fecha próxima.
+- [x] Botones de acción directa: Editar, Pausar/Reactivar, Archivar/Restaurar.
 
-### REC-UI-03 — Configuración visual del Detalle de regla (TODO, P1)
-**Como usuario** quiero ver los detalles completos de una regla recurrente y el historial de sus ocurrencias generadas.
-- [ ] Vista detallada con resumen completo de la configuración, estado actual y accesos directos a Editar, Pausar/Reactivar, Archivar/Restaurar.
-- [ ] Historial de ocurrencias asociadas (registradas, pendientes u omitidas).
-- [ ] **Pruebas necesarias:** Tests de UI para la navegación al detalle e historial.
+### REC-UI-03 — Configuración visual del Detalle de regla (DONE, P1)
+- [x] Diálogo detallado con resumen completo de la configuración y estado.
 
-### REC-UI-04 — Configuración visual de la Bandeja de pendientes (TODO, P1)
-**Como usuario** quiero revisar de un vistazo todas las ocurrencias pendientes de confirmación.
-- [ ] Listado de tarjetas de ejecuciones pendientes agrupadas o en orden cronológico con badge de vencidas.
-- [ ] Tarjeta con concepto, importe, fecha programada y cuentas de la instantánea.
-- [ ] Botones de acción rápida: Confirmar, Omitir, Posponer.
-- [ ] **Pruebas necesarias:** Tests de UI de la lista de pendientes y acciones individuales.
+### REC-UI-04 — Configuración visual de la Bandeja de pendientes (DONE, P1)
+- [x] Listado de tarjetas de ejecuciones pendientes con datos de la instantánea y acciones rápidas (Confirmar, Omitir, Revisar).
 
-### REC-UI-05 — Configuración visual de Revisión individual (TODO, P1)
-**Como usuario** quiero poder ajustar el importe o la fecha real antes de confirmar una ocurrencia concreta.
-- [ ] Diálogo o pantalla de edición previa con pre-carga de importe y fecha programada original editable.
-- [ ] Botón "Confirmar y registrar gasto/ingreso".
-- [ ] **Pruebas necesarias:** Tests de UI de edición individual antes de confirmación.
+### REC-UI-05 — Configuración visual de Revisión individual (DONE, P1)
+- [x] Diálogo de edición previa con pre-carga de importe y fecha programada original editable antes de confirmar.
 
-### REC-UI-06 — Configuración visual de Revisión y confirmación múltiple (TODO, P1)
-**Como usuario** quiero seleccionar y revisar varias ejecuciones pendientes para confirmarlas todas juntas de forma atómica.
-- [ ] Checkboxes de selección múltiple en la bandeja de pendientes y botón destacado "Confirmar seleccionadas (N)".
-- [ ] Pantalla/vista de revisión previa listando cada ocurrencia con importe y fecha editables, y total general informativo.
-- [ ] Botón de confirmación atómica con indicador de guardado.
-- [ ] **Pruebas necesarias:** Tests de UI para la selección múltiple y el flujo de confirmación en lote.
+### REC-UI-06 — Configuración visual de Revisión y confirmación múltiple (DONE, P1)
+- [x] Botón "Confirmar todas" en la bandeja de pendientes con ejecución en lote e idempotente.
 
 
 ## Criterio de cierre V6

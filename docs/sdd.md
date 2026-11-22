@@ -7,7 +7,7 @@ Aplicación Android offline-first que sustituye el registro de gastos e ingresos
 
 **Decisión de persistencia:** Al no existir usuarios reales ni datos históricos de producción que preservar (confirmado por el usuario), se adopta un **reinicio limpio del esquema de persistencia (Esquema V6 limpio)**. Esto elimina la necesidad de migraciones complejas desde el MVP, descarta tablas obsoletas (`reimbursement_ledger`, `settlements`, `settlement_items`) y erradica por completo el booleano `paidFromPersonal`.
 
-**Incluido V6:** saldos reales de caja, ingresos, gastos con cuenta pagadora y cuenta responsable independientes, adelantos bidireccionales derivados en tiempo real, devoluciones parciales o totales que mueven caja y reducen deuda, transferencias normales, ajustes de saldo auditables, categorías configurables (7 favoritas manuales en gastos, lista manual en ingresos), Movimientos, Análisis, exportación CSV, copias y restauración local, y conservación de recurrencias automáticas mensuales adaptadas a las nuevas reglas.
+**Incluido V6:** saldos reales de caja, ingresos, gastos con cuenta pagadora y cuenta responsable independientes, adelantos bidireccionales derivados en tiempo real, devoluciones parciales o totales que mueven caja y reducen deuda, transferencias normales, ajustes de saldo auditables, categorías configurables (7 favoritas manuales en gastos, lista manual en ingresos), Movimientos, Análisis, exportación CSV, copias y restauración local, conservación de recurrencias automáticas V6.1, rediseño de Inicio con los 3 últimos movimientos y Modo de Privacidad (ocultar importes con máscara `"•••• €"`).
 
 **Excluido V6:** sincronización en la nube, multiusuario, login, PIN adicional, OCR, conexión bancaria y creación de cuentas adicionales desde la UI.
 
@@ -102,20 +102,21 @@ El esquema se compone de 6 entidades limpias sin residuos del MVP:
 * `createdAt: Long`
 
 ## 4. Pantallas y navegación
-* **Inicio:** Tarjetas de saldo real Familia (negra) y Personal (gris claro), dos botones grandes Gasto e Ingreso; adelantos siempre visibles (incluso con deuda 0 €). Sin totales mensuales ni lista de recientes. Barra inferior: Inicio / Movimientos / Análisis. Ajustes en cabecera.
+* **Inicio:** Cabecera con saludo/subtítulo, botón Ojo de Privacidad (`contentDescription`: "Ocultar importes" / "Mostrar importes") y Ajustes (⚙️). Tarjetas de saldo real Familia y Personal con el mismo peso y jerarquía visual (azul petróleo y fondo blanco roto neutro `#F8F9FA`). Botones grandes de acciones rápidas: «Añadir ingreso» (`+`) a la izquierda y «Añadir gasto» (`−`) a la derecha. Bloque de Adelantos siempre visible. Sección «Últimos movimientos» mostrando los 3 últimos movimientos (gastos, ingresos, transferencias, devoluciones, ajustes, recurrentes) con concepto, fecha, cuenta e importe, botón «Ver todos» y estado vacío cuando no hay registros. Sin gráficos ni resumen mensual. Barra inferior: Inicio / Movimientos / Análisis.
 * **Nuevo gasto:** Teclado numérico propio (coma, 2 decimales, C, retroceso, importe inicial 0). 7 favoritas manuales + Más en 2x4. Dos selectores separados «Pagado desde» y «Gasto de», recordando última combinación y categoría. Detalles plegados. Guardar en un paso con Deshacer.
 * **Nuevo ingreso:** Importe, cuenta destinataria, lista manual de categorías de ingreso (sin favoritas), fecha y notas opcionales.
-* **Movimientos:** Filas de dos líneas por día descendente, sin resumen mensual. Filtro principal Todas/Familia/Personal por cuenta responsable (en gastos) y destinataria (en ingresos). Periodos: mes, 12 meses móviles, año natural, personalizado. Adelantos mostrados como un único gasto con indicación de pagadora.
-* **Análisis:** Pestañas Categorías y Evolución. Gastos imputados a cuenta responsable. Exclusión de transferencias, devoluciones y ajustes de saldo. Drill-down a Movimientos con retorno de filtros.
+* **Movimientos:** Filas de dos líneas por día descendente, sin resumen mensual. Filtro principal Todas/Familia/Personal por cuenta responsable (en gastos) y destinataria (en ingresos). Periodos: mes, 12 meses móviles, año natural, personalizado. Adelantos mostrados como un único gasto con indicación de pagadora. Ocultación de importes mediante máscara `"•••• €"` si el Modo de Privacidad está activo.
+* **Análisis:** Pestañas Categorías y Evolución. Gastos imputados a cuenta responsable. Exclusión de transferencias, devoluciones y ajustes de saldo. Drill-down a Movimientos con retorno de filtros. Ocultación de importes mediante máscara `"•••• €"` si el Modo de Privacidad está activo.
 * **Detalle de cuenta y transferencias:** Saldo real, Transferir, Movimientos y Adelantos. Transferencia NORMAL vs. DEVOLUCIÓN con elección explícita.
 * **Adelantos:** Saldo neto en ambas direcciones con estado cero visible, historial cronológico único con filtros Todos / Adelantos / Devoluciones y trazabilidad.
 * **Ajustes y datos:** Categorías configurables, copia completa portable y exportación CSV.
 
-## 5. Persistencia, recurrencias y seguridad
+## 5. Persistencia, recurrencias, privacidad y seguridad
 * Kotlin, Jetpack Compose, Room, Hilt, ViewModel/StateFlow, Navigation Compose, WorkManager.
 * Arquitectura `data / domain / feature`. Cálculos contables exclusivamente en dominio; UI solo de presentación.
 * Transacciones atómicas de Room (`withTransaction`) para cualquier operación que altere saldos o deudas.
 * Recurrencias automáticas procesadas por WorkManager aplicando las mismas reglas contables de pagadora/responsable que las transacciones manuales.
+* **Modo de Privacidad:** Conmutador persistente en Preferences DataStore (`UserPreferencesRepository.observePrivacyModeEnabled()`). Reemplaza visualmente valores numéricos por `"•••• €"` sin alterar el motor contable, los flujos de Room, las exportaciones CSV ni los backups JSON. No es un cifrado ni requiere PIN.
 
 ## 6. Criterios de aceptación contables
 1. Personal paga 80 € de compra familiar: Personal -80 € de caja, Familia 0 € de caja, gasto analítico Familia 80 €, deuda Familia $\to$ Personal +80 €.

@@ -142,4 +142,24 @@
 - [ ] **REC-UI-05 — Configuración visual de Revisión individual (TODO, P1):** Pantalla/diálogo de edición de fecha e importe antes de confirmar.
 - [ ] **REC-UI-06 — Configuración visual de Revisión y confirmación múltiple (TODO, P1):** Selección en lote, pantalla de revisión previa con total y confirmación atómica.
 
+---
+
+## Sprint V6-S5: Rediseño de Inicio y Modo de Privacidad (ESTADO: TODO)
+**Meta:** Implementar el rediseño visual de la pantalla de Inicio según los mockups aprobados (nueva paleta blanco roto/azul petróleo/verde/rojo, acciones rápidas "Añadir ingreso" / "Añadir gasto", sección de los 3 últimos movimientos) y el Modo de Privacidad para ocultar importes con la máscara `"•••• €"`.
+
+### Historias pendientes:
+- [ ] **V6-14 — Rediseño visual de Inicio y sección de últimos 3 movimientos (TODO, P1):**
+  - Nueva paleta MD3 (blanco roto, azul petróleo, verde/rojo apagados, paridad Familia/Personal).
+  - Botón "Añadir ingreso" (`+`) a la izquierda y "Añadir gasto" (`−`) a la derecha.
+  - Sección "Últimos movimientos" con exactamente los 3 movimientos más recientes (gastos, ingresos, transferencias, devoluciones, ajustes, recurrentes), botón "Ver todos" y estado vacío ("No hay movimientos registrados").
+  - Diseño compacto y desplazable para Galaxy S25 (360-412 dp) con targets táctiles `>= 48 dp`.
+  - Pruebas unitarias de `HomeViewModel` y de interfaz Compose.
+- [ ] **V6-15 — Modo de privacidad para ocultar importes (TODO, P1):**
+  - Botón de ojo (`Visibility` / `VisibilityOff`) en la cabecera de Inicio.
+  - Persistencia de `privacyModeEnabled` en Preferences DataStore.
+  - Máscara uniforme `"•••• €"` en saldos, adelantos, movimientos y análisis (sin ocultar conceptos, fechas, cuentas o categorías).
+  - `contentDescription` dinámico ("Ocultar importes" / "Mostrar importes").
+  - Pruebas unitarias de `UserPreferencesRepository` y de interfaz Compose.
+
+
 

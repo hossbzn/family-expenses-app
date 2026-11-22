@@ -171,5 +171,35 @@
 - [x] Botón "Confirmar todas" en la bandeja de pendientes con ejecución en lote e idempotente.
 
 
+## P1 — Rediseño de Inicio y Modo de Privacidad (TODO)
+
+### V6-14 — Rediseño visual de Inicio y sección de últimos 3 movimientos (TODO, P1)
+**Como usuario** quiero una pantalla de Inicio renovada, con mejor jerarquía visual y un vistazo rápido a mis últimos 3 movimientos.
+- [ ] Aplicar la nueva paleta visual Material Design 3: fondo neutro blanco roto (`#F8F9FA`), azul petróleo como color principal (`#1A3644`) y verde/rojo apagados para datos semánticos.
+- [ ] Otorgar exactamente el mismo peso visual a las tarjetas de saldo real de Familia y Personal.
+- [ ] Reorganizar botones de acciones rápidas: "Añadir ingreso" con icono `+` a la izquierda y "Añadir gasto" con icono `−` a la derecha (colocado a la derecha por mayor frecuencia de uso).
+- [ ] Implementar la sección "Últimos movimientos" en Inicio mostrando los 3 movimientos más recientes (gastos, ingresos, transferencias, devoluciones, ajustes de saldo y ejecuciones de recurrentes) en orden descendente por fecha y creación.
+- [ ] Cada fila debe mostrar concepto/nota, fecha (ej. "Hoy", "Ayer", "20 nov"), cuenta (ej. "Familia", "Personal") e importe formatado.
+- [ ] Añadir botón "Ver todos" que navega a la pantalla completa de Movimientos.
+- [ ] Mostrar un estado vacío explícito ("No hay movimientos registrados") cuando no existan operaciones.
+- [ ] Optimizar el diseño compacto y desplazable para Galaxy S25 / Android (360 dp - 412 dp) con objetivos táctiles mínimos de 48 dp.
+- [ ] Sin incluir resumen mensual ni gráficos acumulados en Inicio.
+- [ ] **Pruebas necesarias:**
+  - Tests unitarios en `HomeViewModelTest` verificando la emisión de exactamente los 3 últimos movimientos y la gestión del estado vacío.
+  - Tests de interfaz Compose (`ComposeTestRule`) para maquetación, densidad táctil y navegación a Movimientos al pulsar "Ver todos".
+
+### V6-15 — Modo de privacidad para ocultar importes (TODO, P1)
+**Como usuario** quiero poder ocultar los importes numéricos en pantalla con un toque para consultar la app en público manteniendo la privacidad.
+- [ ] Añadir botón de ojo con icono conmutables (`Visibility` / `VisibilityOff`) en la cabecera de Inicio junto al icono de Ajustes (⚙️).
+- [ ] Añadir preferencia `privacyModeEnabled: Flow<Boolean>` en `UserPreferencesRepository` con persistencia local en Preferences DataStore tras cerrar y reabrir la app.
+- [ ] Reemplazar visualmente todos los importes numéricos por la máscara uniforme de longitud fija `"•••• €"` en saldos de cuenta, deuda de adelantos, filas de movimientos y gráficos/totales de Análisis cuando el modo privacidad esté activo.
+- [ ] Mantener siempre visibles los conceptos, notas, fechas, nombres de cuenta y categorías.
+- [ ] Configurar `contentDescription` dinámico en el botón de ojo: "Ocultar importes" cuando están visibles y "Mostrar importes" cuando la máscara está activa.
+- [ ] Garantizar que el modo privacidad no altere los cálculos contables reales de Room, las exportaciones CSV ni los backups JSON, y no presentarlo como una función de seguridad o cifrado.
+- [ ] **Pruebas necesarias:**
+  - Tests unitarios en `UserPreferencesRepositoryTest` para verificar la conmutación y persistencia de la preferencia.
+  - Tests de interfaz Compose verificando que los saldos y movimientos muestran la máscara `"•••• €"` cuando la privacidad está activa y los valores reales cuando está desactivada.
+
+
 ## Criterio de cierre V6
 Todas las funcionalidades V6 (Sprints S1–S4) están implementadas, documentadas y verificadas con 97 pruebas unitarias/de integración, `assembleDebug` y QA visual/interactiva en emulador Android (412 dp y 360 dp).

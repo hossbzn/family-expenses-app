@@ -3,7 +3,10 @@
 **Este documento describe el comportamiento implementado en Family Expenses V6.** Para conocer el funcionamiento del MVP previo consulte [archive/MVP_LEGACY.md](archive/MVP_LEGACY.md). Fuente de verdad: [V6_SPEC.md](V6_SPEC.md).
 
 ## Inicio
-Al abrir verás las dos cuentas: **Familia** en negro y **Personal** en gris claro. Cada una muestra dinero real disponible, no gasto mensual imputado. Pulsando una cuenta abres su detalle. Hay botones grandes **Nuevo gasto** y **Nuevo ingreso**. Debajo, **Adelantos** indica quién debe a quién o «Sin adelantos pendientes». Siempre visible. Menú inferior Inicio / Movimientos / Análisis. Ajustes arriba.
+Al abrir verás las dos cuentas: **Familia** y **Personal** con el mismo peso visual en la nueva paleta de color (azul petróleo e icono distintivo sobre fondo blanco roto neutro). Cada una muestra dinero real disponible, no gasto mensual imputado. Pulsando una cuenta abres su detalle. Debajo encuentras los botones de acciones rápidas: **Añadir ingreso** (con icono `+`) a la izquierda y **Añadir gasto** (con icono `−`) a la derecha. Debajo, **Adelantos** indica quién debe a quién o «Sin adelantos pendientes» (siempre visible). A continuación, la sección **Últimos movimientos** muestra exactamente los tres movimientos más recientes registrados (gastos, ingresos, transferencias, devoluciones, ajustes y recurrentes) con concepto, fecha, cuenta e importe, junto con el botón «Ver todos» para abrir la lista completa. En la cabecera superior dispones del botón de **Modo de Privacidad** (icono de ojo) y el botón de **Ajustes** (⚙️). Menú inferior: Inicio / Movimientos / Análisis.
+
+## Modo de Privacidad
+Pulsando el botón del ojo en la cabecera de Inicio activas o desactivas el modo de privacidad. Al activarlo, todos los importes numéricos visibles en saldos, adelantos, movimientos y análisis se reemplazan por una máscara uniforme `•••• €`. Los conceptos, fechas, cuentas y categorías permanecen siempre visibles. Tu preferencia se guarda en el dispositivo y se mantiene tras reiniciar la app. No altera los datos de la contabilidad, exportaciones ni copias de seguridad.
 
 ## Registrar un gasto
 1. Pulsa Nuevo gasto, introduce el importe con teclado numérico (coma, C y retroceso).

@@ -91,3 +91,33 @@ Resultados reproducidos:
 - Base comparada: `main` en el momento de la revisión
 - Alcance: arranque, WorkManager, Room, recurrentes, backup, notificaciones, CI y documentación.
 - Decisión: **no fusionar todavía**.
+
+### Iteración 2026-11-22 (e) — Revisión independiente del commit a127b9b
+
+- Rama revisada: `fix/estabilizacion-senior-v6`
+- Commit revisado: `a127b9b79297f7a972b9ce1e4c8cb4b06ffe380f`
+- Decisión: **NO FUSIONAR / REQUIERE CAMBIOS ACOTADOS**
+
+| Comprobación | Resultado | Evidencia |
+|---|---|---|
+| `testDebugUnitTest` | PASA | 118 tests, 0 fallos, 0 omitidos |
+| `lintDebug` | PASA | 0 errores, 8 advertencias |
+| `assembleDebug` | PASA | APK debug generado |
+| Migraciones reales 1/2/3/4→5 | NO VALIDADO | No existe `MigrationTestHelper`; las pruebas construyen esquemas manuales distintos de los JSON exportados |
+
+Estado independiente:
+
+- REV-001: RESOLVED.
+- REV-002: OPEN.
+- REV-003: pendiente de cierre junto con REV-002.
+- REV-004: RESOLVED.
+- REV-005: IN_PROGRESS. Fingerprint corregido; falta coherencia inicial entre preferencia y permiso Android.
+- REV-006: IN_PROGRESS. Filtrado centralizado correcto, pero el paso del tiempo no reactiva el Flow sin nueva consulta.
+- REV-007: OPEN. Persisten contradicciones y cifras antiguas en la documentación.
+- REV-008: RESOLVED para compilación, tests y lint locales.
+
+Hallazgos:
+
+- La deduplicación usa correctamente IDs ordenados y solo persiste la huella si la notificación fue mostrada.
+- `AI_REVIEW_LOG.md` todavía describe `lastNotifiedPendingCount`.
+- BACKLOG/SPRINT/Documentacion siguen mezclando COMPLETADO con TODO/EN PROGRESO y cifras de 116/118 tests.

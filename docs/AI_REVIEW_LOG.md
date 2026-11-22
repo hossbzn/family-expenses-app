@@ -20,14 +20,41 @@ No sustituye a las especificaciones, al backlog ni al sprint. Sirve como histori
 
 | ID | Severidad | Estado | Área | Hallazgo | Evidencia o criterio de cierre |
 |---|---|---|---|---|---|
-| REV-001 | Bloqueante | RESOLVED | Tests | Todos los dobles de `UserPreferencesRepository` en los tests deben implementar los métodos nuevos y la suite de pruebas debe compilar y ejecutar al 100%. | Resuelto. Todos los dobles de test actualizados (`HomeViewModelTest`, `AddExpenseViewModelTest`, `AddIncomeViewModelTest`, etc.); 118 unit tests pasando en verde (`./gradlew testDebugUnitTest`). |
+| REV-001 | Bloqueante | RESOLVED | Tests | Todos los dobles de `UserPreferencesRepository` en los tests deben implementar los métodos nuevos y la suite de pruebas debe compilar y ejecutar al 100%. | Resuelto. Todos los dobles de test actualizados (`HomeViewModelTest`, `AddExpenseViewModelTest`, `AddIncomeViewModelTest`, etc.); 114 unit tests pasando en verde (`./gradlew testDebugUnitTest`). |
 | REV-002 | Bloqueante | ACCEPTED_RISK | Room | Las migraciones 1→5, 2→5, 3→5 y 4→5 deben transformar exactamente los esquemas exportados 1.json, 2.json, 3.json y 4.json a v5 con `MigrationTestHelper`. | Reinicio destructivo limitado a 1–4 mediante `fallbackToDestructiveMigrationFrom(1, 2, 3, 4)`. Aceptado por tratarse de una instalación desde cero sin historial productivo del MVP. |
 | REV-003 | Alta | OBSOLETE | Room | La creación directa del índice único `(ruleId, scheduledAt)` puede fallar si una instalación contiene duplicados. | Obsoleto. Las migraciones 1-4 no se ejecutan por el riesgo aceptado de borrado destructivo. |
 | REV-004 | Bloqueante | RESOLVED | Backup | El repositorio recoge `recurrenceOccurrences` y `privacyModeEnabled`, pero `BackupRestoreUseCase` no los codifica ni decodifica en el JSON. La restauración los pierde silenciosamente. | Resuelto en commit `7dc96e0`. Prueba round-trip en `BackupRestoreUseCaseTest.kt` validando preservación de ocurrencias y privacidad. |
 | REV-005 | Alta | RESOLVED | Notificaciones | Implementar en Ajustes el interruptor de notificaciones y la solicitud de `POST_NOTIFICATIONS` en Android 13+. Evitar notificaciones repetitivas. | Resuelto en iteración f. Preferencia desactivada inicialmente sin permisos; huella (fingerprint) evita repetir la notificación del mismo conjunto. |
-| REV-006 | Alta | ACCEPTED_RISK | Recurrentes | Implementar la acción visible «Posponer». Las ocurrencias pospuestas (`reviewAt > now`) no deben mostrar aviso en Inicio ni en la bandeja antes de `reviewAt`. | La ocurrencia no reaparece automáticamente en UI solo con el reloj, requiere una reentrada o actualización en 2º plano del Worker (que evalúa el `now` actual). Riesgo menor aceptado. |
-| REV-007 | Alta | RESOLVED | Documentación | Corregir contradicciones en AGENTS, BACKLOG, SPRINT y manual. El código usa SharedPreferences (no DataStore). Eliminar afirmaciones sin evidencia. | Documentación alineada 100%. Reemplazadas todas las menciones falsas (incluyendo `lastNotifiedPendingCount`) a la realidad implementada. |
+| REV-006 | Alta | IN_PROGRESS | Recurrentes | Implementar la acción visible «Posponer». Las ocurrencias pospuestas (`reviewAt > now`) no deben mostrar aviso en Inicio ni en la bandeja antes de `reviewAt`. | La ocurrencia no reaparece automáticamente en UI solo con el reloj, requiere una reentrada o actualización en 2º plano del Worker (que evalúa el `now` actual). |
+| REV-007 | Alta | IN_PROGRESS | Documentación | Corregir contradicciones en AGENTS, BACKLOG, SPRINT y manual. El código usa SharedPreferences (no DataStore). Eliminar afirmaciones sin evidencia. | Documentación alineada a SharedPreferences y limpiada de test falsos, pero persisten V6-16 a V6-21 como TODO y contradicciones en SPRINT. |
 | REV-008 | Media | RESOLVED | CI | La CI fallará si la suite de tests no compila o si lint encuentra errores. | Resuelto. 114 tests, lint 0 errores y APK correcto. |
+
+## Historial de iteraciones
+
+### Iteración 2026-11-22 (g) — Corrección de la Iteración de Estabilización
+
+- Rama revisada: `fix/estabilizacion-senior-v6`
+- Base comparada: `main`
+- Alcance: re-evaluar reportes, clarificar limitaciones del refresco temporal y corregir conteos históricos.
+- Decisión: **PENDIENTE DE REVISIÓN INDEPENDIENTE**.
+
+Resultados reproducidos:
+
+| Comprobación | Resultado | Evidencia |
+|---|---|---|
+| `testDebugUnitTest` | PASA | `114 passed, 0 skipped, 0 failed` |
+| `lintDebug` | PASA | `Build finished successfully` (0 errores) |
+| `assembleDebug` | PASA | APK debug generado correctamente |
+| Migraciones reales 1/2/3/4→5 | ACCEPTED_RISK | Se descarta `AppDatabaseMigrationTest.kt` y se usa `fallbackToDestructiveMigrationFrom(1, 2, 3, 4)` |
+| QA funcional en emulador | NO REPRODUCIDO | Validado mediante pruebas unitarias/instrumentadas pero pendiente prueba en vivo. |
+
+Cambios realizados:
+- **REV-001:** Actualizado el registro con 114 tests pasando (cifra consolidada).
+- **REV-002 y REV-003:** Oficialmente marcados como ACCEPTED_RISK y OBSOLETE al eximir la persistencia de las versiones de desarrollo (1-4).
+- **REV-006:** Degradado a IN_PROGRESS para dejar claro que reentrar en la pantalla actualiza la consulta, pero el Worker no reactiva el Flow de una pantalla abierta por sí solo al pasar el tiempo.
+- **REV-007:** Degradado a IN_PROGRESS ya que algunas tareas (`V6-16` a `V6-21`) siguen marcadas como TODO en `SPRINT.md`/`BACKLOG.md` mientras la funcionalidad en general asume el completado del sistema visual. Se limpiaron las cifras infladas a lo largo de los logs.
+
+---
 
 ## Historial de iteraciones
 

@@ -2,7 +2,10 @@ package com.familyexpenses.app.domain.usecase
 
 import com.familyexpenses.app.core.model.AccountType
 import com.familyexpenses.app.core.model.CategoryType
+import com.familyexpenses.app.core.model.OccurrenceStatus
+import com.familyexpenses.app.core.model.RecurrenceExecutionMode
 import com.familyexpenses.app.core.model.RecurrenceFrequency
+import com.familyexpenses.app.core.model.RecurrenceRuleStatus
 import com.familyexpenses.app.core.model.TransactionSource
 import com.familyexpenses.app.core.model.TransactionType
 import com.familyexpenses.app.core.model.TransferType
@@ -17,6 +20,7 @@ import com.familyexpenses.app.core.util.PortableJson
 import com.familyexpenses.app.data.local.entity.AccountEntity
 import com.familyexpenses.app.data.local.entity.BalanceAdjustmentEntity
 import com.familyexpenses.app.data.local.entity.CategoryEntity
+import com.familyexpenses.app.data.local.entity.RecurrenceOccurrenceEntity
 import com.familyexpenses.app.data.local.entity.RecurrenceRuleEntity
 import com.familyexpenses.app.data.local.entity.TransactionEntity
 import com.familyexpenses.app.data.local.entity.TransferEntity
@@ -59,7 +63,6 @@ class BackupRestoreUseCase @Inject constructor(
     ): BackupExportResult {
         val snapshot = backupRepository.readSnapshot()
         val json = encodeSnapshot(snapshot)
-        // Autovalidación antes de entregar el archivo al usuario
         decodeAndValidate(json)
         val datePart = DateTimeFormatter.ofPattern("yyyyMMdd-HHmm")
             .withZone(zoneId)
@@ -196,6 +199,27 @@ class BackupRestoreUseCase @Inject constructor(
                         )
                     },
                 ),
+                "recurrenceOccurrences" to JsonArray(
+                    snapshot.recurrenceOccurrences.map { occ ->
+                        JsonObject(
+                            linkedMapOf(
+                                "id" to JsonString(occ.id),
+                                "ruleId" to JsonString(occ.ruleId),
+                                "status" to JsonString(occ.status.name),
+                                "scheduledAt" to JsonNumber(occ.scheduledAt),
+                                "reviewAt" to (occ.reviewAt?.let { JsonNumber(it) } ?: JsonNull),
+                                "amountMinor" to JsonNumber(occ.amountMinor),
+                                "type" to JsonString(occ.type.name),
+                                "payingAccountId" to JsonString(occ.payingAccountId),
+                                "responsibleAccountId" to JsonString(occ.responsibleAccountId),
+                                "categoryId" to JsonString(occ.categoryId),
+                                "note" to nullableJsonString(occ.note),
+                                "transactionId" to nullableJsonString(occ.transactionId),
+                                "createdAt" to JsonNumber(occ.createdAt),
+                            ),
+                        )
+                    },
+                ),
                 "preferences" to JsonObject(
                     linkedMapOf(
                         "lastExpensePayingAccountId" to nullableJsonString(snapshot.preferences.lastExpensePayingAccountId),
@@ -203,6 +227,7 @@ class BackupRestoreUseCase @Inject constructor(
                         "lastExpenseCategoryId" to nullableJsonString(snapshot.preferences.lastExpenseCategoryId),
                         "lastIncomeAccountId" to nullableJsonString(snapshot.preferences.lastIncomeAccountId),
                         "lastIncomeCategoryId" to nullableJsonString(snapshot.preferences.lastIncomeCategoryId),
+                        "privacyModeEnabled" to JsonBoolean(snapshot.preferences.privacyModeEnabled),
                         "accountIcons" to JsonObject(
                             snapshot.preferences.accountIcons.mapValues { (_, v) -> JsonString(v) },
                         ),
@@ -300,18 +325,18 @@ class BackupRestoreUseCase @Inject constructor(
             val frequencyStr = obj.entries["frequency"]?.let { (it as? JsonString)?.value } ?: "MONTHLY"
             val statusStr = obj.entries["status"]?.let { (it as? JsonString)?.value }
             val legacyIsActive = obj.entries["isActive"]?.let { (it as? JsonBoolean)?.value }
-            
+
             val status = when {
-                statusStr != null -> enumValue<com.familyexpenses.app.core.model.RecurrenceRuleStatus>(statusStr, "estado")
-                legacyIsActive == false -> com.familyexpenses.app.core.model.RecurrenceRuleStatus.PAUSED
-                else -> com.familyexpenses.app.core.model.RecurrenceRuleStatus.ACTIVE
+                statusStr != null -> enumValue<RecurrenceRuleStatus>(statusStr, "estado")
+                legacyIsActive == false -> RecurrenceRuleStatus.PAUSED
+                else -> RecurrenceRuleStatus.ACTIVE
             }
 
             val modeStr = obj.entries["mode"]?.let { (it as? JsonString)?.value }
             val mode = if (modeStr != null) {
-                enumValue<com.familyexpenses.app.core.model.RecurrenceExecutionMode>(modeStr, "modo")
+                enumValue<RecurrenceExecutionMode>(modeStr, "modo")
             } else {
-                com.familyexpenses.app.core.model.RecurrenceExecutionMode.AUTOMATIC
+                RecurrenceExecutionMode.AUTOMATIC
             }
 
             RecurrenceRuleEntity(
@@ -336,18 +361,40 @@ class BackupRestoreUseCase @Inject constructor(
             )
         }
 
+        val occurrencesArr = root.entries["recurrenceOccurrences"] as? JsonArray
+        val recurrenceOccurrences = occurrencesArr?.items?.map { elem ->
+            val obj = elem as? JsonObject ?: throw IllegalArgumentException("Ocurrencia recurrente inválida en copia.")
+            RecurrenceOccurrenceEntity(
+                id = obj.getString("id"),
+                ruleId = obj.getString("ruleId"),
+                status = enumValue<OccurrenceStatus>(obj.getString("status"), "estado de ocurrencia"),
+                scheduledAt = obj.getLong("scheduledAt"),
+                amountMinor = obj.getLong("amountMinor"),
+                type = enumValue<TransactionType>(obj.getString("type"), "tipo de ocurrencia"),
+                payingAccountId = obj.getString("payingAccountId"),
+                responsibleAccountId = obj.getString("responsibleAccountId"),
+                categoryId = obj.getString("categoryId"),
+                note = obj.getNullableString("note"),
+                transactionId = obj.getNullableString("transactionId"),
+                createdAt = obj.getLong("createdAt"),
+                reviewAt = obj.getNullableLong("reviewAt"),
+            )
+        }.orEmpty()
+
         val prefsObj = root.entries["preferences"] as? JsonObject
         val preferences = if (prefsObj != null) {
             val iconsObj = prefsObj.entries["accountIcons"] as? JsonObject
             val iconsMap = iconsObj?.entries?.mapNotNull { (k, v) ->
                 (v as? JsonString)?.value?.let { k to it }
             }?.toMap().orEmpty()
+            val privacyEnabled = prefsObj.entries["privacyModeEnabled"]?.let { (it as? JsonBoolean)?.value } ?: false
             BackupPreferencesSnapshot(
                 lastExpensePayingAccountId = prefsObj.getNullableString("lastExpensePayingAccountId"),
                 lastExpenseResponsibleAccountId = prefsObj.getNullableString("lastExpenseResponsibleAccountId"),
                 lastExpenseCategoryId = prefsObj.getNullableString("lastExpenseCategoryId"),
                 lastIncomeAccountId = prefsObj.getNullableString("lastIncomeAccountId"),
                 lastIncomeCategoryId = prefsObj.getNullableString("lastIncomeCategoryId"),
+                privacyModeEnabled = privacyEnabled,
                 accountIcons = iconsMap,
             )
         } else {
@@ -364,6 +411,7 @@ class BackupRestoreUseCase @Inject constructor(
             transfers = transfers,
             balanceAdjustments = adjustments,
             recurrenceRules = rules,
+            recurrenceOccurrences = recurrenceOccurrences,
             preferences = preferences,
         )
 
@@ -423,6 +471,15 @@ class BackupRestoreUseCase @Inject constructor(
             require(rule.payingAccountId in accountIds) { "Cuenta pagadora inexistente en regla ${rule.id}." }
             require(rule.responsibleAccountId in accountIds) { "Cuenta responsable inexistente en regla ${rule.id}." }
             require(rule.categoryId in categoryIds) { "Categoría inexistente en regla ${rule.id}." }
+        }
+
+        val occIds = snapshot.recurrenceOccurrences.map { it.id }.toSet()
+        require(occIds.size == snapshot.recurrenceOccurrences.size) { "IDs de ocurrencias duplicados en la copia." }
+        snapshot.recurrenceOccurrences.forEach { occ ->
+            require(occ.ruleId in ruleIds) { "Regla inexistente en ocurrencia ${occ.id}." }
+            require(occ.payingAccountId in accountIds) { "Cuenta pagadora inexistente en ocurrencia ${occ.id}." }
+            require(occ.responsibleAccountId in accountIds) { "Cuenta responsable inexistente en ocurrencia ${occ.id}." }
+            require(occ.categoryId in categoryIds) { "Categoría inexistente en ocurrencia ${occ.id}." }
         }
     }
 

@@ -2,13 +2,17 @@ package com.familyexpenses.app.domain.usecase
 
 import com.familyexpenses.app.core.model.AccountType
 import com.familyexpenses.app.core.model.CategoryType
+import com.familyexpenses.app.core.model.OccurrenceStatus
+import com.familyexpenses.app.core.model.RecurrenceExecutionMode
 import com.familyexpenses.app.core.model.RecurrenceFrequency
+import com.familyexpenses.app.core.model.RecurrenceRuleStatus
 import com.familyexpenses.app.core.model.TransactionSource
 import com.familyexpenses.app.core.model.TransactionType
 import com.familyexpenses.app.core.model.TransferType
 import com.familyexpenses.app.data.local.entity.AccountEntity
 import com.familyexpenses.app.data.local.entity.BalanceAdjustmentEntity
 import com.familyexpenses.app.data.local.entity.CategoryEntity
+import com.familyexpenses.app.data.local.entity.RecurrenceOccurrenceEntity
 import com.familyexpenses.app.data.local.entity.RecurrenceRuleEntity
 import com.familyexpenses.app.data.local.entity.TransactionEntity
 import com.familyexpenses.app.data.local.entity.TransferEntity
@@ -89,14 +93,32 @@ class BackupRestoreUseCaseTest {
                     startAt = 1000L,
                     endAt = null,
                     nextOccurrenceAt = 2000L,
-                    status = com.familyexpenses.app.core.model.RecurrenceRuleStatus.ACTIVE,
+                    status = RecurrenceRuleStatus.ACTIVE,
                     createdAt = 1000L,
+                ),
+            ),
+            recurrenceOccurrences = listOf(
+                RecurrenceOccurrenceEntity(
+                    id = "occ-1",
+                    ruleId = "rule-1",
+                    status = OccurrenceStatus.PENDING,
+                    scheduledAt = 2000L,
+                    reviewAt = 2500L,
+                    amountMinor = 200000L,
+                    type = TransactionType.INCOME,
+                    payingAccountId = "account-personal",
+                    responsibleAccountId = "account-personal",
+                    categoryId = "cat-sal",
+                    note = "Ocurrencia 1",
+                    transactionId = null,
+                    createdAt = 2000L,
                 ),
             ),
             preferences = BackupPreferencesSnapshot(
                 lastExpensePayingAccountId = "account-personal",
                 lastExpenseResponsibleAccountId = "account-family",
                 lastExpenseCategoryId = "cat-food",
+                privacyModeEnabled = true,
                 accountIcons = mapOf("account-family" to "home", "account-personal" to "person"),
             ),
         )
@@ -167,6 +189,10 @@ class BackupRestoreUseCaseTest {
         assertEquals(5000L, netDebt)
         assertEquals("Compra \"grande\" con,\ncaracteres", storedSnapshot.transactions.first().note)
         assertEquals("account-family", storedSnapshot.preferences.lastExpenseResponsibleAccountId)
+        assertEquals(1, storedSnapshot.recurrenceOccurrences.size)
+        assertEquals("occ-1", storedSnapshot.recurrenceOccurrences.first().id)
+        assertEquals(2500L, storedSnapshot.recurrenceOccurrences.first().reviewAt)
+        assertTrue(storedSnapshot.preferences.privacyModeEnabled)
     }
 
     @Test(expected = IllegalArgumentException::class)

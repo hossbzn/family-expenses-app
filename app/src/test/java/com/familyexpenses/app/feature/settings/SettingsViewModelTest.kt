@@ -18,7 +18,15 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
+
 @OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
 class SettingsViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -56,7 +64,8 @@ class SettingsViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        viewModel = SettingsViewModel(fakePreferences)
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        viewModel = SettingsViewModel(context, fakePreferences)
     }
 
     @After
@@ -69,11 +78,16 @@ class SettingsViewModelTest {
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.notificationsEnabled.collect() }
         advanceUntilIdle()
 
+        // El ViewModel verifica checkPermissionAndSync en init, si no tiene permiso apaga notificationsEnabled
+        // Como estamos en test con Robolectric sin permisos, será false.
+        assertFalse(viewModel.notificationsEnabled.value)
+
+        viewModel.setNotificationsEnabled(true)
+        advanceUntilIdle()
         assertTrue(viewModel.notificationsEnabled.value)
 
         viewModel.setNotificationsEnabled(false)
         advanceUntilIdle()
-
         assertFalse(viewModel.notificationsEnabled.value)
     }
 }

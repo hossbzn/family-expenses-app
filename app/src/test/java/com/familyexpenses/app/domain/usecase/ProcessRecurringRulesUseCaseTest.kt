@@ -234,6 +234,10 @@ private class FakeProcessOccurrenceDao : RecurrenceOccurrenceDao {
         return occurrences.values.filter { it.status == OccurrenceStatus.PENDING }
     }
 
+    override suspend fun getAllOccurrences(): List<RecurrenceOccurrenceEntity> {
+        return occurrences.values.toList()
+    }
+
     override suspend fun updateStatus(id: String, status: OccurrenceStatus, transactionId: String?) {
         occurrences[id]?.let {
             occurrences[id] = it.copy(status = status, transactionId = transactionId)

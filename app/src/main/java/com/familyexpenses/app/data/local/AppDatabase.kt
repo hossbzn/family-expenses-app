@@ -7,6 +7,7 @@ import com.familyexpenses.app.data.local.converter.RoomConverters
 import com.familyexpenses.app.data.local.dao.AccountDao
 import com.familyexpenses.app.data.local.dao.BalanceAdjustmentDao
 import com.familyexpenses.app.data.local.dao.CategoryDao
+import com.familyexpenses.app.data.local.dao.RecurrenceOccurrenceDao
 import com.familyexpenses.app.data.local.dao.RecurrenceRuleDao
 import com.familyexpenses.app.data.local.dao.TransactionDao
 import com.familyexpenses.app.data.local.dao.TransferDao
@@ -16,7 +17,6 @@ import com.familyexpenses.app.data.local.entity.CategoryEntity
 import com.familyexpenses.app.data.local.entity.RecurrenceOccurrenceEntity
 import com.familyexpenses.app.data.local.entity.RecurrenceRuleEntity
 import com.familyexpenses.app.data.local.entity.TransactionEntity
-import com.familyexpenses.app.data.local.dao.RecurrenceOccurrenceDao
 import com.familyexpenses.app.data.local.entity.TransferEntity
 
 @Database(
@@ -29,7 +29,7 @@ import com.familyexpenses.app.data.local.entity.TransferEntity
         RecurrenceRuleEntity::class,
         RecurrenceOccurrenceEntity::class,
     ],
-    version = 2,
+    version = 5,
     exportSchema = true,
 )
 @TypeConverters(RoomConverters::class)

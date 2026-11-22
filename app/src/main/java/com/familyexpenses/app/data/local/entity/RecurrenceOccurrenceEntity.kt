@@ -28,6 +28,7 @@ import com.familyexpenses.app.core.model.TransactionType
         Index("transactionId"),
         Index("status"),
         Index("scheduledAt"),
+        Index(value = ["ruleId", "scheduledAt"], unique = true),
     ],
 )
 data class RecurrenceOccurrenceEntity(
@@ -43,4 +44,5 @@ data class RecurrenceOccurrenceEntity(
     val note: String?,
     val transactionId: String? = null,
     val createdAt: Long,
+    val reviewAt: Long? = null,
 )

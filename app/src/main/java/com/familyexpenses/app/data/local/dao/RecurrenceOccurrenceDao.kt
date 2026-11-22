@@ -28,6 +28,9 @@ interface RecurrenceOccurrenceDao {
     @Query("SELECT * FROM recurrence_occurrences WHERE status = 'PENDING' ORDER BY scheduledAt ASC")
     suspend fun getPendingOccurrences(): List<RecurrenceOccurrenceEntity>
 
+    @Query("SELECT * FROM recurrence_occurrences ORDER BY scheduledAt ASC")
+    suspend fun getAllOccurrences(): List<RecurrenceOccurrenceEntity>
+
     @Query("UPDATE recurrence_occurrences SET status = :status, transactionId = :transactionId WHERE id = :id")
     suspend fun updateStatus(id: String, status: OccurrenceStatus, transactionId: String? = null)
 

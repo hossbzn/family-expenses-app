@@ -131,7 +131,7 @@ class ManagePendingOccurrencesUseCase @Inject constructor(
         )
     }
 
-    suspend fun postponeOccurrence(occurrenceId: String, newScheduledAt: Long) {
+    suspend fun postponeOccurrence(occurrenceId: String, newReviewAt: Long) {
         val occurrence = occurrenceDao.getOccurrenceById(occurrenceId)
             ?: throw IllegalArgumentException("La ocurrencia no existe.")
 
@@ -141,7 +141,7 @@ class ManagePendingOccurrencesUseCase @Inject constructor(
 
         occurrenceDao.upsert(
             occurrence.copy(
-                scheduledAt = newScheduledAt,
+                reviewAt = newReviewAt, // Updates reviewAt without altering scheduledAt or economic date
             ),
         )
     }

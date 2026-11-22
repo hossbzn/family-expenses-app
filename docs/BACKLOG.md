@@ -283,7 +283,7 @@
 ### V6-15 — Modo de privacidad global para ocultar importes (DONE, P1)
 **Como usuario** quiero poder ocultar los importes numéricos en toda la app con un toque para consultar la información en público manteniendo la privacidad.
 - [x] Botón de ojo con icono conmutables (`Visibility` / `VisibilityOff`) en la cabecera de Inicio junto a Ajustes.
-- [x] Preferencia `privacyModeEnabled: Flow<Boolean>` en `UserPreferencesRepository` con persistencia en Preferences DataStore.
+- [x] Preferencia `privacyModeEnabled: Flow<Boolean>` en `UserPreferencesRepository` con persistencia en SharedPreferences.
 - [x] Reemplazar visualmente todos los importes por `"•••• €"` en Inicio, Movimientos, detalles, cuentas, Adelantos, Análisis y Recurrentes mediante el componente reutilizable `MoneyText`.
 - [x] Ocultar escalas, etiquetas monetarias y valores numéricos en los gráficos de Análisis cuando la privacidad esté activa.
 - [x] Mantener visibles conceptos, notas, fechas, nombres de cuenta, categorías y frecuencias.

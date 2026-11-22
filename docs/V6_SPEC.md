@@ -94,7 +94,7 @@ No interpretar transferencias como devolución automáticamente.
 - **Máscara uniforme:** Al activar la privacidad, aplica una máscara uniforme de longitud fija como `"•••• €"`.
 - **En Análisis y Gráficos:** Los gráficos de evolución y anillos de categorías deben ocultar valores, escalas numéricas y etiquetas monetarias en ejes cuando el modo esté activo, evitando que permitan deducir cantidades.
 - **Exclusiones de la máscara:** NO oculta conceptos, notas, fechas, nombres de cuenta, categorías ni frecuencias de ejecución.
-- **Persistencia local:** La preferencia se guarda localmente en `UserPreferencesRepository` (Preferences DataStore) y se mantiene tras cerrar y reabrir la app.
+- **Persistencia local:** La preferencia se guarda localmente en `UserPreferencesRepository` (SharedPreferences) y se mantiene tras cerrar y reabrir la app.
 - **Transparencia y límites:** NO modifica los datos contables reales, el formato de exportación CSV ni los backups JSON. Tampoco se promociona ni presenta como una función de seguridad, cifrado o protección con PIN.
 
 ## 11. Accesibilidad y validación

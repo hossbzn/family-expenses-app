@@ -155,7 +155,7 @@
   - Layout compacto Galaxy S25 (360-412 dp) con targets táctiles mín. 48 dp.
 - [x] **V6-15 — Modo de privacidad global para ocultar importes (DONE, P1):**
   - Botón de ojo (`Visibility` / `VisibilityOff`) en cabecera de Inicio.
-  - Persistencia de `privacyModeEnabled` en Preferences DataStore via `UserPreferencesRepository`.
+  - Persistencia de `privacyModeEnabled` en SharedPreferences via `UserPreferencesRepository`.
   - Componente reutilizable `MoneyText` que enmascara importes con `"•••• €"` en Inicio, Movimientos, detalles, cuentas, Adelantos, Análisis y Recurrentes.
   - `contentDescription` dinámico ("Ocultar importes" / "Mostrar importes").
   - 112 pruebas unitarias pasando al 100% en verde.

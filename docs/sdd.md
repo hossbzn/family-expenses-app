@@ -116,7 +116,7 @@ El esquema se compone de 6 entidades limpias sin residuos del MVP:
 * Arquitectura `data / domain / feature`. Cálculos contables exclusivamente en dominio; UI solo de presentación.
 * Transacciones atómicas de Room (`withTransaction`) para cualquier operación que altere saldos o deudas.
 * Recurrencias automáticas procesadas por WorkManager aplicando las mismas reglas contables de pagadora/responsable que las transacciones manuales.
-* **Modo de Privacidad Global:** Conmutador persistente en Preferences DataStore (`UserPreferencesRepository.observePrivacyModeEnabled()`). Reemplaza visualmente valores numéricos por `"•••• €"` sin alterar el motor contable, los flujos de Room, las exportaciones CSV ni los backups JSON. No es un cifrado ni requiere PIN.
+* **Modo de Privacidad Global:** Conmutador persistente en SharedPreferences (`UserPreferencesRepository.observePrivacyModeEnabled()`). Reemplaza visualmente valores numéricos por `"•••• €"` sin alterar el motor contable, los flujos de Room, las exportaciones CSV ni los backups JSON. No es un cifrado ni requiere PIN.
 
 ## 6. Criterios de aceptación contables
 1. Personal paga 80 € de compra familiar: Personal -80 € de caja, Familia 0 € de caja, gasto analítico Familia 80 €, deuda Familia $\to$ Personal +80 €.

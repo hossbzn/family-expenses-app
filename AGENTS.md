@@ -36,7 +36,7 @@ Después de leer este archivo, leer siempre `docs/AI_REVIEW_LOG.md`. Ese documen
 ## UX y Sistema Visual V6
 - Sistema visual Material Design 3 con fondo neutro blanco roto (`#F8F9FA`), superficies en blanco puro (`#FFFFFF`) y **Azul Petróleo** (`#1A3644`) como color primario. Verde sobrio (`#2E7D32`) y rojo carmesí apagado (`#C62828`) como colores semánticos.
 - Inicio: Mismo peso visual para tarjetas Familia y Personal, botones "Añadir ingreso" (`+`) a la izquierda y "Añadir gasto" (`−`) a la derecha, bloque de Adelantos visible, sección "Últimos movimientos" (3 ítems más recientes) con enlace "Ver todos", y botón de Modo de Privacidad en cabecera junto a Ajustes.
-- Modo de Privacidad Global: Botón de ojo en cabecera con conmutador persistente en Preferences DataStore. Aplica la máscara `"•••• €"` a saldos, deudas, importes de movimientos y gráficos de Análisis sin alterar los datos contables de Room, CSV o copias JSON.
+- Modo de Privacidad Global: Botón de ojo en cabecera con conmutador persistente en SharedPreferences (`UserPreferencesRepository`). Aplica la máscara `"•••• €"` a saldos, deudas, importes de movimientos y gráficos de Análisis sin alterar los datos contables de Room, CSV o copias JSON.
 - Navegación inferior **Inicio / Movimientos / Análisis**; Ajustes en cabecera.
 - Nuevo gasto: teclado propio con coma/C/retroceso; 7 favoritas manuales + Más; **dos selectores** pagadora/responsable; última categoría y combinación, fecha hoy, detalles plegados, Guardar en un paso.
 - Nuevo ingreso: categorías en lista manual sin favoritas.

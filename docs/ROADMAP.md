@@ -21,17 +21,17 @@
 - [x] Movimientos, cuentas, transferencias, análisis y categorías (marcado DONE).
 - [x] Copia/restauración y QA Android (marcado DONE).
 
-## Etapa 3 — Recurrentes V6.1 (pendiente)
-**Dependencia:** verificar integración con motor de operaciones V6 marcado DONE y la preservación de datos instalados; la migración desde MVP sigue siendo un riesgo no resuelto por marcar V6 como DONE.
-- [ ] REC-01: migración y protección de reglas existentes (puede comenzar como auditoría en Etapa 1).
-- [ ] REC-02/03: edición/archivo/pausa/reactivación y cuatro frecuencias.
-- [ ] REC-04: modos automático/pendiente y motor idempotente.
-- [ ] REC-05/06: bandeja, revisión individual y múltiple atómica.
-- [ ] REC-07: aviso en Inicio y notificaciones Android opcionales.
-- [ ] REC-08: tests de caja/deuda, datos históricos, backup y uso real en móvil.
+## Etapa 3 — Recurrentes V6.1 (aprobado para desarrollo)
+**Dependencia:** El motor de operaciones V6 (S1-S4) está 100% completado, validado y funciona offline. La persistencia actual se inició limpia en v1 (sin datos de MVP), por lo que se ajustará la estrategia para no necesitar migración compleja.
+- [ ] REC-01: Ajustar esquema Room (ampliar `RecurrenceRuleEntity` y añadir `RecurrenceOccurrenceEntity`) para soporte de ocurrencias independientes, sin requerir migración destructiva (al estar recién inicializado V6).
+- [ ] REC-02/03: edición/archivo/pausa/reactivación y cuatro frecuencias (Semanal, Mensual, Multi-mes, Anual).
+- [ ] REC-04: modos automático/pendiente y motor idempotente (WorkManager + Room transaccional).
+- [ ] REC-05/06: bandeja de pendientes, revisión individual y múltiple atómica.
+- [ ] REC-07: aviso discreto en Inicio (UI) y notificaciones Android opcionales.
+- [ ] REC-08: pruebas end-to-end (QA en dispositivo), asegurar inclusión en backup CSV/JSON y protección frente a reinicios.
 
 ## Regla de entrega
-No sustituir el APK instalado ni migrar datos sin validar backup, migración Room, conservación de históricos y funcionamiento de las reglas. Desarrollo solo tras autorización explícita; este roadmap es documentación, no ejecución.
+Todo el desarrollo V6.1 debe escribirse mediante commits atómicos y PR, cubriendo DAO, WorkManager, ViewModels y UI, con pruebas unitarias para cada caso. No alterar el comportamiento contable (invariantes de V6).
 
 ---
 

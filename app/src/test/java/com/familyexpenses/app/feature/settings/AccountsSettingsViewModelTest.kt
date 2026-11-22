@@ -64,6 +64,9 @@ class AccountsSettingsViewModelTest {
 
     private val iconsMap = mutableMapOf<String, String>()
     private val fakePreferences = object : UserPreferencesRepository {
+        var privacyMode = false
+        override fun observePrivacyModeEnabled(): Flow<Boolean> = MutableStateFlow(privacyMode)
+        override fun setPrivacyModeEnabled(enabled: Boolean) { privacyMode = enabled }
         override fun getLastExpensePayingAccountId(): String? = null
         override fun setLastExpensePayingAccountId(accountId: String) {}
         override fun getLastExpenseResponsibleAccountId(): String? = null

@@ -7,6 +7,7 @@ import com.familyexpenses.app.data.local.entity.AccountEntity
 import com.familyexpenses.app.data.local.entity.CategoryEntity
 import com.familyexpenses.app.data.repository.AccountRepository
 import com.familyexpenses.app.data.repository.CategoryRepository
+import com.familyexpenses.app.data.repository.UserPreferencesRepository
 import com.familyexpenses.app.domain.model.HistoryItem
 import com.familyexpenses.app.domain.model.MovementKind
 import com.familyexpenses.app.domain.usecase.FilterMovementsUseCase
@@ -16,12 +17,6 @@ import com.familyexpenses.app.domain.usecase.MovementFilterCriteria
 import com.familyexpenses.app.domain.usecase.MovementPeriodFilter
 import com.familyexpenses.app.domain.usecase.MovementTypeFilter
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import java.text.NumberFormat
 import java.time.Instant
 import java.time.LocalDate
@@ -31,6 +26,12 @@ import java.time.format.DateTimeFormatter
 import java.util.Currency
 import java.util.Locale
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 
 @HiltViewModel
 class HistoryViewModel @Inject constructor(
@@ -38,6 +39,7 @@ class HistoryViewModel @Inject constructor(
     getHistoryUseCase: GetHistoryUseCase,
     accountRepository: AccountRepository,
     categoryRepository: CategoryRepository,
+    userPreferencesRepository: UserPreferencesRepository,
     private val filterMovementsUseCase: FilterMovementsUseCase,
 ) : ViewModel() {
 
@@ -79,8 +81,9 @@ class HistoryViewModel @Inject constructor(
         getHistoryUseCase(),
         accountRepository.observeAccounts(),
         categoryRepository.observeCategories(),
+        userPreferencesRepository.observePrivacyModeEnabled(),
         filterState,
-    ) { items, accounts, categories, state ->
+    ) { items, accounts, categories, privacyEnabled, state ->
         val activeAccounts = accounts.filter { !it.isArchived }
         val filteredItems = filterMovementsUseCase(items, state.criteria)
 
@@ -117,6 +120,7 @@ class HistoryViewModel @Inject constructor(
             isSearchExpanded = state.isSearchExpanded,
             isCategorySheetOpen = state.isCategorySheetOpen,
             isCustomDateRangeOpen = state.isCustomDateRangeOpen,
+            privacyModeEnabled = privacyEnabled,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -264,7 +268,7 @@ class HistoryViewModel @Inject constructor(
             }
         }
 
-        val amountText = when (kind) {
+        val formattedAmountText = when (kind) {
             MovementKind.EXPENSE -> formatCurrency(-amountMinor, showPlus = false)
             MovementKind.INCOME -> formatCurrency(amountMinor, showPlus = true)
             MovementKind.NORMAL_TRANSFER, MovementKind.REIMBURSEMENT -> formatCurrency(amountMinor, showPlus = false)
@@ -275,7 +279,8 @@ class HistoryViewModel @Inject constructor(
             kind = kind,
             line1Title = line1Title,
             line2Subtitle = line2Subtitle,
-            amountText = amountText,
+            amountMinor = amountMinor,
+            amountText = formattedAmountText,
             categoryIcon = categoryIcon,
             isAdvance = isAdvance,
         )
@@ -361,6 +366,7 @@ data class HistoryUiState(
     val isSearchExpanded: Boolean = false,
     val isCategorySheetOpen: Boolean = false,
     val isCustomDateRangeOpen: Boolean = false,
+    val privacyModeEnabled: Boolean = false,
 )
 
 data class MovementDayGroup(
@@ -374,6 +380,7 @@ data class MovementRowUiModel(
     val kind: MovementKind,
     val line1Title: String,
     val line2Subtitle: String,
+    val amountMinor: Long,
     val amountText: String,
     val categoryIcon: String?,
     val isAdvance: Boolean,

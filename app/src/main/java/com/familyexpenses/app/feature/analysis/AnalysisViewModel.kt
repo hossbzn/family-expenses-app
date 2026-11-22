@@ -6,6 +6,7 @@ import com.familyexpenses.app.data.local.entity.AccountEntity
 import com.familyexpenses.app.data.repository.AccountRepository
 import com.familyexpenses.app.data.repository.CategoryRepository
 import com.familyexpenses.app.data.repository.ExpenseRepository
+import com.familyexpenses.app.data.repository.UserPreferencesRepository
 import com.familyexpenses.app.domain.usecase.AnalysisCategorySlice
 import com.familyexpenses.app.domain.usecase.AnalysisEvolutionBucket
 import com.familyexpenses.app.domain.usecase.AnalysisSeriesType
@@ -14,12 +15,6 @@ import com.familyexpenses.app.domain.usecase.MovementAccountFilter
 import com.familyexpenses.app.domain.usecase.MovementPeriodFilter
 import com.familyexpenses.app.domain.usecase.MovementTypeFilter
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
@@ -27,6 +22,12 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 
 enum class AnalysisTab {
     CATEGORIES,
@@ -47,6 +48,7 @@ class AnalysisViewModel @Inject constructor(
     accountRepository: AccountRepository,
     expenseRepository: ExpenseRepository,
     categoryRepository: CategoryRepository,
+    userPreferencesRepository: UserPreferencesRepository,
     private val computeAnalysisUseCase: ComputeAnalysisUseCase,
 ) : ViewModel() {
 
@@ -56,8 +58,9 @@ class AnalysisViewModel @Inject constructor(
         accountRepository.observeAccounts(),
         expenseRepository.observeTransactions(),
         categoryRepository.observeCategories(),
+        userPreferencesRepository.observePrivacyModeEnabled(),
         filterState,
-    ) { accounts, transactions, categories, state ->
+    ) { accounts, transactions, categories, privacyEnabled, state ->
         val activeAccounts = accounts.filter { !it.isArchived }
         val result = computeAnalysisUseCase.compute(
             transactions = transactions,
@@ -80,6 +83,7 @@ class AnalysisViewModel @Inject constructor(
             categorySlices = result.categorySlices,
             evolutionBuckets = result.evolutionBuckets,
             isCustomDateRangeOpen = state.isCustomDateRangeOpen,
+            privacyModeEnabled = privacyEnabled,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -260,4 +264,5 @@ data class AnalysisUiState(
     val categorySlices: List<AnalysisCategorySlice> = emptyList(),
     val evolutionBuckets: List<AnalysisEvolutionBucket> = emptyList(),
     val isCustomDateRangeOpen: Boolean = false,
+    val privacyModeEnabled: Boolean = false,
 )

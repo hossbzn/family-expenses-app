@@ -5,8 +5,13 @@ import androidx.core.content.edit
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 interface UserPreferencesRepository {
+    fun observePrivacyModeEnabled(): Flow<Boolean>
+    fun setPrivacyModeEnabled(enabled: Boolean)
     fun getLastExpensePayingAccountId(): String?
     fun setLastExpensePayingAccountId(accountId: String)
     fun getLastExpenseResponsibleAccountId(): String?
@@ -26,6 +31,17 @@ class UserPreferencesRepositoryImpl @Inject constructor(
     @ApplicationContext context: Context,
 ) : UserPreferencesRepository {
     private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+
+    private val privacyModeState = MutableStateFlow(
+        prefs.getBoolean(KEY_PRIVACY_MODE_ENABLED, false),
+    )
+
+    override fun observePrivacyModeEnabled(): Flow<Boolean> = privacyModeState.asStateFlow()
+
+    override fun setPrivacyModeEnabled(enabled: Boolean) {
+        prefs.edit { putBoolean(KEY_PRIVACY_MODE_ENABLED, enabled) }
+        privacyModeState.value = enabled
+    }
 
     override fun getLastExpensePayingAccountId(): String? = prefs.getString(KEY_LAST_EXPENSE_PAYING_ACCOUNT_ID, null)
 
@@ -65,6 +81,7 @@ class UserPreferencesRepositoryImpl @Inject constructor(
 
     companion object {
         private const val PREFS_NAME = "family_expenses_user_prefs"
+        private const val KEY_PRIVACY_MODE_ENABLED = "privacy_mode_enabled"
         private const val KEY_LAST_EXPENSE_PAYING_ACCOUNT_ID = "last_expense_paying_account_id"
         private const val KEY_LAST_EXPENSE_RESPONSIBLE_ACCOUNT_ID = "last_expense_responsible_account_id"
         private const val KEY_LAST_EXPENSE_CATEGORY_ID = "last_expense_category_id"

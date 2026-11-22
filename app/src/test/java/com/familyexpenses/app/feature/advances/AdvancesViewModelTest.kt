@@ -17,6 +17,7 @@ import com.familyexpenses.app.data.repository.AccountRepository
 import com.familyexpenses.app.data.repository.ExpenseRepository
 import com.familyexpenses.app.data.repository.HistoryRepository
 import com.familyexpenses.app.data.repository.TransferRepository
+import com.familyexpenses.app.data.repository.UserPreferencesRepository
 import com.familyexpenses.app.domain.model.MovementKind
 import com.familyexpenses.app.domain.usecase.ComputeNetDebtUseCase
 import kotlinx.coroutines.Dispatchers
@@ -123,6 +124,24 @@ class AdvancesViewModelTest {
         transactionsFlow.value = emptyList()
         transfersFlow.value = emptyList()
 
+        val fakePreferences = object : UserPreferencesRepository {
+            var privacyMode = false
+            override fun observePrivacyModeEnabled(): Flow<Boolean> = MutableStateFlow(privacyMode)
+            override fun setPrivacyModeEnabled(enabled: Boolean) { privacyMode = enabled }
+            override fun getLastExpensePayingAccountId(): String? = null
+            override fun setLastExpensePayingAccountId(accountId: String) {}
+            override fun getLastExpenseResponsibleAccountId(): String? = null
+            override fun setLastExpenseResponsibleAccountId(accountId: String) {}
+            override fun getLastExpenseCategoryId(): String? = null
+            override fun setLastExpenseCategoryId(categoryId: String) {}
+            override fun getLastIncomeAccountId(): String? = null
+            override fun setLastIncomeAccountId(accountId: String) {}
+            override fun getLastIncomeCategoryId(): String? = null
+            override fun setLastIncomeCategoryId(categoryId: String) {}
+            override fun getAccountIcon(accountId: String): String? = null
+            override fun setAccountIcon(accountId: String, icon: String) {}
+        }
+
         viewModel = AdvancesViewModel(
             accountRepository = AccountRepository(fakeAccountDao),
             expenseRepository = ExpenseRepository(fakeTransactionDao),
@@ -133,6 +152,7 @@ class AdvancesViewModelTest {
                 accountDao = fakeAccountDao,
                 categoryDao = fakeCategoryDao,
             ),
+            userPreferencesRepository = fakePreferences,
             computeNetDebtUseCase = ComputeNetDebtUseCase(),
         )
     }

@@ -119,10 +119,13 @@ class AddExpenseViewModelTest {
     }
 
     private val fakePreferences = object : UserPreferencesRepository {
+        var privacyMode = false
         var lastPaying: String? = null
         var lastResponsible: String? = null
         var lastCategory: String? = null
 
+        override fun observePrivacyModeEnabled(): kotlinx.coroutines.flow.Flow<Boolean> = kotlinx.coroutines.flow.MutableStateFlow(privacyMode)
+        override fun setPrivacyModeEnabled(enabled: Boolean) { privacyMode = enabled }
         override fun getLastExpensePayingAccountId(): String? = lastPaying
         override fun setLastExpensePayingAccountId(accountId: String) { lastPaying = accountId }
         override fun getLastExpenseResponsibleAccountId(): String? = lastResponsible

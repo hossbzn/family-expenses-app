@@ -47,7 +47,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.familyexpenses.app.core.ui.MoneyText
 import com.familyexpenses.app.domain.model.MovementKind
+import com.familyexpenses.app.ui.theme.OffWhiteBackground
+import com.familyexpenses.app.ui.theme.OutlineBorder
+import com.familyexpenses.app.ui.theme.PetroleumBlueContainer
+import com.familyexpenses.app.ui.theme.PetroleumBluePrimary
+import com.familyexpenses.app.ui.theme.PureWhiteSurface
 import java.text.NumberFormat
 import java.util.Currency
 import java.util.Locale
@@ -116,6 +122,7 @@ fun AdvancesScreen(
                 netDebtMinor = uiState.netDebtMinor,
                 advancesCount = uiState.advancesCount,
                 reimbursementsCount = uiState.reimbursementsCount,
+                privacyModeEnabled = uiState.privacyModeEnabled,
                 onReimburseClick = onReimburseClick,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             )
@@ -179,10 +186,11 @@ fun AdvancesScreen(
                     ) { item ->
                         AdvanceHistoryRow(
                             item = item,
+                            privacyModeEnabled = uiState.privacyModeEnabled,
                             onClick = { onMovementClick(item.kind, item.id) },
                         )
                         HorizontalDivider(
-                            color = Color(0xFFF3F3F3),
+                            color = OutlineBorder,
                             modifier = Modifier.padding(start = 60.dp, end = 16.dp),
                         )
                     }
@@ -197,21 +205,20 @@ private fun NetDebtSummaryCard(
     netDebtMinor: Long,
     advancesCount: Int,
     reimbursementsCount: Int,
+    privacyModeEnabled: Boolean,
     onReimburseClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val hasDebt = netDebtMinor != 0L
-    val cardColor = if (hasDebt) Color.Black else Color(0xFFF5F5F5)
-    val contentColor = if (hasDebt) Color.White else Color.Black
 
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = cardColor,
-            contentColor = contentColor,
+            containerColor = PureWhiteSurface,
+            contentColor = PetroleumBluePrimary,
         ),
-        border = if (hasDebt) null else BorderStroke(1.dp, Color(0xFFE0E0E0)),
+        border = BorderStroke(1.dp, OutlineBorder),
     ) {
         Column(
             modifier = Modifier
@@ -237,29 +244,30 @@ private fun NetDebtSummaryCard(
                 Icon(
                     imageVector = if (hasDebt) Icons.Default.SwapHoriz else Icons.Default.CheckCircle,
                     contentDescription = null,
-                    tint = if (hasDebt) Color(0xFFCCCCCC) else Color.DarkGray,
+                    tint = PetroleumBluePrimary,
                     modifier = Modifier.size(20.dp),
                 )
                 Text(
                     text = statusTitle,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = if (hasDebt) Color(0xFFDDDDDD) else Color.Black,
+                    color = PetroleumBluePrimary,
                 )
             }
 
-            Text(
-                text = formatCurrency(abs(netDebtMinor)),
+            MoneyText(
+                amountMinor = abs(netDebtMinor),
+                isPrivacyModeEnabled = privacyModeEnabled,
                 style = MaterialTheme.typography.headlineLarge.copy(
                     fontWeight = FontWeight.Bold,
                     fontSize = 34.sp,
                 ),
-                color = contentColor,
+                color = PetroleumBluePrimary,
             )
 
             Text(
                 text = "$statusSubtitle · $advancesCount adelantos, $reimbursementsCount devoluciones",
                 style = MaterialTheme.typography.bodySmall,
-                color = if (hasDebt) Color(0xFFAAAAAA) else Color.Gray,
+                color = Color.Gray,
             )
 
             if (hasDebt) {
@@ -271,8 +279,8 @@ private fun NetDebtSummaryCard(
                         .heightIn(min = 48.dp),
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.White,
-                        contentColor = Color.Black,
+                        containerColor = PetroleumBluePrimary,
+                        contentColor = Color.White,
                     ),
                 ) {
                     Text(
@@ -296,8 +304,8 @@ private fun AdvanceFilterChip(
         onClick = onClick,
         modifier = modifier.heightIn(min = 48.dp),
         shape = RoundedCornerShape(10.dp),
-        color = if (selected) Color.Black else Color(0xFFF5F5F5),
-        border = BorderStroke(1.dp, if (selected) Color.Black else Color(0xFFE0E0E0)),
+        color = if (selected) PetroleumBluePrimary else PureWhiteSurface,
+        border = BorderStroke(1.dp, if (selected) PetroleumBluePrimary else OutlineBorder),
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(
@@ -305,7 +313,7 @@ private fun AdvanceFilterChip(
                 style = MaterialTheme.typography.labelLarge.copy(
                     fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
                 ),
-                color = if (selected) Color.White else Color.Black,
+                color = if (selected) Color.White else PetroleumBluePrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -316,6 +324,7 @@ private fun AdvanceFilterChip(
 @Composable
 private fun AdvanceHistoryRow(
     item: AdvanceHistoryRowUiModel,
+    privacyModeEnabled: Boolean,
     onClick: () -> Unit,
 ) {
     Surface(
@@ -334,7 +343,7 @@ private fun AdvanceHistoryRow(
             Surface(
                 modifier = Modifier.size(36.dp),
                 shape = RoundedCornerShape(10.dp),
-                color = if (item.isReimbursement) Color(0xFFEAEAEA) else Color(0xFFF5F5F5),
+                color = PetroleumBlueContainer,
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
@@ -344,7 +353,7 @@ private fun AdvanceHistoryRow(
                             Icons.Default.SwapHoriz
                         },
                         contentDescription = null,
-                        tint = Color.Black,
+                        tint = PetroleumBluePrimary,
                         modifier = Modifier.size(18.dp),
                     )
                 }
@@ -364,18 +373,18 @@ private fun AdvanceHistoryRow(
                     Text(
                         text = item.title,
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = Color.Black,
+                        color = PetroleumBluePrimary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier
                             .weight(1f)
                             .padding(end = 8.dp),
                     )
-                    Text(
-                        text = item.amountText,
+                    MoneyText(
+                        amountMinor = item.amountMinor,
+                        isPrivacyModeEnabled = privacyModeEnabled,
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                        color = Color.Black,
-                        maxLines = 1,
+                        color = PetroleumBluePrimary,
                     )
                 }
                 Text(

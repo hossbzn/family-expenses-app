@@ -72,6 +72,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.familyexpenses.app.core.ui.MoneyText
 import com.familyexpenses.app.data.local.entity.AccountEntity
 import com.familyexpenses.app.domain.usecase.AnalysisCategorySlice
 import com.familyexpenses.app.domain.usecase.AnalysisEvolutionBucket
@@ -79,6 +80,11 @@ import com.familyexpenses.app.domain.usecase.AnalysisSeriesType
 import com.familyexpenses.app.domain.usecase.MovementAccountFilter
 import com.familyexpenses.app.domain.usecase.MovementPeriodFilter
 import com.familyexpenses.app.feature.expense.resolveCategoryIcon
+import com.familyexpenses.app.ui.theme.OffWhiteBackground
+import com.familyexpenses.app.ui.theme.OutlineBorder
+import com.familyexpenses.app.ui.theme.PetroleumBlueContainer
+import com.familyexpenses.app.ui.theme.PetroleumBluePrimary
+import com.familyexpenses.app.ui.theme.PureWhiteSurface
 import java.text.NumberFormat
 import java.util.Currency
 import java.util.Locale
@@ -240,12 +246,12 @@ fun AnalysisScreen(
             val selectedTabIndex = if (uiState.selectedTab == AnalysisTab.CATEGORIES) 0 else 1
             TabRow(
                 selectedTabIndex = selectedTabIndex,
-                containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = Color.Black,
+                containerColor = PureWhiteSurface,
+                contentColor = PetroleumBluePrimary,
                 indicator = { tabPositions ->
                     TabRowDefaults.SecondaryIndicator(
                         modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
-                        color = Color.Black,
+                        color = PetroleumBluePrimary,
                     )
                 },
             ) {
@@ -384,8 +390,8 @@ private fun AnalysisSegmentChip(
         onClick = onClick,
         modifier = modifier.heightIn(min = 48.dp),
         shape = RoundedCornerShape(10.dp),
-        color = if (isSelected) Color.Black else Color(0xFFF5F5F5),
-        border = BorderStroke(1.dp, if (isSelected) Color.Black else Color(0xFFE0E0E0)),
+        color = if (isSelected) PetroleumBluePrimary else PureWhiteSurface,
+        border = BorderStroke(1.dp, if (isSelected) PetroleumBluePrimary else OutlineBorder),
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(
@@ -393,7 +399,7 @@ private fun AnalysisSegmentChip(
                 style = MaterialTheme.typography.labelLarge.copy(
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                 ),
-                color = if (isSelected) Color.White else Color.Black,
+                color = if (isSelected) Color.White else PetroleumBluePrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -511,7 +517,7 @@ private fun AnalysisPeriodChip(
         onClick = onClick,
         label = { Text(label) },
         colors = FilterChipDefaults.filterChipColors(
-            selectedContainerColor = Color.Black,
+            selectedContainerColor = PetroleumBluePrimary,
             selectedLabelColor = Color.White,
         ),
     )
@@ -568,6 +574,7 @@ private fun CategoriesAnalysisContent(
                         slices = uiState.categorySlices,
                         totalMinor = uiState.totalMinor,
                         seriesLabel = seriesLabel,
+                        privacyModeEnabled = uiState.privacyModeEnabled,
                     )
                     Text(
                         text = "${uiState.transactionCount} movimientos · Pulsa una categoría para ver su detalle",
@@ -587,6 +594,7 @@ private fun CategoriesAnalysisContent(
             CategoryRankingRow(
                 slice = slice,
                 shade = shade,
+                privacyModeEnabled = uiState.privacyModeEnabled,
                 onClick = { onCategoryClick(slice.categoryId) },
             )
         }
@@ -598,6 +606,7 @@ private fun MonochromeDonutChart(
     slices: List<AnalysisCategorySlice>,
     totalMinor: Long,
     seriesLabel: String,
+    privacyModeEnabled: Boolean,
 ) {
     Box(
         modifier = Modifier.size(200.dp),
@@ -652,12 +661,11 @@ private fun MonochromeDonutChart(
                 style = MaterialTheme.typography.labelMedium,
                 color = Color.Gray,
             )
-            Text(
-                text = formatCurrency(totalMinor),
+            MoneyText(
+                amountMinor = totalMinor,
+                isPrivacyModeEnabled = privacyModeEnabled,
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                color = Color.Black,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+                color = PetroleumBluePrimary,
             )
         }
     }
@@ -667,6 +675,7 @@ private fun MonochromeDonutChart(
 private fun CategoryRankingRow(
     slice: AnalysisCategorySlice,
     shade: Color,
+    privacyModeEnabled: Boolean,
     onClick: () -> Unit,
 ) {
     Card(
@@ -675,8 +684,8 @@ private fun CategoryRankingRow(
             .fillMaxWidth()
             .heightIn(min = 60.dp),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, Color(0xFFEEEEEE)),
+        colors = CardDefaults.cardColors(containerColor = PureWhiteSurface),
+        border = BorderStroke(1.dp, OutlineBorder),
     ) {
         Column(
             modifier = Modifier
@@ -698,7 +707,7 @@ private fun CategoryRankingRow(
                 Icon(
                     imageVector = resolveCategoryIcon(slice.categoryIcon),
                     contentDescription = null,
-                    tint = Color.Black,
+                    tint = PetroleumBluePrimary,
                     modifier = Modifier.size(20.dp),
                 )
                 Spacer(modifier = Modifier.width(10.dp))
@@ -706,7 +715,7 @@ private fun CategoryRankingRow(
                     Text(
                         text = slice.categoryName,
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = Color.Black,
+                        color = PetroleumBluePrimary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -717,10 +726,11 @@ private fun CategoryRankingRow(
                     )
                 }
                 Column(horizontalAlignment = Alignment.End) {
-                    Text(
-                        text = formatCurrency(slice.amountMinor),
+                    MoneyText(
+                        amountMinor = slice.amountMinor,
+                        isPrivacyModeEnabled = privacyModeEnabled,
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                        color = Color.Black,
+                        color = PetroleumBluePrimary,
                     )
                     Text(
                         text = String.format(Locale("es", "ES"), "%.1f %%", slice.percentage),
@@ -730,7 +740,7 @@ private fun CategoryRankingRow(
                 }
             }
 
-            // Barra de proporción monocromática
+            // Barra de proporción
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -776,12 +786,14 @@ private fun EvolutionAnalysisContent(
             ) {
                 SummaryMiniCard(
                     title = "Total $seriesLabel",
-                    value = formatCurrency(uiState.totalMinor),
+                    amountMinor = uiState.totalMinor,
+                    privacyModeEnabled = uiState.privacyModeEnabled,
                     modifier = Modifier.weight(1f),
                 )
                 SummaryMiniCard(
                     title = "Media periodo",
-                    value = formatCurrency(uiState.averagePerBucketMinor),
+                    amountMinor = uiState.averagePerBucketMinor,
+                    privacyModeEnabled = uiState.privacyModeEnabled,
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -861,10 +873,11 @@ private fun EvolutionAnalysisContent(
                                 color = Color.Gray,
                             )
                         }
-                        Text(
-                            text = formatCurrency(bucket.amountMinor ?: 0L),
+                        MoneyText(
+                            amountMinor = bucket.amountMinor ?: 0L,
+                            isPrivacyModeEnabled = uiState.privacyModeEnabled,
                             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                            color = Color.Black,
+                            color = PetroleumBluePrimary,
                         )
                     }
                 }
@@ -876,14 +889,15 @@ private fun EvolutionAnalysisContent(
 @Composable
 private fun SummaryMiniCard(
     title: String,
-    value: String,
+    amountMinor: Long,
+    privacyModeEnabled: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, Color(0xFFE5E5E5)),
+        colors = CardDefaults.cardColors(containerColor = PureWhiteSurface),
+        border = BorderStroke(1.dp, OutlineBorder),
     ) {
         Column(
             modifier = Modifier.padding(14.dp),
@@ -894,12 +908,11 @@ private fun SummaryMiniCard(
                 style = MaterialTheme.typography.labelMedium,
                 color = Color.Gray,
             )
-            Text(
-                text = value,
+            MoneyText(
+                amountMinor = amountMinor,
+                isPrivacyModeEnabled = privacyModeEnabled,
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = Color.Black,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+                color = PetroleumBluePrimary,
             )
         }
     }

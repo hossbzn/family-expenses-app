@@ -5,20 +5,26 @@ import com.familyexpenses.app.core.model.TransactionSource
 import com.familyexpenses.app.core.model.TransactionType
 import com.familyexpenses.app.data.local.dao.AccountDao
 import com.familyexpenses.app.data.local.dao.BalanceAdjustmentDao
+import com.familyexpenses.app.data.local.dao.CategoryDao
 import com.familyexpenses.app.data.local.dao.TransactionDao
 import com.familyexpenses.app.data.local.dao.TransferDao
 import com.familyexpenses.app.data.local.entity.AccountEntity
 import com.familyexpenses.app.data.local.entity.BalanceAdjustmentEntity
+import com.familyexpenses.app.data.local.entity.CategoryEntity
 import com.familyexpenses.app.data.local.entity.TransactionEntity
 import com.familyexpenses.app.data.local.entity.TransferEntity
 import com.familyexpenses.app.data.repository.DashboardRepository
 import com.familyexpenses.app.data.repository.ExpenseRepository
+import com.familyexpenses.app.data.repository.HistoryRepository
+import com.familyexpenses.app.data.repository.UserPreferencesRepository
 import com.familyexpenses.app.domain.usecase.ComputeAccountBalanceUseCase
 import com.familyexpenses.app.domain.usecase.ComputeNetDebtUseCase
 import com.familyexpenses.app.domain.usecase.GetDashboardSummaryUseCase
+import com.familyexpenses.app.domain.usecase.GetHistoryUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
@@ -30,6 +36,8 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -98,6 +106,17 @@ class HomeViewModelTest {
         override suspend fun getAllAdjustments(): List<BalanceAdjustmentEntity> = adjustments
     }
 
+    private val fakeCategoryDao = object : CategoryDao {
+        override suspend fun upsert(category: CategoryEntity) {}
+        override suspend fun upsertAll(categories: List<CategoryEntity>) {}
+        override fun observeCategories(): Flow<List<CategoryEntity>> = flowOf(emptyList())
+        override fun observeActiveCategories(): Flow<List<CategoryEntity>> = flowOf(emptyList())
+        override fun observeActiveCategoriesByType(type: com.familyexpenses.app.core.model.CategoryType): Flow<List<CategoryEntity>> = flowOf(emptyList())
+        override fun observeFavoriteExpenseCategories(): Flow<List<CategoryEntity>> = flowOf(emptyList())
+        override suspend fun getCategoryById(categoryId: String): CategoryEntity? = null
+        override suspend fun countCategories(): Int = 0
+    }
+
     private lateinit var viewModel: HomeViewModel
     private lateinit var expenseRepository: ExpenseRepository
 
@@ -134,10 +153,41 @@ class HomeViewModelTest {
             override suspend fun hasOccurrenceForDate(ruleId: String, scheduledAt: Long): Boolean = false
         }
 
+        val historyRepository = HistoryRepository(
+            transactionDao = fakeTransactionDao,
+            transferDao = fakeTransferDao,
+            accountDao = fakeAccountDao,
+            categoryDao = fakeCategoryDao,
+        )
+
+        val fakePreferences = object : UserPreferencesRepository {
+            var privacyMode = false
+            private val privacyFlow = MutableStateFlow(false)
+            override fun observePrivacyModeEnabled(): Flow<Boolean> = privacyFlow
+            override fun setPrivacyModeEnabled(enabled: Boolean) {
+                privacyMode = enabled
+                privacyFlow.value = enabled
+            }
+            override fun getLastExpensePayingAccountId(): String? = null
+            override fun setLastExpensePayingAccountId(accountId: String) {}
+            override fun getLastExpenseResponsibleAccountId(): String? = null
+            override fun setLastExpenseResponsibleAccountId(accountId: String) {}
+            override fun getLastExpenseCategoryId(): String? = null
+            override fun setLastExpenseCategoryId(categoryId: String) {}
+            override fun getLastIncomeAccountId(): String? = null
+            override fun setLastIncomeAccountId(accountId: String) {}
+            override fun getLastIncomeCategoryId(): String? = null
+            override fun setLastIncomeCategoryId(categoryId: String) {}
+            override fun getAccountIcon(accountId: String): String? = null
+            override fun setAccountIcon(accountId: String, icon: String) {}
+        }
+
         viewModel = HomeViewModel(
             getDashboardSummaryUseCase = getDashboardSummaryUseCase,
+            getHistoryUseCase = GetHistoryUseCase(historyRepository),
             recurrenceOccurrenceDao = fakeOccurrenceDao,
             expenseRepository = expenseRepository,
+            userPreferencesRepository = fakePreferences,
         )
     }
 
@@ -155,6 +205,20 @@ class HomeViewModelTest {
         assertEquals(150000L, state.personalCashBalanceMinor)
         assertEquals(300000L, state.familyCashBalanceMinor)
         assertEquals(0L, state.netDebtMinor)
+        assertFalse(state.privacyModeEnabled)
+    }
+
+    @Test
+    fun `togglePrivacyMode toggles privacy mode flag`() = runTest {
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.uiState.collect() }
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.privacyModeEnabled)
+
+        viewModel.togglePrivacyMode()
+        advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value.privacyModeEnabled)
     }
 
     @Test

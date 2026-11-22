@@ -267,32 +267,29 @@
 
 ### Historias Propuestas (S5)
 
-### V6-14 — Rediseño visual de Inicio y sección de últimos 3 movimientos (TODO, P1)
-**Como usuario** quiero una pantalla de Inicio renovada con la nueva paleta de color y un vistazo rápido a mis últimos 3 movimientos.
-- [ ] Aplicar la paleta MD3: fondo blanco roto neutro (`#F8F9FA`), azul petróleo (`#1A3644`) y verde/rojo apagados.
-- [ ] Otorgar exactamente el mismo peso visual a las tarjetas de saldo real de Familia y Personal.
-- [ ] Botón "Añadir ingreso" (`+`) a la izquierda y "Añadir gasto" (`−`) a la derecha.
-- [ ] Sección "Últimos movimientos" en Inicio con los 3 movimientos más recientes (gastos, ingresos, transferencias, devoluciones, ajustes, recurrentes) en orden descendente por fecha y creación.
-- [ ] Cada fila muestra concepto/nota, fecha ("Hoy", "Ayer", "20 nov"), cuenta e importe formatado.
-- [ ] Botón "Ver todos" que navega a la pantalla completa de Movimientos.
-- [ ] Estado vacío explícito ("No hay movimientos registrados") cuando no existan operaciones.
-- [ ] Optimizado para Galaxy S25 (360-412 dp) con objetivos táctiles mín. 48 dp.
-- [ ] **Pruebas necesarias:**
-  - Unitarias (`HomeViewModelTest`): Emisión de exactamente los 3 últimos movimientos y gestión de estado vacío.
-  - UI Compose (`HomeScreenTest`): Maquetación, botones `+` / `−` y navegación al pulsar "Ver todos".
+## P1 — Sistema Visual Global, Rediseño de Inicio y Modo de Privacidad (EN PROGRESO)
 
-### V6-15 — Modo de privacidad global para ocultar importes (TODO, P1)
+### V6-14 — Rediseño visual de Inicio y sección de últimos 3 movimientos (DONE, P1)
+**Como usuario** quiero una pantalla de Inicio renovada con la nueva paleta de color y un vistazo rápido a mis últimos 3 movimientos.
+- [x] Aplicar la paleta MD3: fondo blanco roto neutro (`#F8F9FA`), azul petróleo (`#1A3644`) y verde/rojo apagados.
+- [x] Otorgar exactamente el mismo peso visual a las tarjetas de saldo real de Familia y Personal.
+- [x] Botón "Añadir ingreso" (`+`) a la izquierda y "Añadir gasto" (`−`) a la derecha.
+- [x] Sección "Últimos movimientos" en Inicio con los 3 movimientos más recientes (gastos, ingresos, transferencias, devoluciones, ajustes, recurrentes) en orden descendente por fecha y creación.
+- [x] Cada fila muestra concepto/nota, fecha ("Hoy", "Ayer", "20 nov"), cuenta e importe formatado.
+- [x] Botón "Ver todos" que navega a la pantalla completa de Movimientos.
+- [x] Estado vacío explícito ("No hay movimientos registrados.") cuando no existan operaciones.
+- [x] Optimizado para Galaxy S25 (360-412 dp) con objetivos táctiles mín. 48 dp.
+
+### V6-15 — Modo de privacidad global para ocultar importes (DONE, P1)
 **Como usuario** quiero poder ocultar los importes numéricos en toda la app con un toque para consultar la información en público manteniendo la privacidad.
-- [ ] Botón de ojo con icono conmutables (`Visibility` / `VisibilityOff`) en la cabecera de Inicio junto a Ajustes.
-- [ ] Preferencia `privacyModeEnabled: Flow<Boolean>` en `UserPreferencesRepository` con persistencia en Preferences DataStore.
-- [ ] Reemplazar visualmente todos los importes por `"•••• €"` en Inicio, Movimientos, detalles, cuentas, Adelantos, Análisis y Recurrentes.
-- [ ] Ocultar escalas, etiquetas monetarias y valores numéricos en los gráficos de Análisis cuando la privacidad esté activa.
-- [ ] Mantener visibles conceptos, notas, fechas, nombres de cuenta, categorías y frecuencias.
-- [ ] `contentDescription` dinámico: "Ocultar importes" cuando están visibles y "Mostrar importes" cuando está la máscara.
-- [ ] No modificar datos contables de Room, exportaciones CSV ni backups JSON, ni presentarlo como cifrado/seguridad.
-- [ ] **Pruebas necesarias:**
-  - Unitarias (`UserPreferencesRepositoryTest`): Conmutación y persistencia de la preferencia.
-  - UI Compose (`HomeScreenTest` / `HistoryScreenTest` / `AnalysisScreenTest`): Verificación visual del reemplazo por `"•••• €"` según la preferencia.
+- [x] Botón de ojo con icono conmutables (`Visibility` / `VisibilityOff`) en la cabecera de Inicio junto a Ajustes.
+- [x] Preferencia `privacyModeEnabled: Flow<Boolean>` en `UserPreferencesRepository` con persistencia en Preferences DataStore.
+- [x] Reemplazar visualmente todos los importes por `"•••• €"` en Inicio, Movimientos, detalles, cuentas, Adelantos, Análisis y Recurrentes mediante el componente reutilizable `MoneyText`.
+- [x] Ocultar escalas, etiquetas monetarias y valores numéricos en los gráficos de Análisis cuando la privacidad esté activa.
+- [x] Mantener visibles conceptos, notas, fechas, nombres de cuenta, categorías y frecuencias.
+- [x] `contentDescription` dinámico: "Ocultar importes" cuando están visibles y "Mostrar importes" cuando está la máscara.
+- [x] No modificar datos contables de Room, exportaciones CSV ni backups JSON, ni presentarlo como cifrado/seguridad.
+- [x] 112 pruebas unitarias pasando al 100% en verde.
 
 ### V6-16 — Aplicación del sistema visual a Movimientos y Detalle de movimiento (TODO, P1)
 - [ ] Aplicar fondo blanco roto, azul petróleo en chips/cabecera y máscara `"•••• €"` en importes con privacidad activa.

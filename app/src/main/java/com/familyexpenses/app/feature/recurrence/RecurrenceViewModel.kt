@@ -14,6 +14,7 @@ import com.familyexpenses.app.data.local.entity.RecurrenceOccurrenceEntity
 import com.familyexpenses.app.data.local.entity.RecurrenceRuleEntity
 import com.familyexpenses.app.data.repository.AccountRepository
 import com.familyexpenses.app.data.repository.CategoryRepository
+import com.familyexpenses.app.data.repository.UserPreferencesRepository
 import com.familyexpenses.app.data.seed.DatabaseSeeder
 import com.familyexpenses.app.domain.rule.RecurrenceCalculator
 import com.familyexpenses.app.domain.usecase.ManagePendingOccurrencesUseCase
@@ -40,6 +41,7 @@ class RecurrenceViewModel @Inject constructor(
     accountRepository: AccountRepository,
     categoryRepository: CategoryRepository,
     recurrenceRuleDao: RecurrenceRuleDao,
+    userPreferencesRepository: UserPreferencesRepository,
     private val managePendingOccurrencesUseCase: ManagePendingOccurrencesUseCase,
     private val manageRecurrenceRulesUseCase: ManageRecurrenceRulesUseCase,
     private val recurrenceCalculator: RecurrenceCalculator,
@@ -52,8 +54,20 @@ class RecurrenceViewModel @Inject constructor(
         categoryRepository.observeCategories(),
         recurrenceRuleDao.observeRules(),
         managePendingOccurrencesUseCase.observePendingOccurrences(),
+        userPreferencesRepository.observePrivacyModeEnabled(),
         formState,
-    ) { accounts, categories, rules, pendingOccurrences, form ->
+    ) { flowArray ->
+        @Suppress("UNCHECKED_CAST")
+        val accounts = flowArray[0] as List<AccountEntity>
+        @Suppress("UNCHECKED_CAST")
+        val categories = flowArray[1] as List<CategoryEntity>
+        @Suppress("UNCHECKED_CAST")
+        val rules = flowArray[2] as List<RecurrenceRuleEntity>
+        @Suppress("UNCHECKED_CAST")
+        val pendingOccurrences = flowArray[3] as List<RecurrenceOccurrenceEntity>
+        val privacyEnabled = flowArray[4] as Boolean
+        val form = flowArray[5] as RecurrenceFormState
+
         val activeAccounts = accounts.filter { !it.isArchived }
         val filteredCategories = categories.filter { category ->
             when (form.selectedType) {
@@ -107,6 +121,7 @@ class RecurrenceViewModel @Inject constructor(
             amountError = form.amountError,
             startDateError = form.startDateError,
             endDateError = form.endDateError,
+            privacyModeEnabled = privacyEnabled,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -395,6 +410,7 @@ data class RecurrenceUiState(
     val amountError: String? = null,
     val startDateError: String? = null,
     val endDateError: String? = null,
+    val privacyModeEnabled: Boolean = false,
 )
 
 private data class RecurrenceFormState(

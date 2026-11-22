@@ -94,22 +94,17 @@
 - [x] Implementar `RecurrenceOccurrenceDao` y actualizar `RecurrenceRuleDao` y `AppDatabase` v1/v2.
 - [x] Pruebas unitarias de esquema y modelos (`RecurrenceSchemaTest`).
 
-### REC-02 — Edición y ciclo de vida (IN_PROGRESS, P1)
-- [ ] Auditar reglas/Worker/Room existentes y reglas mensuales día 1, datos reales instalados.
-- [ ] Diseñar esquema con regla, ocurrencia y transacción económica vinculadas; migración no destructiva.
-- [ ] Tests de actualización desde base antigua y preservación de movimientos/recurrentes.
+### REC-02 — Edición y ciclo de vida (DONE, P1)
+- [x] Implementado `ManageRecurrenceRulesUseCase`: pausar/reactivar, archivar/restaurar con nueva fecha inicial por defecto y edición de reglas.
+- [x] Garantizado que la edición/pausa no altere instantáneas de ocurrencias o transacciones ya creadas.
+- [x] Pruebas unitarias de ciclo de vida (`ManageRecurrenceRulesUseCaseTest`).
 
-### REC-02 — Edición y ciclo de vida (TODO, P1)
-- [ ] Editar solo futuras ocurrencias, dejando instantáneas existentes intactas.
-- [ ] Pausar/reactivar, archivar/restaurar, finalizar y consultar historial.
-- [ ] Reactivar archivada con nueva fecha de inicio (próxima ejecución futura por defecto), sin recuperar periodos suspendidos.
+### REC-03 — Frecuencias y calendario (DONE, P1)
+- [x] Implementado `RecurrenceCalculator` soportando las 4 frecuencias: Semanal (día de semana), Mensual (día 1-31), Multi-mes (2, 3 o 6 meses) y Anual (mes y día).
+- [x] Ajuste automático al último día real del mes para días 29/30/31 y 29 de febrero en años no bisiestos.
+- [x] Pruebas unitarias de cálculo de fechas y ajuste de fin de mes (`RecurrenceCalculatorTest`).
 
-### REC-03 — Frecuencias y calendario (TODO, P1)
-- [ ] Semanal, mensual (día 1-31), cada 2/3/6 meses y anual.
-- [ ] Último día si fecha nominal no existe; ancla de intervalos; inicio obligatorio y fin opcional.
-- [ ] No duplicar ejecuciones por reintentos, cambios de fecha o reconciliación.
-
-### REC-04 — Modos y generación de ocurrencias (TODO, P1)
+### REC-04 — Modos y generación de ocurrencias (IN_PROGRESS, P1)
 - [ ] Modo por regla automático o pendiente de confirmar.
 - [ ] Automático registra por motor económico V6; pendiente no modifica caja/deuda/análisis.
 - [ ] Recuperar fechas activas vencidas al reabrir, omitiendo períodos pausados/archivados.

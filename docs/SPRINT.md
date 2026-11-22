@@ -119,3 +119,27 @@
   - Copia portable JSON e importación actualizada con `recurrenceOccurrences`.
   - 111 pruebas unitarias pasando al 100% en verde.
 
+---
+
+## Sprint V6.1-UI: Interfaces Visuales de Recurrentes V6.1 (ESTADO: TODO)
+**Meta:** Diseño e implementación de la experiencia de usuario y vistas de Jetpack Compose para configurar y revisar reglas y ocurrencias pendientes.
+
+> [!IMPORTANT]
+> **Decisiones visuales pendientes:**
+> 1. Ubicación exacta del acceso a la creación de regla: ¿Botón flotante (FAB) o botón de acción integrado en cabecera de "Mis reglas"?
+> 2. Formato de la revisión individual de una ocurrencia pendiente: ¿Pantalla dedicada vs Modal Bottom Sheet sobre la bandeja?
+
+### Historias pendientes:
+- [ ] **REC-UI-01 — Crear y editar la configuración visual de una recurrencia (TODO, P1):**
+  - Cabecera con título dinámico, datos principales (Tipo, Concepto, Importe, Categoría), cuentas dinámicas (Pagadora/Responsable vs Destinataria), programación con 4 frecuencias y previsualización de próxima ejecución con aclaración de días 29/30/31.
+  - Modos Automático y Pendiente con explicaciones descriptivas.
+  - Aviso en edición de impacto exclusivo en futuras ocurrencias.
+  - Validaciones de formulario con errores en línea y adaptabilidad compacta (Galaxy S25).
+  - Pruebas UI Compose y preservación de estado.
+- [ ] **REC-UI-02 — Configuración visual de la Lista de reglas (TODO, P1):** Filtros por estado, tarjetas resumen y acciones de ciclo de vida.
+- [ ] **REC-UI-03 — Configuración visual del Detalle de regla (TODO, P1):** Vista detallada e historial de ocurrencias vinculadas.
+- [ ] **REC-UI-04 — Configuración visual de la Bandeja de pendientes (TODO, P1):** Lista de pendientes con tarjetas de instantánea y acciones rápidas.
+- [ ] **REC-UI-05 — Configuración visual de Revisión individual (TODO, P1):** Pantalla/diálogo de edición de fecha e importe antes de confirmar.
+- [ ] **REC-UI-06 — Configuración visual de Revisión y confirmación múltiple (TODO, P1):** Selección en lote, pantalla de revisión previa con total y confirmación atómica.
+
+

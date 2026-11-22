@@ -47,7 +47,7 @@ Después de leer este archivo, leer siempre `docs/AI_REVIEW_LOG.md`. Ese documen
 
 ## Stack y reglas de arquitectura
 - Kotlin, Jetpack Compose, Room (v5), Hilt, ViewModel + StateFlow, Navigation Compose, WorkManager.
-- **ACCEPTED_RISK:** Dado que es una instalación desde cero (Esquema V6 limpio, sin datos históricos productivos en el MVP), se autoriza el uso de `fallbackToDestructiveMigration()` para descartar versiones de desarrollo (1-4).
+- **ACCEPTED_RISK:** Dado que es una instalación desde cero (Esquema V6 limpio, sin datos históricos productivos en el MVP), se autoriza el uso de `fallbackToDestructiveMigrationFrom(1, 2, 3, 4)` limitando la destrucción estrictamente a las versiones de desarrollo (1 a 4). Se exigirán migraciones explícitas desde la versión 5 en adelante.
 - Prohibición de `runBlocking` en `Application.onCreate`. Toda inicialización o reconciliación inicial debe ser asíncrona e idempotente.
 - Notificaciones de pendientes configurables en `UserPreferencesRepository` con permisos `POST_NOTIFICATIONS` y canal Android.
 

@@ -32,7 +32,7 @@ object DatabaseModule {
             AppDatabase::class.java,
             "family-expenses.db",
         )
-            .fallbackToDestructiveMigration()
+            .fallbackToDestructiveMigrationFrom(1, 2, 3, 4)
             .build()
 
     @Provides

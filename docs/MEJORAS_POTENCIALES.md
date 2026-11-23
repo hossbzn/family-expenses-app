@@ -27,6 +27,7 @@ Este documento recoge observaciones surgidas del uso real de Family Expenses ant
 | UX-004 | Recurrentes | Permitir crear recurrencias desde Nuevo gasto y Nuevo ingreso | Alta | IDEA |
 | UX-005 | Recurrentes | Separar la lista de reglas del formulario de creación y edición | Alta | IDEA |
 | UX-006 | Recurrentes | Reducir el desplazamiento vertical y simplificar la navegación | Alta | IDEA |
+| UX-007 | Captura inteligente | Fotografiar un ticket, extraer sus datos y sugerir la categoría | Alta | IDEA |
 
 ## Observaciones registradas
 
@@ -71,6 +72,18 @@ Este documento recoge observaciones surgidas del uso real de Family Expenses ant
 - **Observación:** La pantalla actual es demasiado larga y exige mucho desplazamiento vertical.
 - **Posible dirección:** Agrupar opciones, mostrar detalles avanzados solo cuando sean necesarios y separar responsabilidades entre lista, formulario, detalle y pendientes.
 - **Validación futura:** Probar creación, edición y revisión de pendientes en un dispositivo compacto sin controles ocultos ni desplazamientos innecesarios.
+
+### UX-007 — Fotografiar un ticket y crear un gasto categorizado
+
+- **Fecha:** 2026-11-23
+- **Observación:** Introducir manualmente los datos de cada ticket reduce mucho la utilidad práctica de la aplicación. Se considera una candidata prioritaria para la siguiente fase.
+- **Experiencia deseada:** Desde Nuevo gasto o un acceso directo, fotografiar un ticket —o elegir una imagen existente— y obtener una propuesta editable con comercio, fecha, importe total, concepto y categoría.
+- **Flujo propuesto:** Capturar y recortar la imagen; reconocer el texto; detectar comercio, fecha y total; sugerir una categoría; mostrar una revisión obligatoria; completar cuenta pagadora y responsable; guardar mediante el mismo flujo contable de un gasto manual.
+- **Primera opción técnica a evaluar:** OCR local en el dispositivo, por ejemplo con Google ML Kit, para evitar depender de conexión, coste por uso o claves externas. La categoría podría sugerirse inicialmente mediante el comercio reconocido, reglas locales y correcciones anteriores del usuario.
+- **Opción avanzada a evaluar:** Utilizar Google Cloud Vision o Gemini si el reconocimiento y la categorización local no ofrecen suficiente calidad. Una clave privada no debe incluirse directamente en el APK; requeriría un intermediario seguro o una estrategia explícita de clave aportada por el usuario.
+- **Privacidad:** Informar claramente antes de enviar un ticket a un servicio externo. Decidir si la fotografía se elimina tras procesarla o se conserva vinculada al movimiento. Los tickets pueden contener datos personales y de pago.
+- **Cautela contable:** Nunca guardar automáticamente sin confirmación. El usuario debe poder corregir importe, fecha, categoría y cuentas antes de registrar el gasto.
+- **Validación futura:** Probar tickets con diferentes comercios, iluminación, inclinación, idiomas, múltiples importes, descuentos y totales ambiguos; medir aciertos en comercio, fecha, total y categoría sugerida.
 
 ## Plantilla para nuevas observaciones
 

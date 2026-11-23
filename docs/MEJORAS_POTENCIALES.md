@@ -28,6 +28,7 @@ Este documento recoge observaciones surgidas del uso real de Family Expenses ant
 | UX-005 | Recurrentes | Separar la lista de reglas del formulario de creación y edición | Alta | IDEA |
 | UX-006 | Recurrentes | Reducir el desplazamiento vertical y simplificar la navegación | Alta | IDEA |
 | UX-007 | Captura inteligente | Fotografiar un ticket, extraer sus datos y sugerir la categoría | Alta | IDEA |
+| UX-008 | Datos y nube | Copia automática y futura sincronización mediante Google Drive | Alta | IDEA |
 
 ## Observaciones registradas
 
@@ -84,6 +85,20 @@ Este documento recoge observaciones surgidas del uso real de Family Expenses ant
 - **Privacidad:** Informar claramente antes de enviar un ticket a un servicio externo. Decidir si la fotografía se elimina tras procesarla o se conserva vinculada al movimiento. Los tickets pueden contener datos personales y de pago.
 - **Cautela contable:** Nunca guardar automáticamente sin confirmación. El usuario debe poder corregir importe, fecha, categoría y cuentas antes de registrar el gasto.
 - **Validación futura:** Probar tickets con diferentes comercios, iluminación, inclinación, idiomas, múltiples importes, descuentos y totales ambiguos; medir aciertos en comercio, fecha, total y categoría sugerida.
+
+### UX-008 — Copia automática y sincronización mediante Google Drive
+
+- **Fecha:** 2026-11-23
+- **Observación:** La información financiera debería poder recuperarse al cambiar o perder el móvil y, en una fase posterior, mantenerse coherente entre dispositivos. Se considera una candidata prioritaria para la siguiente fase.
+- **Primera etapa recomendada:** Automatizar en Google Drive la copia portable que ya existe, con restauración explícita, historial de versiones, fecha de la última copia y acción manual «Crear copia ahora». Esta etapa ofrece recuperación sin introducir todavía conflictos entre dispositivos.
+- **Segunda etapa a evaluar:** Sincronización bidireccional real entre varios dispositivos, manteniendo la aplicación operativa sin conexión y sincronizando cuando vuelva la red.
+- **Decisión funcional pendiente:** Confirmar si el objetivo inicial es solamente copia y restauración, sincronización entre móviles o ambas en etapas separadas.
+- **Autenticación:** Utilizar la cuenta de Google elegida por el usuario mediante OAuth. No incluir tokens, secretos ni credenciales de servicio dentro del APK.
+- **Ubicación a evaluar:** Carpeta privada `appDataFolder` de Google Drive para copias gestionadas por la aplicación, o una carpeta visible si se prioriza que el usuario pueda descargar y administrar los archivos manualmente.
+- **Seguridad y privacidad:** Valorar cifrado local antes de subir la copia, explicar qué datos se almacenan y permitir desconectar la cuenta y eliminar las copias remotas.
+- **Conflictos:** Una sincronización real necesitará identificadores estables, versión o fecha de modificación, registro de borrados y reglas explícitas para cambios simultáneos. No se debe usar simplemente «el último archivo gana» si puede perder movimientos.
+- **Experiencia deseada:** Mostrar cuenta conectada, estado de sincronización, última operación correcta, errores recuperables y opción de reintento sin bloquear el uso local.
+- **Validación futura:** Probar pérdida de conexión, interrupción durante la subida, copias corruptas, restauración en una instalación limpia, cambios simultáneos, borrados y actualización entre diferentes versiones del esquema Room.
 
 ## Plantilla para nuevas observaciones
 

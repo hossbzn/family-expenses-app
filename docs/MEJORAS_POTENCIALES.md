@@ -30,6 +30,7 @@ Este documento recoge observaciones surgidas del uso real de Family Expenses ant
 | UX-007 | Captura inteligente | Fotografiar un ticket, extraer sus datos y sugerir la categoría | Alta | IDEA |
 | UX-008 | Copias de seguridad | Guardar y restaurar copias mediante Google Drive | Alta | IDEA |
 | UX-009 | Inicio | Mostrar el resumen del mes actual como información principal | Alta | IDEA |
+| UX-010 | Entrada de importes | Permitir sumas y restas en el teclado de importe | Alta | IDEA |
 
 ## Observaciones registradas
 
@@ -111,6 +112,18 @@ Este documento recoge observaciones surgidas del uso real de Family Expenses ant
 - **Criterio contable a evaluar:** Si el objetivo es analizar el mes, los gastos deberían atribuirse a la cuenta responsable, no necesariamente a la pagadora; transferencias, devoluciones y ajustes quedarían fuera del resultado de gasto/ingreso.
 - **Navegación:** La acción sobre el resumen mensual puede abrir Análisis ya filtrado al mes y cuenta correspondientes. Los periodos anteriores, anuales o personalizados seguirían consultándose allí.
 - **Privacidad y validación:** Respetar la máscara global de importes y probar cambio de mes, meses sin movimientos, importes negativos, cuentas con adelantos y anchuras de 360–412 dp.
+
+### UX-010 — Operaciones en el campo de importe
+
+- **Fecha:** 2026-11-24
+- **Observación:** Al introducir un gasto o ingreso puede ser necesario sumar varias cantidades de un ticket. Hacer el cálculo fuera de la aplicación interrumpe el flujo de registro.
+- **Experiencia deseada:** Permitir expresiones sencillas como `12,50 + 3,20` y mostrar inmediatamente el resultado `15,70 €` antes de guardar.
+- **Primera versión:** Incorporar suma y resta al teclado propio de Nuevo gasto y Nuevo ingreso. Multiplicación, división y paréntesis quedarían fuera hasta comprobar que sean necesarios.
+- **Interacción:** Mantener visibles tanto la expresión como el resultado, admitir coma decimal, retroceso y limpieza completa, y desactivar Guardar mientras la expresión esté incompleta o sea inválida.
+- **Exactitud contable:** Evaluar la expresión con aritmética decimal exacta o directamente en céntimos. No usar `Float` ni `Double`; en Room se almacenará únicamente el resultado final como `Long` en céntimos.
+- **Reglas:** Rechazar resultados negativos, cero, importes con más de dos decimales y desbordamientos. Definir claramente cómo se interpreta el signo menos para no confundir una resta con un importe negativo.
+- **Privacidad:** Cuando el modo de privacidad esté activo, ocultar tanto el resultado como los operandos monetarios sin impedir la edición mediante el teclado.
+- **Validación futura:** Probar cadenas de operaciones, decimales con coma y punto, correcciones intermedias, expresiones incompletas, importes grandes y el mismo comportamiento en gasto e ingreso.
 
 ## Plantilla para nuevas observaciones
 

@@ -127,7 +127,7 @@
 > [!IMPORTANT]
 > **Decisiones visuales pendientes:**
 > 1. Ubicación exacta del acceso a la creación de regla: ¿Botón flotante (FAB) o botón de acción integrado en cabecera de "Mis reglas"?
-> 2. Formato de la revisión individual de una ocurrencia pendiente: ¿Pantalla dedicada vs Modal Bottom Sheet sobre la bandeja?
+> 2. Formato de la revisión individual de una ocurrencia pendiente: **Decidido (2026-11-24):** Modal Bottom Sheet sobre la bandeja.
 
 ### Historias pendientes:
 - [ ] **REC-UI-01 — Crear y editar la configuración visual de una recurrencia (TODO, P1):**

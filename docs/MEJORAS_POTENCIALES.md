@@ -21,15 +21,15 @@ Este documento recoge observaciones surgidas del uso real de Family Expenses ant
 
 | ID | Área | Mejora potencial | Prioridad provisional | Estado |
 |---|---|---|---|---|
-| UX-001 | Accesibilidad visual | Aumentar y unificar el tamaño de la tipografía | Alta | IDEA |
-| UX-002 | Sistema visual | Dar más presencia visual a ingresos y gastos | Media | IDEA |
-| UX-003 | Acceso rápido | Añadir un widget o acceso de gasto rápido | Media | IDEA |
-| UX-004 | Recurrentes | Permitir crear recurrencias desde Nuevo gasto y Nuevo ingreso | Alta | IDEA |
-| UX-005 | Recurrentes | Separar la lista de reglas del formulario de creación y edición | Alta | IDEA |
-| UX-006 | Recurrentes | Reducir el desplazamiento vertical y simplificar la navegación | Alta | IDEA |
-| UX-007 | Captura inteligente | Fotografiar un ticket, extraer sus datos y sugerir la categoría | Alta | IDEA |
-| UX-008 | Copias de seguridad | Guardar y restaurar copias mediante Google Drive | Alta | IDEA |
-| UX-009 | Inicio | Mostrar el resumen del mes actual como información principal | Alta | IDEA |
+| UX-001 | Accesibilidad visual | Aumentar y unificar el tamaño de la tipografía | Alta | MOVIDA_A_BACKLOG (`V6-22`) |
+| UX-002 | Sistema visual | Dar más presencia visual a ingresos y gastos | Media | MOVIDA_A_BACKLOG (`V6-22`) |
+| UX-003 | Acceso rápido | Añadir un widget o acceso de gasto rápido | Media | MOVIDA_A_BACKLOG (`V6-26`) |
+| UX-004 | Recurrentes | Permitir crear recurrencias desde Nuevo gasto y Nuevo ingreso | Alta | MOVIDA_A_BACKLOG (`V6-25`) |
+| UX-005 | Recurrentes | Separar la lista de reglas del formulario de creación y edición | Alta | MOVIDA_A_BACKLOG (`V6-24`) |
+| UX-006 | Recurrentes | Reducir el desplazamiento vertical y simplificar la navegación | Alta | MOVIDA_A_BACKLOG (`V6-24`) |
+| UX-007 | Captura inteligente | Fotografiar un ticket, extraer sus datos y sugerir la categoría | Alta | EVALUAR |
+| UX-008 | Copias de seguridad | Guardar y restaurar copias mediante Google Drive | Alta | EVALUAR |
+| UX-009 | Inicio | Mostrar el resumen del mes actual como información principal | Alta | MOVIDA_A_BACKLOG (`V6-23`) |
 | UX-010 | Entrada de importes | Permitir sumas y restas en el teclado de importe | Alta | MOVIDA_A_BACKLOG (`V6-18`) |
 | UX-011 | Registro de movimientos | Rediseñar y unificar Nuevo gasto y Nuevo ingreso para pantallas compactas | Alta | MOVIDA_A_BACKLOG (`V6-18`) |
 
@@ -38,6 +38,7 @@ Este documento recoge observaciones surgidas del uso real de Family Expenses ant
 ### UX-001 — Aumentar y unificar el tamaño de la tipografía
 
 - **Fecha:** 2026-11-23
+- **Estado:** `MOVIDA_A_BACKLOG` — incorporada a `V6-22`.
 - **Observación:** El texto, especialmente el de los botones, se percibe pequeño frente a otras aplicaciones utilizadas en el mismo dispositivo.
 - **Posible dirección:** Definir una escala tipográfica común y aumentar el texto de acciones principales y secundarias sin perder adaptabilidad en pantallas compactas.
 - **Validación futura:** Comprobar todas las pantallas en un Galaxy S25 o anchos de 360–412 dp, incluyendo escalas de fuente del sistema del 100 %, 115 % y 130 %.
@@ -45,6 +46,7 @@ Este documento recoge observaciones surgidas del uso real de Family Expenses ant
 ### UX-002 — Dar más presencia visual a ingresos y gastos
 
 - **Fecha:** 2026-11-23
+- **Estado:** `MOVIDA_A_BACKLOG` — incorporada a `V6-22`.
 - **Observación:** Los colores semánticos actuales resultan poco llamativos y cuesta distinguir visualmente ingresos y gastos con rapidez.
 - **Posible dirección:** Revisar verde, rojo, iconos y signos `+`/`−`, manteniendo contraste accesible y sin depender únicamente del color.
 - **Decisión pendiente:** Elegir tonos definitivos después de probarlos en el dispositivo real y en las pantallas principales.
@@ -52,6 +54,7 @@ Este documento recoge observaciones surgidas del uso real de Family Expenses ant
 ### UX-003 — Widget o acceso de gasto rápido
 
 - **Fecha:** 2026-11-23
+- **Estado:** `MOVIDA_A_BACKLOG` — incorporada a `V6-26` (App Shortcuts para Nuevo gasto y Nuevo ingreso).
 - **Observación:** Registrar un gasto frecuente debería requerir menos pasos y no obligar a navegar desde la pantalla de Inicio.
 - **Posible dirección:** Widget compacto o acceso directo que abra una interfaz mínima para introducir importe, categoría y cuentas recordadas.
 - **Cautela:** Evitar registrar importes con un único toque sin confirmación, para reducir altas accidentales.
@@ -59,6 +62,7 @@ Este documento recoge observaciones surgidas del uso real de Family Expenses ant
 ### UX-004 — Crear recurrencias desde Nuevo gasto y Nuevo ingreso
 
 - **Fecha:** 2026-11-23
+- **Estado:** `MOVIDA_A_BACKLOG` — incorporada a `V6-25`.
 - **Observación:** Recurrentes está demasiado escondido dentro de Ajustes y no aparece en el momento natural de crear un movimiento.
 - **Posible dirección:** Mantener el acceso de gestión general y añadir una acción como «Hacer recurrente» en Nuevo gasto y Nuevo ingreso, reutilizando los datos ya introducidos.
 - **Decisión pendiente:** Determinar si la acción será un interruptor, un botón secundario o un paso posterior opcional.
@@ -66,6 +70,7 @@ Este documento recoge observaciones surgidas del uso real de Family Expenses ant
 ### UX-005 — Separar la lista del formulario de recurrentes
 
 - **Fecha:** 2026-11-23
+- **Estado:** `MOVIDA_A_BACKLOG` — incorporada a `V6-24`.
 - **Observación:** Al dar de alta una recurrencia, el formulario aparece arriba y la lista permanece debajo dentro de la misma pantalla, lo que dificulta entender la jerarquía.
 - **Posible dirección:** Una pantalla para listar y gestionar reglas, y otra pantalla o diálogo dedicado para crear y editar una recurrencia.
 - **Objetivo:** Que al terminar o cancelar la edición se vuelva a la lista en la posición y pestaña anteriores.
@@ -73,6 +78,7 @@ Este documento recoge observaciones surgidas del uso real de Family Expenses ant
 ### UX-006 — Reducir el desplazamiento vertical en Recurrentes
 
 - **Fecha:** 2026-11-23
+- **Estado:** `MOVIDA_A_BACKLOG` — incorporada a `V6-24`.
 - **Observación:** La pantalla actual es demasiado larga y exige mucho desplazamiento vertical.
 - **Posible dirección:** Agrupar opciones, mostrar detalles avanzados solo cuando sean necesarios y separar responsabilidades entre lista, formulario, detalle y pendientes.
 - **Validación futura:** Probar creación, edición y revisión de pendientes en un dispositivo compacto sin controles ocultos ni desplazamientos innecesarios.
@@ -80,6 +86,7 @@ Este documento recoge observaciones surgidas del uso real de Family Expenses ant
 ### UX-007 — Fotografiar un ticket y crear un gasto categorizado
 
 - **Fecha:** 2026-11-23
+- **Estado:** `EVALUAR` — aplazada para una fase posterior tras la revisión del 2026-11-24.
 - **Observación:** Introducir manualmente los datos de cada ticket reduce mucho la utilidad práctica de la aplicación. Se considera una candidata prioritaria para la siguiente fase.
 - **Experiencia deseada:** Desde Nuevo gasto o un acceso directo, fotografiar un ticket —o elegir una imagen existente— y obtener una propuesta editable con comercio, fecha, importe total, concepto y categoría.
 - **Flujo propuesto:** Capturar y recortar la imagen; reconocer el texto; detectar comercio, fecha y total; sugerir una categoría; mostrar una revisión obligatoria; completar cuenta pagadora y responsable; guardar mediante el mismo flujo contable de un gasto manual.
@@ -92,6 +99,7 @@ Este documento recoge observaciones surgidas del uso real de Family Expenses ant
 ### UX-008 — Copias de seguridad mediante Google Drive
 
 - **Fecha:** 2026-11-23
+- **Estado:** `EVALUAR` — aplazada para una fase posterior tras la revisión del 2026-11-24.
 - **Observación:** La información financiera debería poder recuperarse al cambiar, perder o restablecer el móvil. El objetivo es almacenar copias de seguridad en Google Drive, no sincronizar movimientos en tiempo real entre dispositivos.
 - **Experiencia deseada:** Automatizar en Google Drive la copia portable que ya existe, conservar varias versiones, mostrar la fecha y resultado de la última copia y ofrecer las acciones «Crear copia ahora» y «Restaurar copia».
 - **Alcance explícito:** Cada copia será una instantánea completa y recuperable. No se mezclarán automáticamente movimientos procedentes de varios móviles ni se implementará sincronización bidireccional.
@@ -105,6 +113,7 @@ Este documento recoge observaciones surgidas del uso real de Family Expenses ant
 ### UX-009 — Mostrar el resumen mensual en Inicio
 
 - **Fecha:** 2026-11-24
+- **Estado:** `MOVIDA_A_BACKLOG` — incorporada a `V6-23` (resultado neto mensual como dato principal, saldo disponible como secundario y navegación actual).
 - **Observación:** En el uso diario resulta más útil saber cómo va el mes actual que ver como cifra principal el saldo real acumulado desde el inicio. Para consultar otros periodos ya existe la pantalla de Análisis.
 - **Experiencia deseada:** Mostrar claramente el mes en curso en Inicio y utilizarlo como resumen inmediato de Familia y Personal, sin obligar a seleccionar filtros.
 - **Saldo real:** No eliminar el saldo de caja acumulado, porque representa el dinero disponible y cumple otra función. Puede mostrarse como dato secundario o quedar accesible desde el detalle de cada cuenta.

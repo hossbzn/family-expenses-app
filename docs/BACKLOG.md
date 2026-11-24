@@ -331,11 +331,67 @@
 - [ ] Aplicar paleta azul petróleo y máscara `"•••• €"` en importes previstos/pendientes de recurrentes.
 - [ ] **Pruebas necesarias:** Tests de UI Compose en lista, formulario y bandeja de pendientes de recurrentes.
 
+## P1/P2 — Mejoras UX aprobadas tras uso real (TODO)
+
+### V6-22 — Escala tipográfica unificada y presencia semántica de ingresos y gastos (TODO, P1)
+**Origen:** `UX-001` y `UX-002` de `MEJORAS_POTENCIALES.md`.
+
+**Como usuario** quiero una tipografía más legible y una diferenciación clara entre ingresos y gastos en toda la aplicación.
+
+- [ ] Definir una escala tipográfica común (`AppTypography`) aumentando legibilidad en botones (`labelLarge` 15–16 sp seminegrita), etiquetas/chips (13–14 sp) y textos de lista (15–16 sp), eliminando tamaños sueltos inconsistentes.
+- [ ] Revisar los tonos semánticos de ingreso (verde) y gasto (rojo) y añadir tokens de tinte suave (`IncomeContainer`/`OnIncomeContainer`, `ExpenseContainer`/`OnExpenseContainer`) con contraste WCAG AA, validando los tonos definitivos en dispositivo real.
+- [ ] Aplicar el estilo de tinte suave (fondo verde/rojo claro + icono y texto oscuros de alto contraste) en botones de acción de Inicio, filas de movimientos y filtros/análisis, manteniendo siempre signos `+`/`−` e iconografía (nunca depender solo del color).
+- [ ] Coordinar su aplicación con `V6-16`..`V6-21` para evitar retrabajo.
+- [ ] **Pruebas necesarias:** Tests de UI Compose en 360–412 dp con escalas de fuente del sistema al 100 %, 115 % y 130 % verificando ausencia de recortes y objetivos táctiles `>= 48 dp`, más verificación visual en dispositivo/emulador.
+
+### V6-23 — Resumen del mes actual en las tarjetas de Inicio (TODO, P1)
+**Origen:** `UX-009` de `MEJORAS_POTENCIALES.md`.
+
+**Como usuario** quiero ver el resultado del mes actual como dato principal en Inicio para saber cómo va el mes de un vistazo sin perder el saldo disponible.
+
+- [ ] Mostrar en las tarjetas de Familia y Personal el **resultado neto del mes en curso** (`ingresos − gastos`) como cifra principal, indicando explícitamente el nombre del mes (ej. «Resultado de noviembre»), manteniendo la paridad visual entre ambas cuentas.
+- [ ] Mostrar la caja acumulada real como dato secundario claramente diferenciado bajo la etiqueta «Saldo disponible» (sin mezclar terminología).
+- [ ] Regla contable: imputar gastos a `responsibleAccountId`, ingresos a la cuenta destinataria, y excluir transferencias, devoluciones y ajustes de saldo del cálculo mensual.
+- [ ] Mantener el comportamiento actual de navegación al pulsar una tarjeta de Inicio (abrir Detalle de cuenta).
+- [ ] Respetar el Modo de Privacidad (`•••• €`) en ambas cifras.
+- [ ] Al implementar, actualizar `docs/V6_SPEC.md` y `AGENTS.md` para reflejar el cambio respecto a `V6-04`/`V6-14`.
+- [ ] **Pruebas necesarias:** Tests unitarios en `HomeViewModelTest` (cambio de mes, meses sin movimientos, resultados negativos, cuentas con adelantos) y tests UI Compose en 360–412 dp y modo privacidad.
+
+### V6-24 — Reorganización de pantallas y formulario compacto de Recurrentes (TODO, P1)
+**Origen:** `UX-005` y `UX-006` de `MEJORAS_POTENCIALES.md` (coordinar con `V6-21`).
+
+**Como usuario** quiero gestionar mis reglas recurrentes desde pantallas separadas y compactas sin scroll excesivo.
+
+- [ ] Separar la Lista de reglas del Formulario de creación y edición en pantallas dedicadas (evitar apilar el formulario encima de la lista).
+- [ ] Al guardar o cancelar una creación/edición, volver a la lista conservando la pestaña de estado activa y la posición de scroll.
+- [ ] Reducir el desplazamiento vertical agrupando opciones secundarias en secciones plegables o panel inferior y separando claramente Lista, Formulario, Detalle y Bandeja de pendientes.
+- [ ] **Pruebas necesarias:** Tests de UI Compose y navegación en 360–412 dp verificando la separación de pantallas, preservación de pestaña/scroll y ausencia de controles ocultos.
+
+### V6-25 — Crear recurrencia desde Nuevo gasto y Nuevo ingreso (TODO, P1)
+**Origen:** `UX-004` de `MEJORAS_POTENCIALES.md`. **Dependencias:** `V6-18` y `V6-24`.
+
+**Como usuario** quiero poder convertir un gasto o ingreso en recurrente en el momento de crearlo sin alargar el formulario rápido.
+
+- [ ] Añadir una acción «Hacer recurrente» dentro del panel inferior de Detalles (`ModalBottomSheet`) de Nuevo gasto y Nuevo ingreso.
+- [ ] Al pulsarla, abrir la pantalla dedicada de creación de recurrencia (`V6-24`) precargada con los datos ya introducidos (tipo, importe, categoría, cuentas pagadora/responsable o destinataria, concepto y fecha).
+- [ ] Mantener intacto el flujo rápido en un paso para movimientos puntuales y las reglas contables V6.
+- [ ] **Pruebas necesarias:** Tests unitarios de precarga/mapeo y tests UI Compose verificando el acceso desde Nuevo gasto y Nuevo ingreso sin alterar el diseño compacto.
+
+### V6-26 — Accesos directos (App Shortcuts) para Nuevo gasto y Nuevo ingreso (TODO, P2)
+**Origen:** `UX-003` de `MEJORAS_POTENCIALES.md`.
+
+**Como usuario** quiero abrir directamente Nuevo gasto o Nuevo ingreso desde la pantalla de inicio de Android para registrar movimientos en menos pasos.
+
+- [ ] Implementar Android App Shortcuts para «Nuevo gasto» y «Nuevo ingreso» (accesibles al mantener pulsado el icono de la app y fijables en el escritorio).
+- [ ] Cada acceso directo abre directamente el formulario compacto correspondiente (`V6-18`) respetando las últimas selecciones recordadas.
+- [ ] Exigir siempre confirmación explícita pulsando Guardar (nunca registrar un movimiento con un solo toque).
+- [ ] **Pruebas necesarias:** Tests de resolución de intents/rutas de navegación y verificación funcional en emulador/dispositivo Android.
+
 ---
 
-### Riesgos y Decisiones Todavía Abiertas
-1. **Riesgo de Deducción Proporcional en Gráficos:** Al ocultar etiquetas monetarias en los gráficos de barras de Análisis, las alturas relativas de las barras podrían permitir inferir proporciones. *Decisión:* ¿Se deben aplanar las barras a altura uniforme en modo privacidad o es suficiente con suprimir la escala monetaria?
-2. **Formato del Diálogo de Revisión Individual de Pendientes:** ¿Implementar como Modal Bottom Sheet vs Diálogo AlertDialog centrado?
+### Riesgos y Decisiones Cerradas
+1. **Riesgo de Deducción Proporcional en Gráficos:** **Decisión cerrada (2026-11-24):** En modo privacidad es suficiente con suprimir la escala y las etiquetas monetarias en los gráficos de Análisis (no se aplanan las barras a altura uniforme).
+2. **Formato de la Revisión Individual de Pendientes (`REC-UI-05`):** **Decisión cerrada (2026-11-24):** Implementar como `ModalBottomSheet` sobre la bandeja de pendientes (mejor encaje con teclado/edición en 360–412 dp y coherente con `V6-18` y `V6-24`).
 
 
 ## Criterio de cierre V6

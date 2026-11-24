@@ -30,7 +30,8 @@ Este documento recoge observaciones surgidas del uso real de Family Expenses ant
 | UX-007 | Captura inteligente | Fotografiar un ticket, extraer sus datos y sugerir la categoría | Alta | IDEA |
 | UX-008 | Copias de seguridad | Guardar y restaurar copias mediante Google Drive | Alta | IDEA |
 | UX-009 | Inicio | Mostrar el resumen del mes actual como información principal | Alta | IDEA |
-| UX-010 | Entrada de importes | Permitir sumas y restas en el teclado de importe | Alta | IDEA |
+| UX-010 | Entrada de importes | Permitir sumas y restas en el teclado de importe | Alta | MOVIDA_A_BACKLOG (`V6-18`) |
+| UX-011 | Registro de movimientos | Rediseñar y unificar Nuevo gasto y Nuevo ingreso para pantallas compactas | Alta | MOVIDA_A_BACKLOG (`V6-18`) |
 
 ## Observaciones registradas
 
@@ -116,6 +117,7 @@ Este documento recoge observaciones surgidas del uso real de Family Expenses ant
 ### UX-010 — Operaciones en el campo de importe
 
 - **Fecha:** 2026-11-24
+- **Estado:** `MOVIDA_A_BACKLOG` — incorporada a `V6-18`.
 - **Observación:** Al introducir un gasto o ingreso puede ser necesario sumar varias cantidades de un ticket. Hacer el cálculo fuera de la aplicación interrumpe el flujo de registro.
 - **Experiencia deseada:** Permitir expresiones sencillas como `12,50 + 3,20` y mostrar inmediatamente el resultado `15,70 €` antes de guardar.
 - **Primera versión:** Incorporar suma y resta al teclado propio de Nuevo gasto y Nuevo ingreso. Multiplicación, división y paréntesis quedarían fuera hasta comprobar que sean necesarios.
@@ -124,6 +126,18 @@ Este documento recoge observaciones surgidas del uso real de Family Expenses ant
 - **Reglas:** Rechazar resultados negativos, cero, importes con más de dos decimales y desbordamientos. Definir claramente cómo se interpreta el signo menos para no confundir una resta con un importe negativo.
 - **Privacidad:** Cuando el modo de privacidad esté activo, ocultar tanto el resultado como los operandos monetarios sin impedir la edición mediante el teclado.
 - **Validación futura:** Probar cadenas de operaciones, decimales con coma y punto, correcciones intermedias, expresiones incompletas, importes grandes y el mismo comportamiento en gasto e ingreso.
+
+### UX-011 — Rediseño compacto y unificado de Nuevo gasto y Nuevo ingreso
+
+- **Fecha:** 2026-11-24
+- **Estado:** `MOVIDA_A_BACKLOG` — incorporada a `V6-18` junto con `UX-010`.
+- **Observación:** En Nuevo gasto es necesario hacer scroll vertical para alcanzar controles esenciales del teclado, como la coma y el retroceso, y para acceder a Detalles. La misma reorganización debe aplicarse a Nuevo ingreso para conservar una experiencia coherente.
+- **Experiencia deseada:** Importe, selección esencial, teclado completo y Guardar visibles simultáneamente en un Galaxy S25 con tamaño de fuente estándar, sin desplazamiento vertical durante el registro habitual.
+- **Estructura compartida:** Reutilizar los mismos componentes de importe, teclado, contenedor, espaciado, privacidad y acción de guardado. Gasto mantiene Pagadora/Responsable y favoritas; Ingreso mantiene Destinataria y categorías de ingreso.
+- **Detalles:** Abrir fecha y campos opcionales en un panel inferior, conservando el estado al abrirlo y cerrarlo. El formulario principal no debe volver a crecer al incorporar futuras funciones.
+- **Accesibilidad:** Guardar debe permanecer accesible. Con texto ampliado se permitirá scroll antes que recortar etiquetas, ocultar controles o reducir las áreas táctiles.
+- **Alcance:** El escaneo de tickets (`UX-007`) y el acceso a recurrentes (`UX-004`) continúan como mejoras separadas; deberán integrarse posteriormente sin romper la estructura compacta.
+- **Backlog:** Los criterios de aceptación y pruebas quedan definidos en `V6-18` de `BACKLOG.md`.
 
 ## Plantilla para nuevas observaciones
 

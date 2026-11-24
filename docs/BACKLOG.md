@@ -258,7 +258,9 @@
 - `PrimaryActionCard` / `QuickActionButton`: Botón de acción rápida con icono (`+` / `−`), alto mín. 48 dp y azul petróleo.
 - `EmptyState`: Vista para estados vacíos con ilustración/icono monocromático y texto explicativo.
 - `FilterChip`: Chip de selección con estado activo en azul petróleo (texto blanco) e inactivo en blanco roto con borde suave.
-- `MoneyInputField` y `NumericKeypad`: Teclado numérico táctil de 48 dp con coma, C y retroceso.
+- `MoneyInputField` y `NumericKeypad`: Componentes compartidos por gasto e ingreso, con teclas táctiles de 48 dp, coma, C, retroceso, suma/resta y evaluación decimal exacta en céntimos.
+- `CompactTransactionForm`: Estructura compartida de Nuevo gasto y Nuevo ingreso que mantiene importe, selectores esenciales, teclado completo y Guardar visibles en pantallas compactas.
+- `TransactionDetailsSheet`: Panel inferior para fecha y datos opcionales, conservando el estado del formulario principal al abrirse o cerrarse.
 - `ConfirmationDialog`: Diálogo modal MD3 para confirmaciones críticas.
 - `TopAppBar` y `NavigationBar`: Cabecera con título, Ojo de Privacidad (`contentDescription` dinámico) y Ajustes; barra inferior con indicador activo en azul petróleo.
 - `RecurrenceStatusBadge`: Chip compacto de estado de regla recurrente (Activa, Pausada, Archivada, Finalizada).
@@ -299,9 +301,23 @@
 - [ ] Aplicar azul petróleo a anillo y gráficos de barras. Ocultar escalas y valores monetarios con privacidad activa.
 - [ ] **Pruebas necesarias:** Tests de UI Compose para gráficos con y sin modo de privacidad.
 
-### V6-18 — Aplicación del sistema visual a Nuevo Gasto y Nuevo Ingreso (TODO, P1)
-- [ ] Aplicar paleta azul petróleo a selectores, teclado numérico de 48 dp y visibilidad de Guardar con teclado.
-- [ ] **Pruebas necesarias:** Tests de UI Compose de teclados y formularios.
+### V6-18 — Rediseño compacto y unificado de Nuevo Gasto y Nuevo Ingreso (TODO, P1)
+**Origen:** `UX-010` y `UX-011` de `MEJORAS_POTENCIALES.md`.
+
+**Como usuario** quiero registrar gastos e ingresos desde una pantalla compacta donde el importe, todos los controles del teclado y Guardar estén accesibles sin desplazarme en el uso normal.
+
+- [ ] Crear una estructura visual compartida para Nuevo gasto y Nuevo ingreso, evitando que evolucionen como formularios distintos o dupliquen la lógica del teclado y del importe.
+- [ ] Aplicar la paleta azul petróleo, tipografía legible, superficies blanco roto/blanco y objetivos táctiles mínimos de 48 dp.
+- [ ] En anchos de 360–412 dp y tamaño de fuente estándar, mantener visibles sin scroll vertical el importe, la selección esencial, el teclado completo —incluidas coma, C y retroceso— y el botón Guardar.
+- [ ] Mantener Guardar fijo y accesible; con texto ampliado permitir desplazamiento antes que recortar texto, ocultar controles o reducir objetivos táctiles.
+- [ ] Gasto conserva categorías favoritas + Más y los selectores independientes Pagadora/Responsable; Ingreso conserva categoría de ingreso y cuenta destinataria. Ambos comparten jerarquía, espaciado y componentes base.
+- [ ] Mover fecha, nota y opciones no esenciales a un `ModalBottomSheet` de Detalles, preservando los valores al abrir, cerrar, rotar o volver al formulario.
+- [ ] Añadir suma y resta al teclado propio: mostrar expresión y resultado antes de guardar, aceptar coma decimal y deshabilitar Guardar ante expresiones incompletas o inválidas.
+- [ ] Evaluar operaciones con aritmética decimal exacta o céntimos enteros; no usar `Float`/`Double` y persistir únicamente el resultado final como `Long` en céntimos.
+- [ ] Rechazar resultados negativos o cero, más de dos decimales y desbordamientos; mantener C y retroceso con comportamiento predecible durante la edición.
+- [ ] Respetar el Modo de Privacidad ocultando operandos y resultado monetario sin impedir el uso del teclado.
+- [ ] No incluir en esta historia el escaneo de tickets ni la creación de recurrentes: deberán integrarse después mediante sus historias específicas sin volver a alargar el formulario principal.
+- [ ] **Pruebas necesarias:** Tests unitarios del evaluador de expresiones; tests de ViewModel para gasto e ingreso; tests UI Compose a 360/412 dp y con texto ampliado; restauración de estado del panel de Detalles; privacidad; y QA funcional en emulador verificando que teclado y Guardar son accesibles.
 
 ### V6-19 — Aplicación del sistema visual a Cuentas, Adelantos, Transferencias y Ajustes (TODO, P1)
 - [ ] Aplicar paleta azul petróleo y máscara `"•••• €"` en saldos y deudas con privacidad activa.

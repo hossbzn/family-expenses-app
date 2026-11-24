@@ -29,6 +29,7 @@ Este documento recoge observaciones surgidas del uso real de Family Expenses ant
 | UX-006 | Recurrentes | Reducir el desplazamiento vertical y simplificar la navegación | Alta | IDEA |
 | UX-007 | Captura inteligente | Fotografiar un ticket, extraer sus datos y sugerir la categoría | Alta | IDEA |
 | UX-008 | Copias de seguridad | Guardar y restaurar copias mediante Google Drive | Alta | IDEA |
+| UX-009 | Inicio | Mostrar el resumen del mes actual como información principal | Alta | IDEA |
 
 ## Observaciones registradas
 
@@ -98,6 +99,18 @@ Este documento recoge observaciones surgidas del uso real de Family Expenses ant
 - **Restauración segura:** Antes de sustituir los datos locales, mostrar la fecha y versión de la copia, advertir del reemplazo y crear, cuando sea posible, una copia local de seguridad previa.
 - **Funcionamiento:** Los errores de subida o restauración deben ser recuperables y nunca impedir el uso local de la aplicación.
 - **Validación futura:** Probar pérdida de conexión, interrupción durante la subida, copias corruptas, varias versiones disponibles, restauración en una instalación limpia y compatibilidad entre diferentes versiones del esquema Room.
+
+### UX-009 — Mostrar el resumen mensual en Inicio
+
+- **Fecha:** 2026-11-24
+- **Observación:** En el uso diario resulta más útil saber cómo va el mes actual que ver como cifra principal el saldo real acumulado desde el inicio. Para consultar otros periodos ya existe la pantalla de Análisis.
+- **Experiencia deseada:** Mostrar claramente el mes en curso en Inicio y utilizarlo como resumen inmediato de Familia y Personal, sin obligar a seleccionar filtros.
+- **Saldo real:** No eliminar el saldo de caja acumulado, porque representa el dinero disponible y cumple otra función. Puede mostrarse como dato secundario o quedar accesible desde el detalle de cada cuenta.
+- **Terminología:** Evitar llamar «saldo» a dos conceptos diferentes. Usar «Saldo disponible» para la caja acumulada y «Resultado de noviembre» o «Gasto de noviembre» para la métrica mensual elegida.
+- **Decisión pendiente:** Confirmar si la cifra principal debe ser el gasto total del mes o el resultado neto mensual (`ingresos − gastos`).
+- **Criterio contable a evaluar:** Si el objetivo es analizar el mes, los gastos deberían atribuirse a la cuenta responsable, no necesariamente a la pagadora; transferencias, devoluciones y ajustes quedarían fuera del resultado de gasto/ingreso.
+- **Navegación:** La acción sobre el resumen mensual puede abrir Análisis ya filtrado al mes y cuenta correspondientes. Los periodos anteriores, anuales o personalizados seguirían consultándose allí.
+- **Privacidad y validación:** Respetar la máscara global de importes y probar cambio de mes, meses sin movimientos, importes negativos, cuentas con adelantos y anchuras de 360–412 dp.
 
 ## Plantilla para nuevas observaciones
 

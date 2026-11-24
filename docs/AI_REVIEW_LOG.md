@@ -31,6 +31,12 @@ No sustituye a las especificaciones, al backlog ni al sprint. Sirve como histori
 
 ## Historial de iteraciones
 
+### Iteración 2026-11-24 — Revisión Batman QA de Inicio y Análisis
+
+- Commit revisado: `d95255e` en `fix/estabilizacion-senior-v6`.
+- Con Gradle 9.9.1 ejecutado directamente pasaron 127 pruebas unitarias, lint terminó con 0 errores y 4 advertencias y se generó el APK de depuración. La comprobación de sintaxis de `gradlew` falló y la QA visual quedó pendiente.
+- Los tres hallazgos y sus criterios de cierre están en [Bugs y QA de Batman](BUGS_BATMAN_QA.md).
+
 ### Iteración 2026-11-22 (g) — Corrección de la Iteración de Estabilización
 
 - Rama revisada: `fix/estabilizacion-senior-v6`

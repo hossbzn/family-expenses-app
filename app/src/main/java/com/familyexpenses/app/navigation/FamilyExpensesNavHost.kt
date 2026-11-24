@@ -69,6 +69,9 @@ fun FamilyExpensesNavHost() {
                 onSettingsClick = {
                     navController.navigate("settings")
                 },
+                onMovementClick = { kind, id ->
+                    navController.navigate("movement-detail/${kind.name}/$id")
+                },
                 savedTransactionId = savedTxId,
                 onClearSavedTransactionId = {
                     backStackEntry.savedStateHandle.remove<String>("saved_transaction_id")

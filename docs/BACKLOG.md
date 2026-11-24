@@ -387,6 +387,14 @@
 - [ ] Exigir siempre confirmación explícita pulsando Guardar (nunca registrar un movimiento con un solo toque).
 - [ ] **Pruebas necesarias:** Tests de resolución de intents/rutas de navegación y verificación funcional en emulador/dispositivo Android.
 
+### V6-27 — Abrir y editar movimientos recientes desde Inicio (REVIEW, P1)
+**Como usuario** quiero pulsar sobre cualquiera de los últimos movimientos en Inicio para abrir directamente su detalle y poder editarlo o borrarlo igual que desde Movimientos.
+
+- [x] Hacer clicables las filas de la sección «Últimos movimientos» en Inicio (`RecentMovementRow`) manteniendo objetivo táctil mínimo de 48 dp.
+- [x] Al pulsar una fila, navegar a la pantalla de Detalle de movimiento (`MovementDetailScreen`) con su tipo (`kind`) e identificador (`id`), permitiendo editar y eliminar con recálculo atómico.
+- [x] Al guardar cambios o eliminar y volver atrás, regresar a Inicio reflejando inmediatamente el recálculo de saldos del mes, deuda de adelantos y últimos 3 movimientos.
+- [ ] **Pruebas necesarias:** Tests unitarios, `lintDebug` y `assembleDebug` verificados. Pendiente: verificación funcional en dispositivo/emulador (editar y borrar desde Inicio) antes de marcar `DONE`.
+
 ---
 
 ### Riesgos y Decisiones Cerradas

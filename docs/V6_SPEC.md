@@ -37,6 +37,7 @@ No interpretar transferencias como devolución automáticamente.
 - Sección «Últimos movimientos»:
   - Muestra exactamente los **tres últimos movimientos** registrados en orden descendente por fecha (`occurredAt`) y orden de creación (`createdAt`).
   - Cada fila muestra concepto/nota, fecha (ej. "Hoy", "Ayer", "20 nov"), cuenta (ej. "Familia", "Personal") e importe formatado.
+  - Pulsar cualquiera de las filas abre el Detalle de movimiento (`MovementDetailScreen`) para editarlo o eliminarlo (igual que desde Movimientos), reflejando el recálculo inmediato al volver a Inicio.
   - Incluye gastos, ingresos, transferencias, devoluciones, ajustes de saldo y ejecuciones de recurrentes.
   - Botón «Ver todos» a la derecha del título que navega a la pantalla de Movimientos.
   - Muestra un estado vacío claro ("No hay movimientos registrados") cuando no existan operaciones.

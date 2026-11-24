@@ -94,6 +94,7 @@ fun HomeRoute(
     onAnalysisClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onRecurringClick: () -> Unit = {},
+    onMovementClick: (kind: MovementKind, id: String) -> Unit = { _, _ -> },
     savedTransactionId: String? = null,
     onClearSavedTransactionId: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
@@ -128,6 +129,7 @@ fun HomeRoute(
         onAnalysisClick = onAnalysisClick,
         onSettingsClick = onSettingsClick,
         onRecurringClick = onRecurringClick,
+        onMovementClick = onMovementClick,
     )
 }
 
@@ -146,6 +148,7 @@ fun HomeScreen(
     onAnalysisClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onRecurringClick: () -> Unit = {},
+    onMovementClick: (kind: MovementKind, id: String) -> Unit = { _, _ -> },
 ) {
     val scrollState = rememberScrollState()
 
@@ -319,6 +322,7 @@ fun HomeScreen(
             RecentMovementsSection(
                 recentMovements = uiState.recentMovements,
                 privacyModeEnabled = uiState.privacyModeEnabled,
+                onMovementClick = onMovementClick,
                 onViewAllClick = onHistoryClick,
             )
 
@@ -530,6 +534,7 @@ private fun AdvancesBlock(
 private fun RecentMovementsSection(
     recentMovements: List<HistoryItem>,
     privacyModeEnabled: Boolean,
+    onMovementClick: (kind: MovementKind, id: String) -> Unit,
     onViewAllClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -575,6 +580,7 @@ private fun RecentMovementsSection(
                         RecentMovementRow(
                             item = item,
                             privacyModeEnabled = privacyModeEnabled,
+                            onClick = { onMovementClick(item.kind, item.id) },
                         )
                         if (index < recentMovements.size - 1) {
                             HorizontalDivider(color = OutlineBorder)
@@ -593,6 +599,7 @@ private fun RecentMovementsSection(
 private fun RecentMovementRow(
     item: HistoryItem,
     privacyModeEnabled: Boolean,
+    onClick: () -> Unit,
 ) {
     val badgeContainerColor = when (item.kind) {
         MovementKind.INCOME -> IncomeContainer
@@ -615,57 +622,65 @@ private fun RecentMovementRow(
         MovementKind.NORMAL_TRANSFER, MovementKind.REIMBURSEMENT -> PetroleumBluePrimary
     }
 
-    Row(
+    Surface(
+        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
+            .heightIn(min = 56.dp),
+        color = Color.Transparent,
     ) {
-        Surface(
-            modifier = Modifier.size(34.dp),
-            shape = RoundedCornerShape(10.dp),
-            color = badgeContainerColor,
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(
-                imageVector = badgeIcon,
-                contentDescription = null,
-                tint = badgeIconTint,
-                modifier = Modifier
-                    .padding(7.dp)
-                    .size(20.dp),
-            )
-        }
-        Spacer(modifier = Modifier.width(12.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = item.note ?: item.categoryName ?: when (item.kind) {
-                    MovementKind.NORMAL_TRANSFER -> "Transferencia"
-                    MovementKind.REIMBURSEMENT -> "Devolución"
-                    else -> "Movimiento"
-                },
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                color = PetroleumBluePrimary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            val dateLabel = item.occurredAt.toRelativeDateText()
-            val accountLabel = if (item.kind == MovementKind.EXPENSE) item.responsibleAccountName else item.payingAccountName
-            Text(
-                text = "$dateLabel · $accountLabel",
-                style = MaterialTheme.typography.bodySmall,
-                color = TextSecondaryColor,
-            )
-        }
+            Surface(
+                modifier = Modifier.size(34.dp),
+                shape = RoundedCornerShape(10.dp),
+                color = badgeContainerColor,
+            ) {
+                Icon(
+                    imageVector = badgeIcon,
+                    contentDescription = null,
+                    tint = badgeIconTint,
+                    modifier = Modifier
+                        .padding(7.dp)
+                        .size(20.dp),
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = item.note ?: item.categoryName ?: when (item.kind) {
+                        MovementKind.NORMAL_TRANSFER -> "Transferencia"
+                        MovementKind.REIMBURSEMENT -> "Devolución"
+                        else -> "Movimiento"
+                    },
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                    color = PetroleumBluePrimary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                val dateLabel = item.occurredAt.toRelativeDateText()
+                val accountLabel = if (item.kind == MovementKind.EXPENSE) item.responsibleAccountName else item.payingAccountName
+                Text(
+                    text = "$dateLabel · $accountLabel",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextSecondaryColor,
+                )
+            }
 
-        MoneyText(
-            amountMinor = item.amountMinor,
-            isPrivacyModeEnabled = privacyModeEnabled,
-            showPlusSign = item.kind == MovementKind.INCOME,
-            showMinusSign = item.kind == MovementKind.EXPENSE,
-            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-            color = amountColor,
-        )
+            MoneyText(
+                amountMinor = item.amountMinor,
+                isPrivacyModeEnabled = privacyModeEnabled,
+                showPlusSign = item.kind == MovementKind.INCOME,
+                showMinusSign = item.kind == MovementKind.EXPENSE,
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                color = amountColor,
+            )
+        }
     }
 }
 

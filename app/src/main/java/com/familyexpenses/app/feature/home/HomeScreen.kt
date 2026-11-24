@@ -189,43 +189,80 @@ fun HomeScreen(
             )
         },
         bottomBar = {
-            NavigationBar(
-                containerColor = PureWhiteSurface,
-                tonalElevation = 4.dp,
-            ) {
-                NavigationBarItem(
-                    selected = true,
-                    onClick = { /* Ya en Inicio */ },
-                    icon = { Icon(Icons.Default.Home, contentDescription = "Inicio") },
-                    label = { Text("Inicio") },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = PureWhiteSurface,
-                        selectedTextColor = PetroleumBluePrimary,
-                        indicatorColor = PetroleumBluePrimary,
-                        unselectedIconColor = Color.Gray,
-                        unselectedTextColor = Color.Gray,
-                    ),
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = onHistoryClick,
-                    icon = { Icon(Icons.AutoMirrored.Filled.ReceiptLong, contentDescription = "Movimientos") },
-                    label = { Text("Movimientos") },
-                    colors = NavigationBarItemDefaults.colors(
-                        unselectedIconColor = Color.Gray,
-                        unselectedTextColor = Color.Gray,
-                    ),
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = onAnalysisClick,
-                    icon = { Icon(Icons.Default.BarChart, contentDescription = "Análisis") },
-                    label = { Text("Análisis") },
-                    colors = NavigationBarItemDefaults.colors(
-                        unselectedIconColor = Color.Gray,
-                        unselectedTextColor = Color.Gray,
-                    ),
-                )
+            Column(modifier = Modifier.fillMaxWidth()) {
+                // Acciones rápidas fijas abajo para uso con una sola mano: "Ingreso" (+) y "Gasto" (−)
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = OffWhiteBackground,
+                ) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        HorizontalDivider(color = OutlineBorder)
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 10.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            QuickActionButton(
+                                label = "Ingreso",
+                                icon = Icons.Default.Add,
+                                containerColor = IncomeContainer,
+                                borderColor = IncomeBorder,
+                                contentColor = OnIncomeContainer,
+                                onClick = onAddIncomeClick,
+                                modifier = Modifier.weight(1f),
+                            )
+                            QuickActionButton(
+                                label = "Gasto",
+                                icon = Icons.Default.Remove,
+                                containerColor = ExpenseContainer,
+                                borderColor = ExpenseBorder,
+                                contentColor = OnExpenseContainer,
+                                onClick = onAddExpenseClick,
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
+                    }
+                }
+
+                NavigationBar(
+                    containerColor = PureWhiteSurface,
+                    tonalElevation = 4.dp,
+                ) {
+                    NavigationBarItem(
+                        selected = true,
+                        onClick = { /* Ya en Inicio */ },
+                        icon = { Icon(Icons.Default.Home, contentDescription = "Inicio") },
+                        label = { Text("Inicio") },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = PureWhiteSurface,
+                            selectedTextColor = PetroleumBluePrimary,
+                            indicatorColor = PetroleumBluePrimary,
+                            unselectedIconColor = Color.Gray,
+                            unselectedTextColor = Color.Gray,
+                        ),
+                    )
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = onHistoryClick,
+                        icon = { Icon(Icons.AutoMirrored.Filled.ReceiptLong, contentDescription = "Movimientos") },
+                        label = { Text("Movimientos") },
+                        colors = NavigationBarItemDefaults.colors(
+                            unselectedIconColor = Color.Gray,
+                            unselectedTextColor = Color.Gray,
+                        ),
+                    )
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = onAnalysisClick,
+                        icon = { Icon(Icons.Default.BarChart, contentDescription = "Análisis") },
+                        label = { Text("Análisis") },
+                        colors = NavigationBarItemDefaults.colors(
+                            unselectedIconColor = Color.Gray,
+                            unselectedTextColor = Color.Gray,
+                        ),
+                    )
+                }
             }
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -238,14 +275,15 @@ fun HomeScreen(
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            // 1. Tarjetas de saldo real: Familia y Personal con el mismo peso e igual jerarquía visual
+            // 1. Tarjetas de saldo del mes actual: Familia y Personal con el mismo peso e igual jerarquía visual
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 AccountSummaryCard(
                     accountName = "Familia",
-                    balanceMinor = uiState.familyCashBalanceMinor,
+                    monthlyNetMinor = uiState.familyMonthlyNetMinor,
+                    monthName = uiState.currentMonthName,
                     icon = Icons.Default.HomeWork,
                     privacyModeEnabled = uiState.privacyModeEnabled,
                     onClick = onFamilyAccountClick,
@@ -253,7 +291,8 @@ fun HomeScreen(
                 )
                 AccountSummaryCard(
                     accountName = "Personal",
-                    balanceMinor = uiState.personalCashBalanceMinor,
+                    monthlyNetMinor = uiState.personalMonthlyNetMinor,
+                    monthName = uiState.currentMonthName,
                     icon = Icons.Default.Person,
                     privacyModeEnabled = uiState.privacyModeEnabled,
                     onClick = onPersonalAccountClick,
@@ -261,97 +300,7 @@ fun HomeScreen(
                 )
             }
 
-            // 2. Botones de acciones rápidas: "Añadir ingreso" (+) a la izquierda, "Añadir gasto" (−) a la derecha
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                // Añadir ingreso (+)
-                Surface(
-                    onClick = onAddIncomeClick,
-                    modifier = Modifier
-                        .weight(1f)
-                        .heightIn(min = 54.dp),
-                    shape = RoundedCornerShape(14.dp),
-                    color = IncomeContainer,
-                    border = BorderStroke(1.dp, IncomeBorder),
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 10.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                    ) {
-                        Surface(
-                            shape = RoundedCornerShape(20.dp),
-                            color = PureWhiteSurface,
-                            modifier = Modifier.size(32.dp),
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = null,
-                                tint = OnIncomeContainer,
-                                modifier = Modifier
-                                    .padding(6.dp)
-                                    .size(18.dp),
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Añadir ingreso",
-                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                            color = OnIncomeContainer,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
-                }
-
-                // Añadir gasto (−)
-                Surface(
-                    onClick = onAddExpenseClick,
-                    modifier = Modifier
-                        .weight(1f)
-                        .heightIn(min = 54.dp),
-                    shape = RoundedCornerShape(14.dp),
-                    color = ExpenseContainer,
-                    border = BorderStroke(1.dp, ExpenseBorder),
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 10.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                    ) {
-                        Surface(
-                            shape = RoundedCornerShape(20.dp),
-                            color = PureWhiteSurface,
-                            modifier = Modifier.size(32.dp),
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Remove,
-                                contentDescription = null,
-                                tint = OnExpenseContainer,
-                                modifier = Modifier
-                                    .padding(6.dp)
-                                    .size(18.dp),
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Añadir gasto",
-                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                            color = OnExpenseContainer,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
-                }
-            }
-
-            // 3. Bloque de Adelantos siempre visible
+            // 2. Bloque de Adelantos siempre visible
             AdvancesBlock(
                 netDebtMinor = uiState.netDebtMinor,
                 privacyModeEnabled = uiState.privacyModeEnabled,
@@ -379,20 +328,81 @@ fun HomeScreen(
 }
 
 /**
- * Tarjeta de saldo real con la misma jerarquía para Familia y Personal.
+ * Botón grande de acción rápida inferior con protagonismo en el signo (+ / −).
+ */
+@Composable
+private fun QuickActionButton(
+    label: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    containerColor: Color,
+    borderColor: Color,
+    contentColor: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        onClick = onClick,
+        modifier = modifier.heightIn(min = 74.dp),
+        shape = RoundedCornerShape(16.dp),
+        color = containerColor,
+        border = BorderStroke(1.dp, borderColor),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            Surface(
+                shape = RoundedCornerShape(22.dp),
+                color = PureWhiteSurface,
+                modifier = Modifier.size(44.dp),
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = contentColor,
+                    modifier = Modifier
+                        .padding(9.dp)
+                        .size(26.dp),
+                )
+            }
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(
+                text = label,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = contentColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+    }
+}
+
+/**
+ * Tarjeta de saldo del mes actual con la misma jerarquía para Familia y Personal.
  */
 @Composable
 private fun AccountSummaryCard(
     accountName: String,
-    balanceMinor: Long,
+    monthlyNetMinor: Long,
+    monthName: String,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     privacyModeEnabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val monthlyLabel = if (monthName.isNotBlank()) "Saldo de $monthName" else "Saldo del mes"
+    val monthlyColor = when {
+        privacyModeEnabled || monthlyNetMinor == 0L -> PetroleumBluePrimary
+        monthlyNetMinor > 0L -> OnIncomeContainer
+        else -> OnExpenseContainer
+    }
+
     Card(
         onClick = onClick,
-        modifier = modifier.heightIn(min = 110.dp),
+        modifier = modifier.heightIn(min = 114.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = PureWhiteSurface,
@@ -420,14 +430,24 @@ private fun AccountSummaryCard(
                     text = accountName,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = PetroleumBluePrimary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = monthlyLabel,
+                style = MaterialTheme.typography.bodySmall,
+                color = TextSecondaryColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
             MoneyText(
-                amountMinor = balanceMinor,
+                amountMinor = monthlyNetMinor,
                 isPrivacyModeEnabled = privacyModeEnabled,
+                showPlusSign = false,
                 style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                color = PetroleumBluePrimary,
+                color = monthlyColor,
             )
         }
     }

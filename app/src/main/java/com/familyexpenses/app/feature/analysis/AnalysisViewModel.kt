@@ -78,6 +78,8 @@ class AnalysisViewModel @Inject constructor(
             periodLabel = formatPeriodLabel(state.periodFilter),
             seriesType = state.seriesType,
             totalMinor = result.totalMinor,
+            totalIncomesMinor = result.totalIncomesMinor,
+            totalExpensesMinor = result.totalExpensesMinor,
             averagePerBucketMinor = result.averagePerBucketMinor,
             transactionCount = result.transactionCount,
             categorySlices = result.categorySlices,
@@ -200,8 +202,9 @@ class AnalysisViewModel @Inject constructor(
     }
 
     private fun encodeTypeFilter(seriesType: AnalysisSeriesType): String = when (seriesType) {
-        AnalysisSeriesType.EXPENSES -> MovementTypeFilter.EXPENSES.name
+        AnalysisSeriesType.BALANCE -> MovementTypeFilter.ALL.name
         AnalysisSeriesType.INCOMES -> MovementTypeFilter.INCOMES.name
+        AnalysisSeriesType.EXPENSES -> MovementTypeFilter.EXPENSES.name
     }
 
     private fun encodePeriod(periodFilter: MovementPeriodFilter): Triple<String, String, String> =
@@ -259,6 +262,8 @@ data class AnalysisUiState(
     val periodLabel: String = "",
     val seriesType: AnalysisSeriesType = AnalysisSeriesType.EXPENSES,
     val totalMinor: Long = 0L,
+    val totalIncomesMinor: Long = 0L,
+    val totalExpensesMinor: Long = 0L,
     val averagePerBucketMinor: Long = 0L,
     val transactionCount: Int = 0,
     val categorySlices: List<AnalysisCategorySlice> = emptyList(),

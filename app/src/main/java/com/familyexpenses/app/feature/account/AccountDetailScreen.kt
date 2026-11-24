@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -153,6 +154,7 @@ fun AccountDetailScreen(
     val accountTitle = account?.name ?: "Cuenta"
 
     Scaffold(
+        containerColor = OffWhiteBackground,
         topBar = {
             TopAppBar(
                 title = {
@@ -170,8 +172,8 @@ fun AccountDetailScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    containerColor = OffWhiteBackground,
+                    titleContentColor = PetroleumBluePrimary,
                 ),
             )
         },
@@ -192,10 +194,10 @@ fun AccountDetailScreen(
                     .heightIn(min = 130.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = if (isFamily) Color.Black else Color(0xFFF5F5F5),
-                    contentColor = if (isFamily) Color.White else Color.Black,
+                    containerColor = PureWhiteSurface,
+                    contentColor = PetroleumBluePrimary,
                 ),
-                border = if (isFamily) null else BorderStroke(1.dp, Color(0xFFE0E0E0)),
+                border = BorderStroke(1.dp, OutlineBorder),
             ) {
                 Column(
                     modifier = Modifier
@@ -232,6 +234,7 @@ fun AccountDetailScreen(
                         .weight(1f)
                         .heightIn(min = 52.dp),
                     shape = RoundedCornerShape(12.dp),
+                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 12.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = PetroleumBluePrimary,
                         contentColor = Color.White,
@@ -240,12 +243,15 @@ fun AccountDetailScreen(
                     Icon(
                         imageVector = Icons.Default.SwapHoriz,
                         contentDescription = null,
-                        modifier = Modifier.size(20.dp),
+                        modifier = Modifier.size(18.dp),
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = "Transferir",
-                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                        maxLines = 1,
+                        softWrap = false,
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
 
@@ -255,19 +261,23 @@ fun AccountDetailScreen(
                         .weight(1f)
                         .heightIn(min = 52.dp),
                     shape = RoundedCornerShape(12.dp),
+                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 12.dp),
                     border = BorderStroke(1.dp, OutlineBorder),
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ReceiptLong,
                         contentDescription = null,
                         tint = PetroleumBluePrimary,
-                        modifier = Modifier.size(20.dp),
+                        modifier = Modifier.size(18.dp),
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = "Movimientos",
-                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                         color = PetroleumBluePrimary,
+                        maxLines = 1,
+                        softWrap = false,
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
             }

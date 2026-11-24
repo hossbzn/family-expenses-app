@@ -344,18 +344,18 @@
 - [x] Coordinar su aplicación con `V6-16`..`V6-21` para evitar retrabajo.
 - [ ] **Pruebas necesarias:** Tests unitarios (`MoneyTextTest`, `ThemeTokensTest`, 120 tests en verde), `lintDebug` y `assembleDebug` verificados. Pendiente: tests de UI Compose en 360–412 dp con escalas 100 %/115 %/130 % y verificación visual en dispositivo/emulador antes de marcar `DONE`.
 
-### V6-23 — Resumen del mes actual en las tarjetas de Inicio (TODO, P1)
+### V6-23 — Resumen del mes actual en las tarjetas de Inicio (REVIEW, P1)
 **Origen:** `UX-009` de `MEJORAS_POTENCIALES.md`.
 
-**Como usuario** quiero ver el resultado del mes actual como dato principal en Inicio para saber cómo va el mes de un vistazo sin perder el saldo disponible.
+**Como usuario** quiero ver el saldo del mes actual como dato único y protagonista en las tarjetas de Inicio para saber cómo va el mes de un vistazo.
 
-- [ ] Mostrar en las tarjetas de Familia y Personal el **resultado neto del mes en curso** (`ingresos − gastos`) como cifra principal, indicando explícitamente el nombre del mes (ej. «Resultado de noviembre»), manteniendo la paridad visual entre ambas cuentas.
-- [ ] Mostrar la caja acumulada real como dato secundario claramente diferenciado bajo la etiqueta «Saldo disponible» (sin mezclar terminología).
-- [ ] Regla contable: imputar gastos a `responsibleAccountId`, ingresos a la cuenta destinataria, y excluir transferencias, devoluciones y ajustes de saldo del cálculo mensual.
-- [ ] Mantener el comportamiento actual de navegación al pulsar una tarjeta de Inicio (abrir Detalle de cuenta).
-- [ ] Respetar el Modo de Privacidad (`•••• €`) en ambas cifras.
-- [ ] Al implementar, actualizar `docs/V6_SPEC.md` y `AGENTS.md` para reflejar el cambio respecto a `V6-04`/`V6-14`.
-- [ ] **Pruebas necesarias:** Tests unitarios en `HomeViewModelTest` (cambio de mes, meses sin movimientos, resultados negativos, cuentas con adelantos) y tests UI Compose en 360–412 dp y modo privacidad.
+- [x] Mostrar en las tarjetas de Familia y Personal el **saldo del mes en curso** como dato único (ej. «Saldo de noviembre»), manteniendo la paridad visual entre ambas cuentas y sin mostrar el dato secundario de saldo disponible en Inicio.
+- [x] Mantener el saldo disponible real acumulado accesible al pulsar cada tarjeta (Detalle de cuenta).
+- [x] Regla contable del saldo mensual en Inicio: `ingresos − gastos` (imputados a `responsibleAccountId`) `+` transferencias normales entrantes `−` transferencias normales salientes del mes en curso; excluir devoluciones de adelanto, ajustes de saldo y meses anteriores. En Análisis las transferencias normales siguen excluidas.
+- [x] Mantener el comportamiento actual de navegación al pulsar una tarjeta de Inicio (abrir Detalle de cuenta).
+- [x] Respetar el Modo de Privacidad (`•••• €`) en las tarjetas.
+- [x] Actualizar `docs/V6_SPEC.md`, `docs/sdd.md`, `docs/Documentacion.md`, `docs/MEJORAS_POTENCIALES.md` y `AGENTS.md` con este criterio.
+- [ ] **Pruebas necesarias:** Tests unitarios (`ComputeMonthlyNetResultUseCaseTest`, `HomeViewModelTest`), `lintDebug` y `assembleDebug` verificados. Pendiente: tests UI Compose en 360–412 dp y validación visual en dispositivo/emulador antes de marcar `DONE`.
 
 ### V6-24 — Reorganización de pantallas y formulario compacto de Recurrentes (TODO, P1)
 **Origen:** `UX-005` y `UX-006` de `MEJORAS_POTENCIALES.md` (coordinar con `V6-21`).

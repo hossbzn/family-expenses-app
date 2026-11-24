@@ -31,8 +31,8 @@ No interpretar transferencias como devolución automáticamente.
 
 ## 3. Inicio
 - Cabecera con saludo/subtítulo ("Buenos días / Resumen familiar"), botón de ojo para el Modo de Privacidad y botón de Ajustes (⚙️).
-- Tarjetas de saldo real de Familia y Personal con el mismo peso y jerarquía visual. Ambas muestran saldos de caja reales individualmente, sin saldo agregado global.
-- Botones grandes de acciones rápidas: «Añadir ingreso» a la izquierda con icono `+`, y «Añadir gasto» a la derecha con icono `−` (Gasto colocado a la derecha por ser la acción más frecuente).
+- Tarjetas de Familia y Personal con el mismo peso y jerarquía visual: muestran únicamente el **saldo del mes en curso** (`ingresos − gastos` imputados a cuenta responsable + transferencias normales entrantes − transferencias normales salientes del mes; excluyendo devoluciones de adelanto, ajustes de saldo y meses anteriores), sin saldo agregado global. El saldo disponible real acumulado se consulta al pulsar cada tarjeta (Detalle de cuenta); en Análisis las transferencias normales siguen excluidas.
+- Botones grandes de acciones rápidas fijados en la parte inferior sobre la barra de navegación (para uso cómodo con una sola mano): **«Ingreso»** a la izquierda con icono `+` protagonista, y **«Gasto»** a la derecha con icono `−` protagonista (Gasto colocado a la derecha por ser la acción más frecuente).
 - Adelantos siempre visibles: «Familia te debe X», «Personal debe a Familia X» o «Sin adelantos pendientes», clic para detalle.
 - Sección «Últimos movimientos»:
   - Muestra exactamente los **tres últimos movimientos** registrados en orden descendente por fecha (`occurredAt`) y orden de creación (`createdAt`).
@@ -40,7 +40,7 @@ No interpretar transferencias como devolución automáticamente.
   - Incluye gastos, ingresos, transferencias, devoluciones, ajustes de saldo y ejecuciones de recurrentes.
   - Botón «Ver todos» a la derecha del título que navega a la pantalla de Movimientos.
   - Muestra un estado vacío claro ("No hay movimientos registrados") cuando no existan operaciones.
-  - Sin resumen mensual ni gráficos acumulados en Inicio.
+  - Sin gráficos acumulados en Inicio.
 - Diseño compacto y desplazable optimizado para un dispositivo base Galaxy S25 (360-412 dp).
 - Cabecera con Ajustes y Modo de Privacidad; barra inferior con Inicio, Movimientos y Análisis.
 
@@ -61,9 +61,9 @@ No interpretar transferencias como devolución automáticamente.
 
 ## 6. Análisis
 - Dos pestañas Categorías y Evolución; inicial Categorías.
-- Filtros compartidos de cuenta, periodo y Gastos/Ingresos (se muestran por separado).
+- Filtros compartidos de cuenta, periodo y serie (**Saldo**, **Ingresos** o **Gastos**).
 - Categorías: anillo monocromático y ranking con importes/porcentajes.
-- Evolución: una serie de barras (gastos O ingresos); mensual para años/12 meses, diaria para mes; granularidad adecuada para rango personalizado. Meses futuros vacíos, no ceros ficticios.
+- Evolución: una serie de barras (**Saldo**, **Ingresos** o **Gastos**); mensual para años/12 meses, diaria para mes; granularidad adecuada para rango personalizado. Meses futuros vacíos, no ceros ficticios.
 - Al pulsar categoría o barra abrir Movimientos con filtros aplicados; al volver recuperar íntegro el estado de Análisis.
 - Atribuir gastos a responsable y excluir transferencias, devoluciones y ajustes de ingresos/gastos.
 

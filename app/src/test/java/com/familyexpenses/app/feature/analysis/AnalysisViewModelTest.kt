@@ -227,5 +227,19 @@ class AnalysisViewModelTest {
         assertEquals("MONTH", bucketReq.periodTypeName)
         assertEquals(LocalDate.of(LocalDate.now().year, 1, 1).toString(), bucketReq.periodStartIso)
         assertEquals("", bucketReq.categoryId)
+
+        // Verificar serie BALANCE con todas las cuentas -> 120000 - 4500 = 115500 y drilldown ALL
+        viewModel.onAccountFilterSelected(MovementAccountFilter.All)
+        viewModel.onSelectMonthPeriod()
+        viewModel.onSeriesTypeSelected(AnalysisSeriesType.BALANCE)
+        advanceUntilIdle()
+
+        state = viewModel.uiState.value
+        assertEquals(AnalysisSeriesType.BALANCE, state.seriesType)
+        assertEquals(120000L, state.totalIncomesMinor)
+        assertEquals(4500L, state.totalExpensesMinor)
+        assertEquals(115500L, state.totalMinor)
+        val balanceDrillDown = viewModel.buildCategoryDrillDown("cat-food")
+        assertEquals(MovementTypeFilter.ALL.name, balanceDrillDown.typeFilterName)
     }
 }

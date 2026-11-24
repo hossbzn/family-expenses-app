@@ -96,6 +96,7 @@ import com.familyexpenses.app.ui.theme.PureWhiteSurface
 import java.text.NumberFormat
 import java.util.Currency
 import java.util.Locale
+import kotlin.math.abs
 
 private val MonochromeShades = listOf(
     Color(0xFF111111),
@@ -371,17 +372,17 @@ private fun SeriesTypeSelector(
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         SemanticSeriesChip(
-            label = "Gastos",
-            icon = Icons.Default.Remove,
-            isSelected = selectedSeries == AnalysisSeriesType.EXPENSES,
-            selectedContainerColor = ExpenseContainer,
-            selectedContentColor = OnExpenseContainer,
-            selectedBorderColor = ExpenseBorder,
+            label = "Saldo",
+            icon = null,
+            isSelected = selectedSeries == AnalysisSeriesType.BALANCE,
+            selectedContainerColor = PetroleumBlueContainer,
+            selectedContentColor = PetroleumBluePrimary,
+            selectedBorderColor = PetroleumBluePrimary,
             modifier = Modifier.weight(1f),
-            onClick = { onSeriesSelected(AnalysisSeriesType.EXPENSES) },
+            onClick = { onSeriesSelected(AnalysisSeriesType.BALANCE) },
         )
         SemanticSeriesChip(
             label = "Ingresos",
@@ -393,13 +394,23 @@ private fun SeriesTypeSelector(
             modifier = Modifier.weight(1f),
             onClick = { onSeriesSelected(AnalysisSeriesType.INCOMES) },
         )
+        SemanticSeriesChip(
+            label = "Gastos",
+            icon = Icons.Default.Remove,
+            isSelected = selectedSeries == AnalysisSeriesType.EXPENSES,
+            selectedContainerColor = ExpenseContainer,
+            selectedContentColor = OnExpenseContainer,
+            selectedBorderColor = ExpenseBorder,
+            modifier = Modifier.weight(1f),
+            onClick = { onSeriesSelected(AnalysisSeriesType.EXPENSES) },
+        )
     }
 }
 
 @Composable
 private fun SemanticSeriesChip(
     label: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: androidx.compose.ui.graphics.vector.ImageVector?,
     isSelected: Boolean,
     selectedContainerColor: Color,
     selectedContentColor: Color,
@@ -418,17 +429,19 @@ private fun SemanticSeriesChip(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp),
+                .padding(horizontal = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = contentColor,
-                modifier = Modifier.size(18.dp),
-            )
-            Spacer(modifier = Modifier.width(6.dp))
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = contentColor,
+                    modifier = Modifier.size(16.dp),
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+            }
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelLarge.copy(
@@ -436,6 +449,7 @@ private fun SemanticSeriesChip(
                 ),
                 color = contentColor,
                 maxLines = 1,
+                softWrap = false,
                 overflow = TextOverflow.Ellipsis,
             )
         }
@@ -591,7 +605,11 @@ private fun CategoriesAnalysisContent(
     uiState: AnalysisUiState,
     onCategoryClick: (String) -> Unit,
 ) {
-    val seriesLabel = if (uiState.seriesType == AnalysisSeriesType.EXPENSES) "Total gastos" else "Total ingresos"
+    val seriesLabel = when (uiState.seriesType) {
+        AnalysisSeriesType.BALANCE -> "Saldo periodo"
+        AnalysisSeriesType.INCOMES -> "Total ingresos"
+        AnalysisSeriesType.EXPENSES -> "Total gastos"
+    }
 
     if (uiState.categorySlices.isEmpty()) {
         Box(
@@ -601,10 +619,10 @@ private fun CategoriesAnalysisContent(
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                text = if (uiState.seriesType == AnalysisSeriesType.EXPENSES) {
-                    "No hay gastos en este periodo."
-                } else {
-                    "No hay ingresos en este periodo."
+                text = when (uiState.seriesType) {
+                    AnalysisSeriesType.BALANCE -> "No hay movimientos en este periodo."
+                    AnalysisSeriesType.INCOMES -> "No hay ingresos en este periodo."
+                    AnalysisSeriesType.EXPENSES -> "No hay gastos en este periodo."
                 },
                 style = MaterialTheme.typography.bodyLarge,
                 color = Color.Gray,
@@ -636,6 +654,7 @@ private fun CategoriesAnalysisContent(
                     MonochromeDonutChart(
                         slices = uiState.categorySlices,
                         totalMinor = uiState.totalMinor,
+                        seriesType = uiState.seriesType,
                         seriesLabel = seriesLabel,
                         privacyModeEnabled = uiState.privacyModeEnabled,
                     )
@@ -649,6 +668,30 @@ private fun CategoriesAnalysisContent(
             }
         }
 
+        if (uiState.seriesType == AnalysisSeriesType.BALANCE) {
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    SummaryMiniCard(
+                        title = "Ingresos",
+                        amountMinor = uiState.totalIncomesMinor,
+                        privacyModeEnabled = uiState.privacyModeEnabled,
+                        amountColor = OnIncomeContainer,
+                        modifier = Modifier.weight(1f),
+                    )
+                    SummaryMiniCard(
+                        title = "Gastos",
+                        amountMinor = uiState.totalExpensesMinor,
+                        privacyModeEnabled = uiState.privacyModeEnabled,
+                        amountColor = OnExpenseContainer,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
+        }
+
         itemsIndexed(
             items = uiState.categorySlices,
             key = { _, slice -> slice.categoryId },
@@ -657,6 +700,7 @@ private fun CategoriesAnalysisContent(
             CategoryRankingRow(
                 slice = slice,
                 shade = shade,
+                seriesType = uiState.seriesType,
                 privacyModeEnabled = uiState.privacyModeEnabled,
                 onClick = { onCategoryClick(slice.categoryId) },
             )
@@ -668,9 +712,18 @@ private fun CategoriesAnalysisContent(
 private fun MonochromeDonutChart(
     slices: List<AnalysisCategorySlice>,
     totalMinor: Long,
+    seriesType: AnalysisSeriesType,
     seriesLabel: String,
     privacyModeEnabled: Boolean,
 ) {
+    val grossMagnitude = slices.sumOf { abs(it.amountMinor) }
+    val totalColor = when {
+        privacyModeEnabled -> PetroleumBluePrimary
+        seriesType == AnalysisSeriesType.BALANCE && totalMinor > 0L -> OnIncomeContainer
+        seriesType == AnalysisSeriesType.BALANCE && totalMinor < 0L -> OnExpenseContainer
+        else -> PetroleumBluePrimary
+    }
+
     Box(
         modifier = Modifier.size(200.dp),
         contentAlignment = Alignment.Center,
@@ -684,7 +737,7 @@ private fun MonochromeDonutChart(
             )
             val arcSize = Size(diameter, diameter)
 
-            if (totalMinor <= 0L) {
+            if (grossMagnitude <= 0L) {
                 drawArc(
                     color = Color(0xFFE0E0E0),
                     startAngle = 0f,
@@ -698,7 +751,7 @@ private fun MonochromeDonutChart(
                 var startAngle = -90f
                 val gapDegrees = if (slices.size > 1) 1.5f else 0f
                 slices.forEachIndexed { index, slice ->
-                    val rawSweep = (slice.amountMinor.toFloat() / totalMinor.toFloat()) * 360f
+                    val rawSweep = (abs(slice.amountMinor).toFloat() / grossMagnitude.toFloat()) * 360f
                     val sweep = (rawSweep - gapDegrees).coerceAtLeast(1f)
                     val color = MonochromeShades[index % MonochromeShades.size]
                     drawArc(
@@ -727,8 +780,9 @@ private fun MonochromeDonutChart(
             MoneyText(
                 amountMinor = totalMinor,
                 isPrivacyModeEnabled = privacyModeEnabled,
+                showPlusSign = false,
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                color = PetroleumBluePrimary,
+                color = totalColor,
             )
         }
     }
@@ -738,9 +792,16 @@ private fun MonochromeDonutChart(
 private fun CategoryRankingRow(
     slice: AnalysisCategorySlice,
     shade: Color,
+    seriesType: AnalysisSeriesType,
     privacyModeEnabled: Boolean,
     onClick: () -> Unit,
 ) {
+    val amountColor = when {
+        privacyModeEnabled -> PetroleumBluePrimary
+        seriesType == AnalysisSeriesType.BALANCE && slice.amountMinor > 0L -> OnIncomeContainer
+        seriesType == AnalysisSeriesType.BALANCE && slice.amountMinor < 0L -> OnExpenseContainer
+        else -> PetroleumBluePrimary
+    }
     Card(
         onClick = onClick,
         modifier = Modifier
@@ -792,8 +853,9 @@ private fun CategoryRankingRow(
                     MoneyText(
                         amountMinor = slice.amountMinor,
                         isPrivacyModeEnabled = privacyModeEnabled,
+                        showPlusSign = false,
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                        color = PetroleumBluePrimary,
+                        color = amountColor,
                     )
                     Text(
                         text = String.format(Locale("es", "ES"), "%.1f %%", slice.percentage),
@@ -830,12 +892,21 @@ private fun EvolutionAnalysisContent(
     onBucketClick: (AnalysisEvolutionBucket) -> Unit,
 ) {
     val maxMinor = uiState.evolutionBuckets
-        .mapNotNull { it.amountMinor }
+        .mapNotNull { it.amountMinor?.let(::abs) }
         .maxOrNull()
         ?.coerceAtLeast(1L)
         ?: 1L
 
-    val seriesLabel = if (uiState.seriesType == AnalysisSeriesType.EXPENSES) "Gastos" else "Ingresos"
+    val seriesLabel = when (uiState.seriesType) {
+        AnalysisSeriesType.BALANCE -> "Saldo"
+        AnalysisSeriesType.INCOMES -> "Ingresos"
+        AnalysisSeriesType.EXPENSES -> "Gastos"
+    }
+    val totalTitle = when (uiState.seriesType) {
+        AnalysisSeriesType.BALANCE -> "Saldo periodo"
+        AnalysisSeriesType.INCOMES -> "Total Ingresos"
+        AnalysisSeriesType.EXPENSES -> "Total Gastos"
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -848,7 +919,7 @@ private fun EvolutionAnalysisContent(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 SummaryMiniCard(
-                    title = "Total $seriesLabel",
+                    title = totalTitle,
                     amountMinor = uiState.totalMinor,
                     privacyModeEnabled = uiState.privacyModeEnabled,
                     modifier = Modifier.weight(1f),
@@ -884,6 +955,7 @@ private fun EvolutionAnalysisContent(
                     EvolutionBarChart(
                         buckets = uiState.evolutionBuckets,
                         maxMinor = maxMinor,
+                        seriesType = uiState.seriesType,
                         onBucketClick = onBucketClick,
                     )
                 }
@@ -955,6 +1027,7 @@ private fun SummaryMiniCard(
     amountMinor: Long,
     privacyModeEnabled: Boolean,
     modifier: Modifier = Modifier,
+    amountColor: Color = PetroleumBluePrimary,
 ) {
     Card(
         modifier = modifier,
@@ -974,8 +1047,9 @@ private fun SummaryMiniCard(
             MoneyText(
                 amountMinor = amountMinor,
                 isPrivacyModeEnabled = privacyModeEnabled,
+                showPlusSign = false,
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = PetroleumBluePrimary,
+                color = if (privacyModeEnabled) PetroleumBluePrimary else amountColor,
             )
         }
     }
@@ -985,6 +1059,7 @@ private fun SummaryMiniCard(
 private fun EvolutionBarChart(
     buckets: List<AnalysisEvolutionBucket>,
     maxMinor: Long,
+    seriesType: AnalysisSeriesType,
     onBucketClick: (AnalysisEvolutionBucket) -> Unit,
 ) {
     val chartHeight = 160.dp
@@ -1001,6 +1076,7 @@ private fun EvolutionBarChart(
                 EvolutionBarColumn(
                     bucket = bucket,
                     maxMinor = maxMinor,
+                    seriesType = seriesType,
                     chartHeight = chartHeight,
                     modifier = Modifier.weight(1f),
                     onClick = { onBucketClick(bucket) },
@@ -1022,6 +1098,7 @@ private fun EvolutionBarChart(
                 EvolutionBarColumn(
                     bucket = bucket,
                     maxMinor = maxMinor,
+                    seriesType = seriesType,
                     chartHeight = chartHeight,
                     modifier = Modifier.width(28.dp),
                     onClick = { onBucketClick(bucket) },
@@ -1035,6 +1112,7 @@ private fun EvolutionBarChart(
 private fun EvolutionBarColumn(
     bucket: AnalysisEvolutionBucket,
     maxMinor: Long,
+    seriesType: AnalysisSeriesType,
     chartHeight: androidx.compose.ui.unit.Dp,
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
@@ -1059,17 +1137,24 @@ private fun EvolutionBarColumn(
             contentAlignment = Alignment.BottomCenter,
         ) {
             if (amountMinor != null) {
-                val fraction = if (amountMinor == 0L) {
+                val magnitude = abs(amountMinor)
+                val fraction = if (magnitude == 0L) {
                     0.02f
                 } else {
-                    (amountMinor.toFloat() / maxMinor.toFloat()).coerceIn(0.04f, 1f)
+                    (magnitude.toFloat() / maxMinor.toFloat()).coerceIn(0.04f, 1f)
+                }
+                val barColor = when {
+                    amountMinor == 0L -> Color(0xFFD0D0D0)
+                    seriesType == AnalysisSeriesType.BALANCE && amountMinor > 0L -> OnIncomeContainer
+                    seriesType == AnalysisSeriesType.BALANCE && amountMinor < 0L -> OnExpenseContainer
+                    else -> PetroleumBluePrimary
                 }
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(0.72f)
                         .fillMaxHeight(fraction)
                         .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
-                        .background(if (amountMinor > 0L) Color.Black else Color(0xFFD0D0D0)),
+                        .background(barColor),
                 )
             } else {
                 // Periodo futuro: sin barra (vacío, sin ceros ficticios)

@@ -7,7 +7,10 @@ import com.familyexpenses.app.data.local.dao.TransactionDao
 import com.familyexpenses.app.data.local.dao.TransferDao
 import com.familyexpenses.app.domain.model.DashboardSummary
 import com.familyexpenses.app.domain.usecase.ComputeAccountBalanceUseCase
+import com.familyexpenses.app.domain.usecase.ComputeMonthlyNetResultUseCase
 import com.familyexpenses.app.domain.usecase.ComputeNetDebtUseCase
+import java.time.YearMonth
+import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
@@ -21,6 +24,7 @@ class DashboardRepository @Inject constructor(
     private val balanceAdjustmentDao: BalanceAdjustmentDao,
     private val computeAccountBalanceUseCase: ComputeAccountBalanceUseCase,
     private val computeNetDebtUseCase: ComputeNetDebtUseCase,
+    private val computeMonthlyNetResultUseCase: ComputeMonthlyNetResultUseCase,
 ) {
 
     fun observeSummary(): Flow<DashboardSummary> = combine(
@@ -56,10 +60,34 @@ class DashboardRepository @Inject constructor(
             transfers = transfers,
         )
 
+        val zoneId = ZoneId.systemDefault()
+        val currentMonth = YearMonth.now(zoneId)
+        val personalMonthlyNet = personalAccount?.let {
+            computeMonthlyNetResultUseCase.compute(
+                accountId = it.id,
+                transactions = transactions,
+                transfers = transfers,
+                yearMonth = currentMonth,
+                zoneId = zoneId,
+            )
+        } ?: 0L
+        val familyMonthlyNet = familyAccount?.let {
+            computeMonthlyNetResultUseCase.compute(
+                accountId = it.id,
+                transactions = transactions,
+                transfers = transfers,
+                yearMonth = currentMonth,
+                zoneId = zoneId,
+            )
+        } ?: 0L
+
         DashboardSummary(
             personalCashBalanceMinor = personalCash,
             familyCashBalanceMinor = familyCash,
             netDebtMinor = netDebt,
+            personalMonthlyNetMinor = personalMonthlyNet,
+            familyMonthlyNetMinor = familyMonthlyNet,
+            currentMonthName = computeMonthlyNetResultUseCase.formatMonthName(currentMonth),
         )
     }
 }

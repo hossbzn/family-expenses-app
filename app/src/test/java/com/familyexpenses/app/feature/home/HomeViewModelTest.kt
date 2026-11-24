@@ -3,6 +3,7 @@ package com.familyexpenses.app.feature.home
 import com.familyexpenses.app.core.model.AccountType
 import com.familyexpenses.app.core.model.TransactionSource
 import com.familyexpenses.app.core.model.TransactionType
+import com.familyexpenses.app.core.model.TransferType
 import com.familyexpenses.app.data.local.dao.AccountDao
 import com.familyexpenses.app.data.local.dao.BalanceAdjustmentDao
 import com.familyexpenses.app.data.local.dao.CategoryDao
@@ -18,7 +19,10 @@ import com.familyexpenses.app.data.repository.ExpenseRepository
 import com.familyexpenses.app.data.repository.HistoryRepository
 import com.familyexpenses.app.data.repository.UserPreferencesRepository
 import com.familyexpenses.app.domain.usecase.ComputeAccountBalanceUseCase
+import com.familyexpenses.app.domain.usecase.ComputeMonthlyNetResultUseCase
 import com.familyexpenses.app.domain.usecase.ComputeNetDebtUseCase
+import java.time.YearMonth
+import java.time.ZoneId
 import com.familyexpenses.app.domain.usecase.GetDashboardSummaryUseCase
 import com.familyexpenses.app.domain.usecase.GetHistoryUseCase
 import kotlinx.coroutines.Dispatchers
@@ -129,6 +133,7 @@ class HomeViewModelTest {
 
         val computeAccountBalanceUseCase = ComputeAccountBalanceUseCase()
         val computeNetDebtUseCase = ComputeNetDebtUseCase()
+        val computeMonthlyNetResultUseCase = ComputeMonthlyNetResultUseCase()
 
         val dashboardRepository = DashboardRepository(
             accountDao = fakeAccountDao,
@@ -137,6 +142,7 @@ class HomeViewModelTest {
             balanceAdjustmentDao = fakeAdjustmentDao,
             computeAccountBalanceUseCase = computeAccountBalanceUseCase,
             computeNetDebtUseCase = computeNetDebtUseCase,
+            computeMonthlyNetResultUseCase = computeMonthlyNetResultUseCase,
         )
 
         expenseRepository = ExpenseRepository(fakeTransactionDao)
@@ -252,6 +258,94 @@ class HomeViewModelTest {
         assertEquals(300000L, state.familyCashBalanceMinor)
         // Familia debe 80 € a Personal: +8000
         assertEquals(8000L, state.netDebtMinor)
+        // Resultado mensual imputado a cuenta responsable (Familia -80 €, Personal 0 €)
+        assertEquals(-8000L, state.familyMonthlyNetMinor)
+        assertEquals(0L, state.personalMonthlyNetMinor)
+        assertTrue(state.currentMonthName.isNotBlank())
+    }
+
+    @Test
+    fun `monthly net includes normal transfers of current month and excludes reimbursements adjustments and previous months`() = runTest {
+        val now = System.currentTimeMillis()
+        val previousMonthMillis = YearMonth.now(ZoneId.systemDefault())
+            .minusMonths(1)
+            .atDay(15)
+            .atTime(12, 0)
+            .atZone(ZoneId.systemDefault())
+            .toInstant()
+            .toEpochMilli()
+
+        transactions.addAll(
+            listOf(
+                TransactionEntity(
+                    id = "tx-inc-current",
+                    payingAccountId = "acc-family",
+                    responsibleAccountId = "acc-family",
+                    categoryId = "cat-salary",
+                    amountMinor = 50000L,
+                    type = TransactionType.INCOME,
+                    source = TransactionSource.MANUAL,
+                    occurredAt = now,
+                    createdAt = now,
+                ),
+                TransactionEntity(
+                    id = "tx-exp-prev-month",
+                    payingAccountId = "acc-family",
+                    responsibleAccountId = "acc-family",
+                    categoryId = "cat-food",
+                    amountMinor = 10000L,
+                    type = TransactionType.EXPENSE,
+                    source = TransactionSource.MANUAL,
+                    occurredAt = previousMonthMillis,
+                    createdAt = previousMonthMillis,
+                ),
+            ),
+        )
+        transfers.addAll(
+            listOf(
+                TransferEntity(
+                    id = "tr-normal-1",
+                    sourceAccountId = "acc-personal",
+                    destinationAccountId = "acc-family",
+                    amountMinor = 20000L,
+                    type = TransferType.NORMAL,
+                    occurredAt = now,
+                    createdAt = now,
+                ),
+                TransferEntity(
+                    id = "tr-reimb-1",
+                    sourceAccountId = "acc-family",
+                    destinationAccountId = "acc-personal",
+                    amountMinor = 5000L,
+                    type = TransferType.REIMBURSEMENT,
+                    occurredAt = now,
+                    createdAt = now,
+                ),
+            ),
+        )
+        adjustments.add(
+            BalanceAdjustmentEntity(
+                id = "adj-1",
+                accountId = "acc-family",
+                amountDeltaMinor = 5000L,
+                reason = "Cuadre",
+                occurredAt = now,
+                createdAt = now,
+            ),
+        )
+
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.uiState.collect() }
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        // Saldo mensual Familia: 500 € ingreso + 200 € transferencia normal = 700 € (excluye devolución, ajuste y mes anterior)
+        assertEquals(70000L, state.familyMonthlyNetMinor)
+        // Saldo mensual Personal: -200 € transferencia normal (excluye devolución)
+        assertEquals(-20000L, state.personalMonthlyNetMinor)
+        // Saldo disponible Familia: 3000 + 500 - 100 + 200 - 50 + 50 = 3600 €
+        assertEquals(360000L, state.familyCashBalanceMinor)
+        // Saldo disponible Personal: 1500 - 200 + 50 = 1350 €
+        assertEquals(135000L, state.personalCashBalanceMinor)
     }
 
     @Test

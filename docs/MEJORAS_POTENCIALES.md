@@ -113,7 +113,7 @@ Este documento recoge observaciones surgidas del uso real de Family Expenses ant
 ### UX-009 — Mostrar el resumen mensual en Inicio
 
 - **Fecha:** 2026-11-24
-- **Estado:** `MOVIDA_A_BACKLOG` — incorporada a `V6-23` (resultado neto mensual como dato principal, saldo disponible como secundario y navegación actual).
+- **Estado:** `MOVIDA_A_BACKLOG` — incorporada a `V6-23` (saldo del mes actual como único dato en Inicio incluyendo transferencias normales del mes, saldo disponible en Detalle de cuenta y navegación actual).
 - **Observación:** En el uso diario resulta más útil saber cómo va el mes actual que ver como cifra principal el saldo real acumulado desde el inicio. Para consultar otros periodos ya existe la pantalla de Análisis.
 - **Experiencia deseada:** Mostrar claramente el mes en curso en Inicio y utilizarlo como resumen inmediato de Familia y Personal, sin obligar a seleccionar filtros.
 - **Saldo real:** No eliminar el saldo de caja acumulado, porque representa el dinero disponible y cumple otra función. Puede mostrarse como dato secundario o quedar accesible desde el detalle de cada cuenta.

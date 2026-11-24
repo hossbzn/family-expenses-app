@@ -11,10 +11,12 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 import javax.inject.Inject
+import kotlin.math.abs
 
 enum class AnalysisSeriesType {
-    EXPENSES,
+    BALANCE,
     INCOMES,
+    EXPENSES,
 }
 
 data class AnalysisCategorySlice(
@@ -43,6 +45,8 @@ data class AnalysisResult(
     val transactionCount: Int,
     val categorySlices: List<AnalysisCategorySlice>,
     val evolutionBuckets: List<AnalysisEvolutionBucket>,
+    val totalIncomesMinor: Long = 0L,
+    val totalExpensesMinor: Long = 0L,
 )
 
 class ComputeAnalysisUseCase @Inject constructor(
@@ -58,15 +62,16 @@ class ComputeAnalysisUseCase @Inject constructor(
         today: LocalDate = LocalDate.now(),
         zoneId: ZoneId = ZoneId.systemDefault(),
     ): AnalysisResult {
-        val targetTransactionType = when (seriesType) {
-            AnalysisSeriesType.EXPENSES -> TransactionType.EXPENSE
-            AnalysisSeriesType.INCOMES -> TransactionType.INCOME
-        }
         val (periodStart, periodEnd) = filterMovementsUseCase.resolveDateRange(periodFilter)
 
         // Excluir TransactionType.ADJUSTMENT; transferencias y ajustes de saldo no existen aquí
         val matchingTransactions = transactions.filter { tx ->
-            if (tx.type != targetTransactionType) return@filter false
+            val matchesType = when (seriesType) {
+                AnalysisSeriesType.EXPENSES -> tx.type == TransactionType.EXPENSE
+                AnalysisSeriesType.INCOMES -> tx.type == TransactionType.INCOME
+                AnalysisSeriesType.BALANCE -> tx.type == TransactionType.INCOME || tx.type == TransactionType.EXPENSE
+            }
+            if (!matchesType) return@filter false
             val matchesAccount = when (accountFilter) {
                 MovementAccountFilter.All -> true
                 is MovementAccountFilter.Account -> tx.responsibleAccountId == accountFilter.accountId
@@ -76,15 +81,39 @@ class ComputeAnalysisUseCase @Inject constructor(
             !txDate.isBefore(periodStart) && !txDate.isAfter(periodEnd)
         }
 
-        val totalMinor = matchingTransactions.sumOf { it.amountMinor }
+        val totalIncomesMinor = matchingTransactions
+            .filter { it.type == TransactionType.INCOME }
+            .sumOf { it.amountMinor }
+        val totalExpensesMinor = matchingTransactions
+            .filter { it.type == TransactionType.EXPENSE }
+            .sumOf { it.amountMinor }
+
+        val totalMinor = when (seriesType) {
+            AnalysisSeriesType.EXPENSES -> totalExpensesMinor
+            AnalysisSeriesType.INCOMES -> totalIncomesMinor
+            AnalysisSeriesType.BALANCE -> totalIncomesMinor - totalExpensesMinor
+        }
+        val grossTotalMinor = if (seriesType == AnalysisSeriesType.BALANCE) {
+            totalIncomesMinor + totalExpensesMinor
+        } else {
+            totalMinor
+        }
         val categoryMap = categories.associateBy { it.id }
 
         val categorySlices = matchingTransactions
             .groupBy { it.categoryId }
             .map { (categoryId, txs) ->
                 val cat = categoryMap[categoryId]
-                val sum = txs.sumOf { it.amountMinor }
-                val pct = if (totalMinor > 0L) (sum.toDouble() * 100.0 / totalMinor.toDouble()).toFloat() else 0f
+                val sum = if (seriesType == AnalysisSeriesType.BALANCE) {
+                    txs.sumOf { if (it.type == TransactionType.INCOME) it.amountMinor else -it.amountMinor }
+                } else {
+                    txs.sumOf { it.amountMinor }
+                }
+                val pct = if (grossTotalMinor > 0L) {
+                    (abs(sum).toDouble() * 100.0 / grossTotalMinor.toDouble()).toFloat()
+                } else {
+                    0f
+                }
                 AnalysisCategorySlice(
                     categoryId = categoryId,
                     categoryName = cat?.name ?: "Sin categoría",
@@ -95,7 +124,7 @@ class ComputeAnalysisUseCase @Inject constructor(
                 )
             }
             .sortedWith(
-                compareByDescending<AnalysisCategorySlice> { it.amountMinor }
+                compareByDescending<AnalysisCategorySlice> { abs(it.amountMinor) }
                     .thenBy { it.categoryName },
             )
 
@@ -118,12 +147,19 @@ class ComputeAnalysisUseCase @Inject constructor(
                 val bucketTxs = txsWithDate.filter { (_, date) ->
                     !date.isBefore(spec.startDate) && !date.isAfter(spec.endDate)
                 }
+                val bucketAmount = if (seriesType == AnalysisSeriesType.BALANCE) {
+                    bucketTxs.sumOf { (tx, _) ->
+                        if (tx.type == TransactionType.INCOME) tx.amountMinor else -tx.amountMinor
+                    }
+                } else {
+                    bucketTxs.sumOf { (tx, _) -> tx.amountMinor }
+                }
                 AnalysisEvolutionBucket(
                     label = spec.label,
                     fullLabel = spec.fullLabel,
                     startDate = spec.startDate,
                     endDate = spec.endDate,
-                    amountMinor = bucketTxs.sumOf { (tx, _) -> tx.amountMinor },
+                    amountMinor = bucketAmount,
                     transactionCount = bucketTxs.size,
                 )
             }
@@ -142,6 +178,8 @@ class ComputeAnalysisUseCase @Inject constructor(
             transactionCount = matchingTransactions.size,
             categorySlices = categorySlices,
             evolutionBuckets = evolutionBuckets,
+            totalIncomesMinor = totalIncomesMinor,
+            totalExpensesMinor = totalExpensesMinor,
         )
     }
 

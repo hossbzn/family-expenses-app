@@ -240,4 +240,61 @@ class ComputeAnalysisUseCaseTest {
         )
         assertEquals(9, customWeekly.evolutionBuckets.size) // 60 días / 7 = 8 semanas completas + 4 días
     }
+
+    @Test
+    fun `balance series computes net incomes minus expenses and excludes adjustments`() {
+        val today = LocalDate.of(2026, 6, 15)
+        val txs = listOf(
+            TransactionEntity(
+                id = "tx-inc",
+                type = TransactionType.INCOME,
+                amountMinor = 100000L,
+                payingAccountId = "account-personal",
+                responsibleAccountId = "account-personal",
+                categoryId = "cat-salary",
+                occurredAt = epochOn(LocalDate.of(2026, 6, 1)),
+                source = TransactionSource.MANUAL,
+                createdAt = 0L,
+            ),
+            TransactionEntity(
+                id = "tx-exp",
+                type = TransactionType.EXPENSE,
+                amountMinor = 120000L,
+                payingAccountId = "account-personal",
+                responsibleAccountId = "account-personal",
+                categoryId = "cat-food",
+                occurredAt = epochOn(LocalDate.of(2026, 6, 2)),
+                source = TransactionSource.MANUAL,
+                createdAt = 0L,
+            ),
+            TransactionEntity(
+                id = "tx-adj",
+                type = TransactionType.ADJUSTMENT,
+                amountMinor = 50000L,
+                payingAccountId = "account-personal",
+                responsibleAccountId = "account-personal",
+                categoryId = "cat-food",
+                occurredAt = epochOn(LocalDate.of(2026, 6, 3)),
+                source = TransactionSource.MANUAL,
+                createdAt = 0L,
+            ),
+        )
+
+        val result = useCase.compute(
+            transactions = txs,
+            categories = categories,
+            accountFilter = MovementAccountFilter.Account("account-personal"),
+            periodFilter = MovementPeriodFilter.Month(YearMonth.of(2026, 6)),
+            seriesType = AnalysisSeriesType.BALANCE,
+            today = today,
+            zoneId = zoneId,
+        )
+
+        assertEquals(100000L, result.totalIncomesMinor)
+        assertEquals(120000L, result.totalExpensesMinor)
+        assertEquals(-20000L, result.totalMinor)
+        assertEquals(2, result.transactionCount)
+        assertEquals(100000L, result.evolutionBuckets[0].amountMinor)
+        assertEquals(-120000L, result.evolutionBuckets[1].amountMinor)
+    }
 }

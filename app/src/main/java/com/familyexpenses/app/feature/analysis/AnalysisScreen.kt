@@ -26,11 +26,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DatePickerDialog
@@ -80,7 +82,13 @@ import com.familyexpenses.app.domain.usecase.AnalysisSeriesType
 import com.familyexpenses.app.domain.usecase.MovementAccountFilter
 import com.familyexpenses.app.domain.usecase.MovementPeriodFilter
 import com.familyexpenses.app.feature.expense.resolveCategoryIcon
+import com.familyexpenses.app.ui.theme.ExpenseBorder
+import com.familyexpenses.app.ui.theme.ExpenseContainer
+import com.familyexpenses.app.ui.theme.IncomeBorder
+import com.familyexpenses.app.ui.theme.IncomeContainer
 import com.familyexpenses.app.ui.theme.OffWhiteBackground
+import com.familyexpenses.app.ui.theme.OnExpenseContainer
+import com.familyexpenses.app.ui.theme.OnIncomeContainer
 import com.familyexpenses.app.ui.theme.OutlineBorder
 import com.familyexpenses.app.ui.theme.PetroleumBlueContainer
 import com.familyexpenses.app.ui.theme.PetroleumBluePrimary
@@ -155,6 +163,7 @@ fun AnalysisScreen(
     onBucketClick: (AnalysisEvolutionBucket) -> Unit,
 ) {
     Scaffold(
+        containerColor = OffWhiteBackground,
         topBar = {
             TopAppBar(
                 title = {
@@ -164,14 +173,14 @@ fun AnalysisScreen(
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    containerColor = OffWhiteBackground,
+                    titleContentColor = PetroleumBluePrimary,
                 ),
             )
         },
         bottomBar = {
             NavigationBar(
-                containerColor = Color.White,
+                containerColor = PureWhiteSurface,
                 tonalElevation = 4.dp,
             ) {
                 NavigationBarItem(
@@ -200,9 +209,9 @@ fun AnalysisScreen(
                     icon = { Icon(Icons.Default.BarChart, contentDescription = "Análisis") },
                     label = { Text("Análisis") },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color.White,
-                        selectedTextColor = Color.Black,
-                        indicatorColor = Color.Black,
+                        selectedIconColor = PureWhiteSurface,
+                        selectedTextColor = PetroleumBluePrimary,
+                        indicatorColor = PetroleumBluePrimary,
                         unselectedIconColor = Color.Gray,
                         unselectedTextColor = Color.Gray,
                     ),
@@ -364,18 +373,72 @@ private fun SeriesTypeSelector(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        AnalysisSegmentChip(
+        SemanticSeriesChip(
             label = "Gastos",
+            icon = Icons.Default.Remove,
             isSelected = selectedSeries == AnalysisSeriesType.EXPENSES,
+            selectedContainerColor = ExpenseContainer,
+            selectedContentColor = OnExpenseContainer,
+            selectedBorderColor = ExpenseBorder,
             modifier = Modifier.weight(1f),
             onClick = { onSeriesSelected(AnalysisSeriesType.EXPENSES) },
         )
-        AnalysisSegmentChip(
+        SemanticSeriesChip(
             label = "Ingresos",
+            icon = Icons.Default.Add,
             isSelected = selectedSeries == AnalysisSeriesType.INCOMES,
+            selectedContainerColor = IncomeContainer,
+            selectedContentColor = OnIncomeContainer,
+            selectedBorderColor = IncomeBorder,
             modifier = Modifier.weight(1f),
             onClick = { onSeriesSelected(AnalysisSeriesType.INCOMES) },
         )
+    }
+}
+
+@Composable
+private fun SemanticSeriesChip(
+    label: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    isSelected: Boolean,
+    selectedContainerColor: Color,
+    selectedContentColor: Color,
+    selectedBorderColor: Color,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    val contentColor = if (isSelected) selectedContentColor else PetroleumBluePrimary
+    Surface(
+        onClick = onClick,
+        modifier = modifier.heightIn(min = 48.dp),
+        shape = RoundedCornerShape(10.dp),
+        color = if (isSelected) selectedContainerColor else PureWhiteSurface,
+        border = BorderStroke(1.dp, if (isSelected) selectedBorderColor else OutlineBorder),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = contentColor,
+                modifier = Modifier.size(18.dp),
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                ),
+                color = contentColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
     }
 }
 

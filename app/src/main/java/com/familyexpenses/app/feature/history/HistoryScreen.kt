@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.ChevronLeft
@@ -30,6 +31,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.Card
@@ -74,7 +76,11 @@ import com.familyexpenses.app.domain.usecase.MovementAccountFilter
 import com.familyexpenses.app.domain.usecase.MovementPeriodFilter
 import com.familyexpenses.app.domain.usecase.MovementTypeFilter
 import com.familyexpenses.app.feature.expense.resolveCategoryIcon
+import com.familyexpenses.app.ui.theme.ExpenseContainer
+import com.familyexpenses.app.ui.theme.IncomeContainer
 import com.familyexpenses.app.ui.theme.OffWhiteBackground
+import com.familyexpenses.app.ui.theme.OnExpenseContainer
+import com.familyexpenses.app.ui.theme.OnIncomeContainer
 import com.familyexpenses.app.ui.theme.OutlineBorder
 import com.familyexpenses.app.ui.theme.PetroleumBlueContainer
 import com.familyexpenses.app.ui.theme.PetroleumBluePrimary
@@ -146,6 +152,7 @@ fun HistoryScreen(
     val listState = rememberLazyListState()
 
     Scaffold(
+        containerColor = OffWhiteBackground,
         topBar = {
             TopAppBar(
                 title = {
@@ -173,15 +180,15 @@ fun HistoryScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    containerColor = OffWhiteBackground,
+                    titleContentColor = PetroleumBluePrimary,
                 ),
             )
         },
         bottomBar = {
             if (showBottomBar) {
                 NavigationBar(
-                    containerColor = Color.White,
+                    containerColor = PureWhiteSurface,
                     tonalElevation = 4.dp,
                 ) {
                     NavigationBarItem(
@@ -200,9 +207,9 @@ fun HistoryScreen(
                         icon = { Icon(Icons.AutoMirrored.Filled.ReceiptLong, contentDescription = "Movimientos") },
                         label = { Text("Movimientos") },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = Color.White,
-                            selectedTextColor = Color.Black,
-                            indicatorColor = Color.Black,
+                            selectedIconColor = PureWhiteSurface,
+                            selectedTextColor = PetroleumBluePrimary,
+                            indicatorColor = PetroleumBluePrimary,
                             unselectedIconColor = Color.Gray,
                             unselectedTextColor = Color.Gray,
                         ),
@@ -603,13 +610,23 @@ private fun SecondaryFiltersRow(
             MovementTypeFilter.REIMBURSEMENTS to "Devoluciones",
         )
         items(typeItems) { (typeFilter, label) ->
+            val selectedContainer = when (typeFilter) {
+                MovementTypeFilter.INCOMES -> IncomeContainer
+                MovementTypeFilter.EXPENSES -> ExpenseContainer
+                else -> PetroleumBluePrimary
+            }
+            val selectedLabel = when (typeFilter) {
+                MovementTypeFilter.INCOMES -> OnIncomeContainer
+                MovementTypeFilter.EXPENSES -> OnExpenseContainer
+                else -> Color.White
+            }
             FilterChip(
                 selected = selectedType == typeFilter,
                 onClick = { onTypeSelected(typeFilter) },
                 label = { Text(label) },
                 colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = PetroleumBluePrimary,
-                    selectedLabelColor = Color.White,
+                    selectedContainerColor = selectedContainer,
+                    selectedLabelColor = selectedLabel,
                 ),
             )
         }
@@ -640,10 +657,26 @@ private fun CompactMovementRow(
                 .padding(horizontal = 16.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            val iconContainerColor = when (row.kind) {
+                MovementKind.INCOME -> IncomeContainer
+                MovementKind.EXPENSE -> ExpenseContainer
+                MovementKind.NORMAL_TRANSFER, MovementKind.REIMBURSEMENT -> PetroleumBlueContainer
+            }
+            val iconTint = when (row.kind) {
+                MovementKind.INCOME -> OnIncomeContainer
+                MovementKind.EXPENSE -> OnExpenseContainer
+                MovementKind.NORMAL_TRANSFER, MovementKind.REIMBURSEMENT -> PetroleumBluePrimary
+            }
+            val amountColor = when (row.kind) {
+                MovementKind.INCOME -> OnIncomeContainer
+                MovementKind.EXPENSE -> OnExpenseContainer
+                MovementKind.NORMAL_TRANSFER, MovementKind.REIMBURSEMENT -> PetroleumBluePrimary
+            }
+
             Surface(
                 modifier = Modifier.size(36.dp),
                 shape = RoundedCornerShape(10.dp),
-                color = PetroleumBlueContainer,
+                color = iconContainerColor,
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     val icon = when (row.kind) {
@@ -653,7 +686,7 @@ private fun CompactMovementRow(
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        tint = PetroleumBluePrimary,
+                        tint = iconTint,
                         modifier = Modifier.size(18.dp),
                     )
                 }
@@ -684,8 +717,9 @@ private fun CompactMovementRow(
                         amountMinor = row.amountMinor,
                         isPrivacyModeEnabled = privacyModeEnabled,
                         showPlusSign = row.kind == MovementKind.INCOME,
+                        showMinusSign = row.kind == MovementKind.EXPENSE,
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                        color = if (row.kind == MovementKind.INCOME) Color(0xFF2E7D32) else PetroleumBluePrimary,
+                        color = amountColor,
                     )
                 }
 

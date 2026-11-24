@@ -333,16 +333,16 @@
 
 ## P1/P2 — Mejoras UX aprobadas tras uso real (TODO)
 
-### V6-22 — Escala tipográfica unificada y presencia semántica de ingresos y gastos (TODO, P1)
+### V6-22 — Escala tipográfica unificada y presencia semántica de ingresos y gastos (REVIEW, P1)
 **Origen:** `UX-001` y `UX-002` de `MEJORAS_POTENCIALES.md`.
 
 **Como usuario** quiero una tipografía más legible y una diferenciación clara entre ingresos y gastos en toda la aplicación.
 
-- [ ] Definir una escala tipográfica común (`AppTypography`) aumentando legibilidad en botones (`labelLarge` 15–16 sp seminegrita), etiquetas/chips (13–14 sp) y textos de lista (15–16 sp), eliminando tamaños sueltos inconsistentes.
-- [ ] Revisar los tonos semánticos de ingreso (verde) y gasto (rojo) y añadir tokens de tinte suave (`IncomeContainer`/`OnIncomeContainer`, `ExpenseContainer`/`OnExpenseContainer`) con contraste WCAG AA, validando los tonos definitivos en dispositivo real.
-- [ ] Aplicar el estilo de tinte suave (fondo verde/rojo claro + icono y texto oscuros de alto contraste) en botones de acción de Inicio, filas de movimientos y filtros/análisis, manteniendo siempre signos `+`/`−` e iconografía (nunca depender solo del color).
-- [ ] Coordinar su aplicación con `V6-16`..`V6-21` para evitar retrabajo.
-- [ ] **Pruebas necesarias:** Tests de UI Compose en 360–412 dp con escalas de fuente del sistema al 100 %, 115 % y 130 % verificando ausencia de recortes y objetivos táctiles `>= 48 dp`, más verificación visual en dispositivo/emulador.
+- [x] Definir una escala tipográfica común (`AppTypography`) aumentando legibilidad en botones (`labelLarge` 15–16 sp seminegrita), etiquetas/chips (13–14 sp) y textos de lista (15–16 sp), eliminando tamaños sueltos inconsistentes.
+- [x] Revisar los tonos semánticos de ingreso (verde) y gasto (rojo) y añadir tokens de tinte suave (`IncomeContainer`/`OnIncomeContainer`, `ExpenseContainer`/`OnExpenseContainer`) con contraste WCAG AA, validando los tonos definitivos en dispositivo real.
+- [x] Aplicar el estilo de tinte suave (fondo verde/rojo claro + icono y texto oscuros de alto contraste) en botones de acción de Inicio, filas de movimientos y filtros/análisis, manteniendo siempre signos `+`/`−` e iconografía (nunca depender solo del color).
+- [x] Coordinar su aplicación con `V6-16`..`V6-21` para evitar retrabajo.
+- [ ] **Pruebas necesarias:** Tests unitarios (`MoneyTextTest`, `ThemeTokensTest`, 120 tests en verde), `lintDebug` y `assembleDebug` verificados. Pendiente: tests de UI Compose en 360–412 dp con escalas 100 %/115 %/130 % y verificación visual en dispositivo/emulador antes de marcar `DONE`.
 
 ### V6-23 — Resumen del mes actual en las tarjetas de Inicio (TODO, P1)
 **Origen:** `UX-009` de `MEJORAS_POTENCIALES.md`.

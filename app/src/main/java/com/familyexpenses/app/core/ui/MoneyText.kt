@@ -18,13 +18,14 @@ fun MoneyText(
     isPrivacyModeEnabled: Boolean,
     modifier: Modifier = Modifier,
     showPlusSign: Boolean = false,
+    showMinusSign: Boolean = false,
     style: TextStyle = LocalTextStyle.current,
     color: Color = Color.Unspecified,
 ) {
     val textToDisplay = if (isPrivacyModeEnabled) {
         PRIVACY_MASK
     } else {
-        formatCurrencyText(amountMinor, showPlusSign)
+        formatCurrencyText(amountMinor, showPlusSign = showPlusSign, showMinusSign = showMinusSign)
     }
 
     Text(
@@ -35,10 +36,18 @@ fun MoneyText(
     )
 }
 
-fun formatCurrencyText(minorAmount: Long, showPlusSign: Boolean = false): String {
+fun formatCurrencyText(
+    minorAmount: Long,
+    showPlusSign: Boolean = false,
+    showMinusSign: Boolean = false,
+): String {
     val formatter = NumberFormat.getCurrencyInstance(Locale("es", "ES")).apply {
         currency = Currency.getInstance("EUR")
     }
     val formatted = formatter.format(minorAmount / 100.0)
-    return if (showPlusSign && minorAmount > 0L) "+$formatted" else formatted
+    return when {
+        showPlusSign && minorAmount > 0L -> "+$formatted"
+        showMinusSign && minorAmount > 0L -> "−$formatted"
+        else -> formatted
+    }
 }

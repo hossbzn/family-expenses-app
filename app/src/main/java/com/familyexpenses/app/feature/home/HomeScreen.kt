@@ -64,11 +64,18 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.familyexpenses.app.core.ui.MoneyText
 import com.familyexpenses.app.domain.model.HistoryItem
 import com.familyexpenses.app.domain.model.MovementKind
+import com.familyexpenses.app.ui.theme.ExpenseBorder
+import com.familyexpenses.app.ui.theme.ExpenseContainer
+import com.familyexpenses.app.ui.theme.IncomeBorder
+import com.familyexpenses.app.ui.theme.IncomeContainer
 import com.familyexpenses.app.ui.theme.OffWhiteBackground
+import com.familyexpenses.app.ui.theme.OnExpenseContainer
+import com.familyexpenses.app.ui.theme.OnIncomeContainer
 import com.familyexpenses.app.ui.theme.OutlineBorder
 import com.familyexpenses.app.ui.theme.PetroleumBlueContainer
 import com.familyexpenses.app.ui.theme.PetroleumBluePrimary
 import com.familyexpenses.app.ui.theme.PureWhiteSurface
+import com.familyexpenses.app.ui.theme.TextSecondaryColor
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -155,7 +162,7 @@ fun HomeScreen(
                         Text(
                             text = "Resumen familiar",
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color.Gray,
+                            color = TextSecondaryColor,
                         )
                     }
                 },
@@ -264,25 +271,27 @@ fun HomeScreen(
                     onClick = onAddIncomeClick,
                     modifier = Modifier
                         .weight(1f)
-                        .heightIn(min = 52.dp),
+                        .heightIn(min = 54.dp),
                     shape = RoundedCornerShape(14.dp),
-                    color = PureWhiteSurface,
-                    border = BorderStroke(1.dp, OutlineBorder),
+                    color = IncomeContainer,
+                    border = BorderStroke(1.dp, IncomeBorder),
                 ) {
                     Row(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 10.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center,
                     ) {
                         Surface(
                             shape = RoundedCornerShape(20.dp),
-                            color = PetroleumBlueContainer,
+                            color = PureWhiteSurface,
                             modifier = Modifier.size(32.dp),
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Add,
                                 contentDescription = null,
-                                tint = PetroleumBluePrimary,
+                                tint = OnIncomeContainer,
                                 modifier = Modifier
                                     .padding(6.dp)
                                     .size(18.dp),
@@ -291,8 +300,10 @@ fun HomeScreen(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "Añadir ingreso",
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                            color = PetroleumBluePrimary,
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                            color = OnIncomeContainer,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
                 }
@@ -302,25 +313,27 @@ fun HomeScreen(
                     onClick = onAddExpenseClick,
                     modifier = Modifier
                         .weight(1f)
-                        .heightIn(min = 52.dp),
+                        .heightIn(min = 54.dp),
                     shape = RoundedCornerShape(14.dp),
-                    color = PureWhiteSurface,
-                    border = BorderStroke(1.dp, OutlineBorder),
+                    color = ExpenseContainer,
+                    border = BorderStroke(1.dp, ExpenseBorder),
                 ) {
                     Row(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 10.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center,
                     ) {
                         Surface(
                             shape = RoundedCornerShape(20.dp),
-                            color = Color(0xFFFFEBEE),
+                            color = PureWhiteSurface,
                             modifier = Modifier.size(32.dp),
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Remove,
                                 contentDescription = null,
-                                tint = Color(0xFFC62828),
+                                tint = OnExpenseContainer,
                                 modifier = Modifier
                                     .padding(6.dp)
                                     .size(18.dp),
@@ -329,8 +342,10 @@ fun HomeScreen(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "Añadir gasto",
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                            color = PetroleumBluePrimary,
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                            color = OnExpenseContainer,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
                 }
@@ -559,6 +574,27 @@ private fun RecentMovementRow(
     item: HistoryItem,
     privacyModeEnabled: Boolean,
 ) {
+    val badgeContainerColor = when (item.kind) {
+        MovementKind.INCOME -> IncomeContainer
+        MovementKind.EXPENSE -> ExpenseContainer
+        MovementKind.NORMAL_TRANSFER, MovementKind.REIMBURSEMENT -> PetroleumBlueContainer
+    }
+    val badgeIconTint = when (item.kind) {
+        MovementKind.INCOME -> OnIncomeContainer
+        MovementKind.EXPENSE -> OnExpenseContainer
+        MovementKind.NORMAL_TRANSFER, MovementKind.REIMBURSEMENT -> PetroleumBluePrimary
+    }
+    val badgeIcon = when (item.kind) {
+        MovementKind.INCOME -> Icons.Default.Add
+        MovementKind.EXPENSE -> Icons.Default.Remove
+        MovementKind.NORMAL_TRANSFER, MovementKind.REIMBURSEMENT -> Icons.Default.SwapHoriz
+    }
+    val amountColor = when (item.kind) {
+        MovementKind.INCOME -> OnIncomeContainer
+        MovementKind.EXPENSE -> OnExpenseContainer
+        MovementKind.NORMAL_TRANSFER, MovementKind.REIMBURSEMENT -> PetroleumBluePrimary
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -566,6 +602,21 @@ private fun RecentMovementRow(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        Surface(
+            modifier = Modifier.size(34.dp),
+            shape = RoundedCornerShape(10.dp),
+            color = badgeContainerColor,
+        ) {
+            Icon(
+                imageVector = badgeIcon,
+                contentDescription = null,
+                tint = badgeIconTint,
+                modifier = Modifier
+                    .padding(7.dp)
+                    .size(20.dp),
+            )
+        }
+        Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = item.note ?: item.categoryName ?: when (item.kind) {
@@ -583,15 +634,17 @@ private fun RecentMovementRow(
             Text(
                 text = "$dateLabel · $accountLabel",
                 style = MaterialTheme.typography.bodySmall,
-                color = Color.Gray,
+                color = TextSecondaryColor,
             )
         }
 
         MoneyText(
             amountMinor = item.amountMinor,
             isPrivacyModeEnabled = privacyModeEnabled,
+            showPlusSign = item.kind == MovementKind.INCOME,
+            showMinusSign = item.kind == MovementKind.EXPENSE,
             style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-            color = if (item.kind == MovementKind.INCOME) Color(0xFF2E7D32) else PetroleumBluePrimary,
+            color = amountColor,
         )
     }
 }

@@ -13,3 +13,11 @@ val TextSecondaryColor = Color(0xFF606266)
 
 val MutedSemanticGreen = Color(0xFF2E7D32)
 val MutedSemanticRed = Color(0xFFC62828)
+
+val IncomeContainer = Color(0xFFE8F5E9)
+val OnIncomeContainer = Color(0xFF1B5E20)
+val IncomeBorder = Color(0xFFA5D6A7)
+
+val ExpenseContainer = Color(0xFFFFEBEE)
+val OnExpenseContainer = Color(0xFFB71C1C)
+val ExpenseBorder = Color(0xFFEF9A9A)
